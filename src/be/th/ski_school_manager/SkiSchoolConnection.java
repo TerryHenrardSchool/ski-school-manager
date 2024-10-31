@@ -8,18 +8,25 @@ import javax.swing.JOptionPane;
 
 public class SkiSchoolConnection {
 	
+	private static final String DATABASE_DRIVER = "oracle.jdbc.driver.OracleDriver";
+	private static final String DATABASE_URL = "jdbc:oracle:thin:@//193.190.64.10:1522/xepdb1";
+	private static final String DATABASE_USERNAME = "STUDENT03_05";
+	private static final String DATABASE_PASSWORD = "dontchangeme";
+	
 	private static Connection instance = null;
-    private static final String DATABASE_URL = "jdbc:ucanaccess://./Ecole.accdb"; // Database URL
 	
 	private SkiSchoolConnection(){
 		try{
-			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-			instance = DriverManager.getConnection(DATABASE_URL);
+			Class.forName(DATABASE_DRIVER);
+			
+			System.setProperty("oracle.jdbc.Trace", "true");
+			instance = DriverManager.getConnection(DATABASE_URL, DATABASE_USERNAME, DATABASE_PASSWORD);
+			System.out.println("Successfully connected!");
 		} catch (ClassNotFoundException ex){
 			JOptionPane.showMessageDialog(null, "Driver class is nowhere to be found."+ ex.getMessage());
 			System.exit(0);			
 		} catch (SQLException ex) {
-			JOptionPane.showMessageDialog(null, "JDBC error : " +ex.getMessage());
+			JOptionPane.showMessageDialog(null, "JDBC error : " + ex.getMessage());
 			System.exit(0);			
 		}
 		
