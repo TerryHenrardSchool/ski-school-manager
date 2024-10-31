@@ -1,5 +1,5 @@
 
-![Logo](ski-school-logo.webp)
+![Logo](ski-school-manager-logo.webp)
 
 
 # Ski school manager
