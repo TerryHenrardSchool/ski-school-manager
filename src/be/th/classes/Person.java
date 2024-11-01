@@ -89,8 +89,8 @@ public abstract class Person implements Serializable {
 
     // Setters
     public void setId(int id) {
-        if (!Utils.isPositiveInteger(id)) {
-            throw new IllegalArgumentException("ID must be positive.");
+        if (!Utils.isNonNegativeInteger(id)) {
+            throw new IllegalArgumentException("ID cannot be negative.");
         }
         this.id = id;
     }

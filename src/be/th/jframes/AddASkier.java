@@ -11,11 +11,19 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import java.awt.Font;
 import com.toedter.calendar.JDateChooser;
+
+import be.th.classes.Skier;
+import be.th.classes.Utils;
+import be.th.dao.DAO;
+import be.th.dao.DAOFactory;
+import be.th.dao.SkierDAO;
+
 import java.awt.Color;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.lang.invoke.StringConcatFactory;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.awt.event.ActionEvent;
@@ -179,8 +187,8 @@ public class AddASkier extends JFrame {
 		lblStreetNumber.setBounds(10, 292, 108, 31);
 		panel.add(lblStreetNumber);
 		
-		JButton CancelBtn = new JButton("Cancel");
-		CancelBtn.addActionListener(new ActionListener() {
+		JButton cancelBtn = new JButton("Cancel");
+		cancelBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MainMenu mainMenu = new MainMenu();
 				mainMenu.setVisible(true);
@@ -188,27 +196,56 @@ public class AddASkier extends JFrame {
 				dispose();
 			}
 		});
-		CancelBtn.setFont(BUTTON_FONT);
-		CancelBtn.setContentAreaFilled(true);
-		CancelBtn.setOpaque(true);
-		CancelBtn.setBorderPainted(false);
-		CancelBtn.setBackground(new Color(255, 57, 57));
-		CancelBtn.setBounds(121, 360, 154, 51);
-		panel.add(CancelBtn);
+		cancelBtn.setFont(BUTTON_FONT);
+		cancelBtn.setContentAreaFilled(true);
+		cancelBtn.setOpaque(true);
+		cancelBtn.setBorderPainted(false);
+		cancelBtn.setBackground(new Color(255, 57, 57));
+		cancelBtn.setBounds(121, 360, 154, 51);
+		panel.add(cancelBtn);
 		
-		JButton SubmitBtn = new JButton("Submit");
-		SubmitBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				areFieldsValid();
-			}
+		JButton submitBtn = new JButton("Submit");
+		submitBtn.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        try {
+		            if (!areFieldsValid()) {
+		                return;
+		            }
+		            
+		            String skierLastName = Utils.formatStringForDataBaseStorage(lastNameField.getText());
+		            String skierFirstName = Utils.formatStringForDataBaseStorage(firstNameField.getText());
+		            LocalDate skierDateOfBirth = Utils.formatDateFromJDateChooserToLocalDate(dateOfBirthField.getDate());
+		            String phoneNumber = Utils.formatStringForDataBaseStorage(phoneNumberField.getText());
+		            String email = Utils.formatStringForDataBaseStorage(emailField.getText());
+		            String city = Utils.formatStringForDataBaseStorage(cityField.getText());
+		            String postcode = Utils.formatStringForDataBaseStorage(postcodeField.getText());
+		            String streetName = Utils.formatStringForDataBaseStorage(streetNameField.getText());
+		            String streetNumber = Utils.formatStringForDataBaseStorage(streetNumberField.getText());
+		            
+		            Skier skier = new Skier(skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+		            
+		            boolean isAdded = new DAOFactory().getSkierDAO().create(skier);
+		            
+		            if (isAdded) {
+		                JOptionPane.showMessageDialog(null, "Skier added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+		                resetFormFields();
+		            } else {
+		                JOptionPane.showMessageDialog(null, "Failed to add skier. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+		            }
+
+		        } catch (Exception ex) {
+		            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		        }
+		    }
 		});
-		SubmitBtn.setFont(BUTTON_FONT);
-		SubmitBtn.setContentAreaFilled(true);
-		SubmitBtn.setOpaque(true);
-		SubmitBtn.setBorderPainted(false);
-		SubmitBtn.setBackground(new Color(139, 255, 96));
-		SubmitBtn.setBounds(304, 360, 154, 51);
-		panel.add(SubmitBtn);
+
+		submitBtn.setFont(BUTTON_FONT);
+		submitBtn.setContentAreaFilled(true);
+		submitBtn.setOpaque(true);
+		submitBtn.setBorderPainted(false);
+		submitBtn.setBackground(new Color(139, 255, 96));
+		submitBtn.setBounds(304, 360, 154, 51);
+		panel.add(submitBtn);
 		
 		JLabel lblNewLabel_1 = new JLabel("Add a new skier");
 		lblNewLabel_1.setFont(TITLE_FONT);
@@ -220,36 +257,27 @@ public class AddASkier extends JFrame {
 	}
 	
 	private boolean areFieldsValid() {
-	    // Vérification de base pour les champs requis
-	    if (!validateField(lastNameField, "Last name is required") ||
+	    if (
+    		!validateField(lastNameField, "Last name is required") ||
 	        !validateField(firstNameField, "First name is required") ||
 	        !validateField(phoneNumberField, "Phone number is required") ||
 	        !validateField(emailField, "Email is required") ||
 	        !validateField(cityField, "City is required") ||
 	        !validateField(postcodeField, "Postcode is required") ||
 	        !validateField(streetNameField, "Street name is required") ||
-	        !validateField(streetNumberField, "Street number is required")) {
+	        !validateField(streetNumberField, "Street number is required") ||
+	        !validateRegex(phoneNumberField, "^\\+?[0-9. ()-]{7,}$", "Phone number format is invalid. Please enter a valid phone number.") ||
+	        !validateRegex(emailField, "^[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,}$", "Email format is invalid. Please enter a valid email address.")
+        ) {
 	        return false;
 	    }
 
-	    // Validation spécifique pour la date de naissance
 	    LocalDate skierDateOfBirth = dateOfBirthField.getDate() != null 
 	        ? dateOfBirthField.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() 
 	        : null;
+	    
 	    if (skierDateOfBirth == null) {
 	        JOptionPane.showMessageDialog(this, "Date of birth is required.", "Error", JOptionPane.ERROR_MESSAGE);
-	        return false;
-	    }
-
-	    // Validation du format du numéro de téléphone
-	    String phoneRegex = "^\\+?[0-9. ()-]{7,}$";
-	    if (!validateRegex(phoneNumberField, phoneRegex, "Phone number format is invalid. Please enter a valid phone number.")) {
-	        return false;
-	    }
-
-	    // Validation du format de l'email
-	    String emailRegex = "^[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,}$";
-	    if (!validateRegex(emailField, emailRegex, "Email format is invalid. Please enter a valid email address.")) {
 	        return false;
 	    }
 
@@ -264,12 +292,23 @@ public class AddASkier extends JFrame {
 	    return true;
 	}
 
-	// Nouvelle fonction pour la validation par regex
 	private boolean validateRegex(JTextField field, String regex, String errorMessage) {
 	    if (!field.getText().trim().matches(regex)) {
 	        JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
 	        return false;
 	    }
 	    return true;
+	}
+	
+	private void resetFormFields() {
+	    lastNameField.setText("");
+	    firstNameField.setText("");
+	    dateOfBirthField.setDate(null);
+	    phoneNumberField.setText("");
+	    emailField.setText("");
+	    cityField.setText("");
+	    postcodeField.setText("");
+	    streetNameField.setText("");
+	    streetNumberField.setText("");
 	}
 }

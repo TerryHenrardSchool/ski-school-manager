@@ -23,6 +23,20 @@ public class Skier extends Person {
     ) {
         super(id, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
     }
+    
+    public Skier(
+    		String lastName, 
+    		String firstName, 
+    		LocalDate dateOfBirth,
+    		String city, 
+    		String postcode, 
+    		String streetName, 
+    		String streetNumber,
+    		String phoneNumber, 
+    		String email
+    		) {
+    	this(0, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+    }
 
     // Methods
     public boolean hasScheduledLesson() {
