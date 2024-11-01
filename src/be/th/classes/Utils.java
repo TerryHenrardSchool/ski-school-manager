@@ -1,9 +1,11 @@
-package be.th.ski_school_manager;
+package be.th.classes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -12,8 +14,12 @@ public class Utils {
     private static final int MIN_VALID_YEAR = 1900;
     private static final String DATE_PATTERN_STRING = "YYYY-MM-DD";
 	
-    public static boolean isPositiveInteger(int id) {
-        return id > 0;
+    public static boolean isPositiveInteger(int number) {
+        return number > 0;
+    }
+    
+    public static boolean isNonNegativeInteger(int number) {
+    	return number >= 0;
     }
 
     public static boolean isNonEmptyString(String value) {
@@ -61,5 +67,13 @@ public class Utils {
     
     public static boolean isBooleanValid(Boolean value) {
         return value != null;
+    }
+    
+    public static String formatStringForDataBaseStorage(String string) {
+    	return string.trim().toLowerCase();
+    }
+    
+    public static LocalDate formatDateFromJDateChooserToLocalDate(Date date) {
+    	return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 }
