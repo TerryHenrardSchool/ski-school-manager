@@ -1,4 +1,4 @@
-package be.th.ski_school_manager;
+package be.th.classes;
 
 import java.util.Objects;
 
@@ -9,15 +9,15 @@ public class LessonType {
     private String level;
     private double price;
     private String name;
-    private String ageCategory;
+    private String ageCategoryName;
 
     // Constructor
-    public LessonType(int id, String level, double price, String name, String ageCategory) {
+    public LessonType(int id, String level, double price, String name, String ageCategoryName) {
     	setId(id);
         setLevel(level);
         setPrice(price);
         setName(name);
-        setAgeCategory(ageCategory);
+        setAgeCategoryName(ageCategoryName);
     }
 
     // Getters
@@ -36,9 +36,9 @@ public class LessonType {
     public String getName() {
         return name;
     }
-
-    public String getAgeCategory() {
-        return ageCategory;
+    
+    public String getAgeCategoryName() {
+    	return ageCategoryName;
     }
 
     // Setters
@@ -69,13 +69,14 @@ public class LessonType {
         }
         this.name = name;
     }
-
-    public void setAgeCategory(String ageCategory) {
-        if (!Utils.isNonEmptyString(ageCategory)) {
-            throw new IllegalArgumentException("Age category cannot be null or empty.");
-        }
-        this.ageCategory = ageCategory;
+    
+    public void setAgeCategoryName(String ageCategoryName) {
+    	if (!Utils.isNonEmptyString(ageCategoryName)) {
+    		throw new IllegalArgumentException("Age category name cannot be null or empty.");
+    	}
+    	this.ageCategoryName = ageCategoryName;
     }
+
     
     // Override methods
     @Override
@@ -92,13 +93,12 @@ public class LessonType {
         return id == lessonType.id &&
            Double.compare(lessonType.price, price) == 0 &&
            Objects.equals(level, lessonType.level) &&
-           Objects.equals(name, lessonType.name) &&
-           Objects.equals(ageCategory, lessonType.ageCategory);
+           Objects.equals(name, lessonType.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, level, price, name, ageCategory);
+        return Objects.hash(id, level, price, name);
     }
 
     @Override
@@ -107,8 +107,6 @@ public class LessonType {
            "id=" + id +
            ", level='" + level + '\'' +
            ", price=" + price +
-           ", name='" + name + '\'' +
-           ", ageCategory='" + ageCategory + '\'';
+           ", name='" + name + '\'';
     }
-
 }

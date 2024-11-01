@@ -1,8 +1,10 @@
-package be.th.ski_school_manager;
+package be.th.dao;
 
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
+
+import be.th.classes.Instructor;
 
 public class InstructorDAO extends DAO<Instructor> {
 
@@ -33,5 +35,11 @@ public class InstructorDAO extends DAO<Instructor> {
 	@Override
 	public List<Instructor> findAll(Map<String, Object> criteria) {
  		return null; // TODO
+	}
+
+	@Override
+	public List<Instructor> findAll() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

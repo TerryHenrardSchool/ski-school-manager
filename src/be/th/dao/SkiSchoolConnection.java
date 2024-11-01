@@ -1,4 +1,4 @@
-package be.th.ski_school_manager;
+package be.th.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 public class SkiSchoolConnection {
 	
 	private static final String DATABASE_DRIVER = "oracle.jdbc.driver.OracleDriver";
-	private static final String DATABASE_URL = "jdbc:oracle:thin:@//193.190.64.10:1522/xepdb1";
+	private static final String DATABASE_URL = "jdbc:oracle:thin:@//193.190.64.10:1522/xepdb1?useUnicode=true&characterEncoding=UTF-8&defaultNChar=true";
 	private static final String DATABASE_USERNAME = "STUDENT03_05";
 	private static final String DATABASE_PASSWORD = "dontchangeme";
 	
