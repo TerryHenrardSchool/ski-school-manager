@@ -16,8 +16,9 @@ public class SkierDAO extends DAO<Skier>{
 
 	@Override
 	public boolean create(Skier skier) {
-	    String sql = "INSERT INTO skier (lastName, firstName, dateOfBirth, phoneNumber, email, city, postcode, streetName, streetNumber) " + 
+	    String sql = "INSERT INTO skiers (last_name, first_name, date_of_birth, phone_number, email, city, postcode, street_name, street_number) " + 
 	    			 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	    
 	    try (PreparedStatement pstmt = super.connection.prepareStatement(sql)) {
 	        pstmt.setString(1, skier.getLastName());
 	        pstmt.setString(2, skier.getFirstName());

@@ -232,7 +232,6 @@ public class AddASkier extends JFrame {
 		            } else {
 		                JOptionPane.showMessageDialog(null, "Failed to add skier. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
 		            }
-
 		        } catch (Exception ex) {
 		            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		        }
@@ -267,7 +266,9 @@ public class AddASkier extends JFrame {
 	        !validateField(streetNameField, "Street name is required") ||
 	        !validateField(streetNumberField, "Street number is required") ||
 	        !validateRegex(phoneNumberField, "^\\+?[0-9. ()-]{7,}$", "Phone number format is invalid. Please enter a valid phone number.") ||
-	        !validateRegex(emailField, "^[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,}$", "Email format is invalid. Please enter a valid email address.")
+	        !validateRegex(emailField, "^[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,}$", "Email format is invalid. Please enter a valid email address.") ||
+	        !validateRegex(postcodeField, "^[0-9]{4}$", "Postcode characters must only be numbers and 4 digits long.") ||
+	        !validateRegex(streetNumberField, "^[0-9]*$", "Street number characters must only be numbers.")
         ) {
 	        return false;
 	    }
