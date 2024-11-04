@@ -187,7 +187,8 @@ public class SearchASkier extends JFrame {
 		idSearchTxtField.setColumns(10);
 		
 		JButton btnSearchSkier = new JButton("Search");
-		btnSearchSkier.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnSearchSkier.setFont(FontStyles.BUTTON);
+		btnSearchSkier.setBackground(ColorStyles.GREEN);
 		btnSearchSkier.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				final Integer id = getNumberField(idSearchTxtField, "id");
@@ -248,6 +249,7 @@ public class SearchASkier extends JFrame {
 		panel_1.add(firstNameSearchTxtField);
 		
 		JButton btnResetSearch = new JButton("Reset");
+		btnResetSearch.setBackground(ColorStyles.BLUE);
 		btnResetSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				displaySkiersInTable(skierMap.values());
@@ -347,7 +349,7 @@ public class SearchASkier extends JFrame {
 			}
 		});
 		btnDeleteSkier.setFont(FontStyles.BUTTON);
-		btnDeleteSkier.setBackground(ColorStyles.CANCEL_BUTTON);
+		btnDeleteSkier.setBackground(ColorStyles.RED);
 		btnDeleteSkier.setBounds(292, 388, 110, 31);
 		contentPane.add(btnDeleteSkier);
 				

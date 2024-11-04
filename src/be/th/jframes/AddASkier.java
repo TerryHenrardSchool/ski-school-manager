@@ -199,7 +199,7 @@ public class AddASkier extends JFrame {
 		cancelBtn.setContentAreaFilled(true);
 		cancelBtn.setOpaque(true);
 		cancelBtn.setBorderPainted(false);
-		cancelBtn.setBackground(ColorStyles.CANCEL_BUTTON);
+		cancelBtn.setBackground(ColorStyles.RED);
 		cancelBtn.setBounds(121, 360, 154, 51);
 		panel.add(cancelBtn);
 		
@@ -237,7 +237,7 @@ public class AddASkier extends JFrame {
 		submitBtn.setContentAreaFilled(true);
 		submitBtn.setOpaque(true);
 		submitBtn.setBorderPainted(false);
-		submitBtn.setBackground(ColorStyles.SUBMIT_BUTTON);
+		submitBtn.setBackground(ColorStyles.GREEN);
 		submitBtn.setBounds(304, 360, 154, 51);
 		panel.add(submitBtn);
 		
