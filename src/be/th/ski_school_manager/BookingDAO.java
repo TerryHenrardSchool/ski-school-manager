@@ -1,10 +1,8 @@
-package be.th.dao;
+package be.th.ski_school_manager;
 
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
-
-import be.th.models.Booking;
 
 public class BookingDAO extends DAO<Booking>{
 
@@ -18,7 +16,7 @@ public class BookingDAO extends DAO<Booking>{
 	}
 
 	@Override
-	public boolean delete(int id) {
+	public boolean delete(Booking obj) {
 		return false; // TODO
 	}
 
@@ -35,11 +33,5 @@ public class BookingDAO extends DAO<Booking>{
 	@Override
 	public List<Booking> findAll(Map<String, Object> criteria) {
  		return null; // TODO
-	}
-
-	@Override
-	public List<Booking> findAll() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

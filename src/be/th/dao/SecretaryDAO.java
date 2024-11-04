@@ -9,7 +9,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
-import be.th.classes.Secretary;
+import be.th.models.Secretary;
 
 public class SecretaryDAO extends DAO<Secretary>{
 
@@ -23,7 +23,7 @@ public class SecretaryDAO extends DAO<Secretary>{
 	}
 
 	@Override
-	public boolean delete(Secretary obj) {
+	public boolean delete(int id) {
 		return false; // TODO
 	}
 

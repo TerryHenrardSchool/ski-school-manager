@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import be.th.classes.LessonType;
+import be.th.models.LessonType;
 
 public class LessonTypesDAO extends DAO<LessonType>{
 
@@ -24,7 +24,7 @@ public class LessonTypesDAO extends DAO<LessonType>{
 	}
 
 	@Override
-	public boolean delete(LessonType obj) {
+	public boolean delete(int id) {
 		// TODO Auto-generated method stub
 		return false;
 	}
