@@ -2,12 +2,12 @@ package be.th.dao;
 
 import java.sql.Connection;
 
-import be.th.classes.Booking;
-import be.th.classes.Instructor;
-import be.th.classes.Lesson;
-import be.th.classes.LessonType;
-import be.th.classes.Secretary;
-import be.th.classes.Skier;
+import be.th.models.Booking;
+import be.th.models.Instructor;
+import be.th.models.Lesson;
+import be.th.models.LessonType;
+import be.th.models.Secretary;
+import be.th.models.Skier;
 
 public class DAOFactory {
 	protected static final Connection CONNECTION  = SkiSchoolConnection.getInstance();

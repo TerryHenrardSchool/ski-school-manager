@@ -4,9 +4,9 @@ import javax.swing.*;
 
 import com.toedter.calendar.JDateChooser;
 
-import be.th.classes.LessonType;
 import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
+import be.th.models.LessonType;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
