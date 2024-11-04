@@ -61,8 +61,7 @@ public class AddAnInstructor extends JFrame {
 	 * Create the frame.
 	 */
 	public AddAnInstructor() {
-		// Release 1.1.1 commentary
-		// You did a great job man
+		// I'll add some library
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 630, 554);
 		contentPane = new JPanel();
