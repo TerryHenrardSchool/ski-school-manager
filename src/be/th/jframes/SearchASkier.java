@@ -30,6 +30,8 @@ import be.th.models.Address;
 import be.th.models.Person;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
+import be.th.styles.ColorStyles;
+import be.th.styles.FontStyles;
 import be.th.validators.DateValidator;
 import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
@@ -344,7 +346,8 @@ public class SearchASkier extends JFrame {
 				confirmDeletion();
 			}
 		});
-		btnDeleteSkier.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnDeleteSkier.setFont(FontStyles.BUTTON);
+		btnDeleteSkier.setBackground(ColorStyles.CANCEL_BUTTON);
 		btnDeleteSkier.setBounds(30, 387, 110, 31);
 		contentPane.add(btnDeleteSkier);
 				
