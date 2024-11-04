@@ -1,15 +1,15 @@
-package be.th.ski_school_manager;
+package be.th.classes;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class Instructor extends Person {
-	
+public class Skier extends Person {
+
 	// Static attributes
-	private static final long serialVersionUID = -5724827101822519690L;
+	private static final long serialVersionUID = -342070697036823773L;
 
 	// Constructor
-    public Instructor(
+    public Skier(
 		int id, 
 		String lastName, 
 		String firstName, 
@@ -18,26 +18,32 @@ public class Instructor extends Person {
 		String postcode, 
 		String streetName, 
 		String streetNumber,
-		String phoneNumber, 
-		String email
-	) {
+        String phoneNumber, 
+        String email
+    ) {
         super(id, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+    }
+    
+    public Skier(
+    		String lastName, 
+    		String firstName, 
+    		LocalDate dateOfBirth,
+    		String city, 
+    		String postcode, 
+    		String streetName, 
+    		String streetNumber,
+    		String phoneNumber, 
+    		String email
+    		) {
+    	this(0, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
     }
 
     // Methods
-    public boolean isAccreditate() {
-        return false;
-    }
-
     public boolean hasScheduledLesson() {
-        return false;
-    }
-
-    public ArrayList<Lesson> getSchedule(int instructorId) {
-        return new ArrayList<>(); //TODO
+        return false; //TODO
     }
     
-  //Override methods
+    //Override methods
     @Override
     public boolean equals(Object object) {
     	if(!(object instanceof Person)) {

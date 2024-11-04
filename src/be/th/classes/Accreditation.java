@@ -1,4 +1,4 @@
-package be.th.ski_school_manager;
+package be.th.classes;
 
 import java.util.Objects;
 

@@ -1,4 +1,4 @@
-package be.th.ski_school_manager;
+package be.th.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
+
+import be.th.classes.Secretary;
 
 public class SecretaryDAO extends DAO<Secretary>{
 
@@ -33,7 +35,7 @@ public class SecretaryDAO extends DAO<Secretary>{
 	@Override
 	public Secretary find(int id) {
         String query = "SELECT * FROM secretaries WHERE secretary_id = ?";
-        try (PreparedStatement stmt = connect.prepareStatement(query)) {
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, id);
 
             ResultSet rs = stmt.executeQuery();
@@ -63,5 +65,11 @@ public class SecretaryDAO extends DAO<Secretary>{
 	@Override
 	public List<Secretary> findAll(Map<String, Object> criteria) {
  		return null; // TODO
+	}
+
+	@Override
+	public List<Secretary> findAll() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
