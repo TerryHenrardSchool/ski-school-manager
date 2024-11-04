@@ -285,7 +285,7 @@ public class SearchASkier extends JFrame {
 		phoneNumberTextField.setToolTipText("");
 		phoneNumberTextField.setColumns(10);
 		
-		JLabel lblSearchEmailAddress = new JLabel("Email address:");
+		JLabel lblSearchEmailAddress = new JLabel("Email:");
 		lblSearchEmailAddress.setBounds(10, 236, 110, 25);
 		panel_1.add(lblSearchEmailAddress);
 		lblSearchEmailAddress.setFont(new Font("Tahoma", Font.PLAIN, 14));
