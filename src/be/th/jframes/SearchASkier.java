@@ -348,7 +348,7 @@ public class SearchASkier extends JFrame {
 		});
 		btnDeleteSkier.setFont(FontStyles.BUTTON);
 		btnDeleteSkier.setBackground(ColorStyles.CANCEL_BUTTON);
-		btnDeleteSkier.setBounds(30, 387, 110, 31);
+		btnDeleteSkier.setBounds(292, 388, 110, 31);
 		contentPane.add(btnDeleteSkier);
 				
 		loadSkierMap();
