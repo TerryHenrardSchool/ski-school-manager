@@ -1,4 +1,4 @@
-package be.th.ski_school_manager;
+package be.th.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,19 +7,20 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 
 public class SkiSchoolConnection {
-	
+
 	private static Connection instance = null;
-    private static final String DATABASE_URL = "jdbc:ucanaccess://./Ecole.accdb"; // Database URL
 	
 	private SkiSchoolConnection(){
 		try{
-			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-			instance = DriverManager.getConnection(DATABASE_URL);
+			Class.forName(DatabaseConstants.DRIVER);
+			
+			System.setProperty("oracle.jdbc.Trace", "true");
+			instance = DriverManager.getConnection(DatabaseConstants.URL, DatabaseConstants.USERNAME, DatabaseConstants.PASSWORD);
 		} catch (ClassNotFoundException ex){
 			JOptionPane.showMessageDialog(null, "Driver class is nowhere to be found."+ ex.getMessage());
 			System.exit(0);			
 		} catch (SQLException ex) {
-			JOptionPane.showMessageDialog(null, "JDBC error : " +ex.getMessage());
+			JOptionPane.showMessageDialog(null, "JDBC error : " + ex.getMessage());
 			System.exit(0);			
 		}
 		
