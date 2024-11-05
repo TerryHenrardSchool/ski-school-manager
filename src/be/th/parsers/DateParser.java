@@ -31,4 +31,13 @@ public class DateParser {
             throw new Exception(e);
         }
     }
+    
+    public static Date toDate(LocalDate localDate) {
+        if (!DateValidator.hasValue(localDate)) {
+    		throw new IllegalArgumentException();
+        }
+        
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
 }

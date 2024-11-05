@@ -100,13 +100,13 @@ public class SearchASkier extends JFrame {
 		panel.setLayout(null);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 24, 1219, 279);
+		scrollPane.setBounds(10, 24, 1219, 242);
 		panel.add(scrollPane);
 		
 		table = new JTable();
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		table.getTableHeader().setReorderingAllowed(false);
 		table.getSelectionModel().addListSelectionListener(this::handleEventOnSkiersTableRows);
-
 		
 		DefaultTableModel tableModel = new DefaultTableModel(
 		    new Object[][] {},
@@ -130,6 +130,49 @@ public class SearchASkier extends JFrame {
 		
 		scrollPane.setViewportView(table);
 		
+		JButton btnDeleteSkier = new JButton("Delete skier");
+		btnDeleteSkier.setBounds(10, 271, 110, 31);
+		panel.add(btnDeleteSkier);
+		btnDeleteSkier.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(!ObjectValidator.hasValue(selectedSkier)) {
+					warnThereIsNoSkierSlected();
+					return;
+				}
+				
+				final int userResponse = askConfirmationBeforeDeletion();
+				if (userResponse != 0) {
+					return;
+				}
+				
+				final boolean isDeleted = skierDAO.delete(selectedSkier.getId());
+				if(!isDeleted) {
+					sendErrorWhileDeleting();
+				}
+				
+				confirmDeletion();
+			}
+		});
+		btnDeleteSkier.setFont(FontStyles.BUTTON);
+		btnDeleteSkier.setBackground(ColorStyles.RED);
+		
+		JButton btnUpdateInformation = new JButton("Update skier");
+		btnUpdateInformation.setBounds(130, 271, 110, 31);
+		panel.add(btnUpdateInformation);
+		btnUpdateInformation.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(!ObjectValidator.hasValue(selectedSkier)) {
+					warnThereIsNoSkierSlected();
+					return;
+				}
+				
+				UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier);
+				updateASkierFrame.setVisible(true);
+			}
+		});
+		btnUpdateInformation.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnUpdateInformation.setBackground(ColorStyles.ORANGE);
+		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new TitledBorder(null, "Search criteria", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panel_1.setBounds(20, 64, 252, 313);
@@ -146,25 +189,6 @@ public class SearchASkier extends JFrame {
 		idSearchTxtField.setBounds(130, 24, 110, 31);
 		panel_1.add(idSearchTxtField);
 		idSearchTxtField.setColumns(10);
-		
-		JButton btnSearchSkier = new JButton("Search");
-		btnSearchSkier.setFont(FontStyles.BUTTON);
-		btnSearchSkier.setBackground(ColorStyles.GREEN);
-		btnSearchSkier.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				final Integer id = getNumberField(idSearchTxtField, "id");
-				final String lastName = getTextField(lastNameSearchTxtField);
-				final String firstName = getTextField(firstNameSearchTxtField);
-				final LocalDate birthdate = DateParser.toLocalDate(birthDateTextField.getDate());
-				final String email = getTextField(emailSearchTxtField);
-				final String address = getTextField(addressSearchTxtField);
-				final String phoneNumber = getTextField(phoneNumberTextField);
-
-				displaySkiersInTable(searchSkiers(id, lastName, firstName, birthdate, email, address, phoneNumber));
-			}
-		});
-		btnSearchSkier.setBounds(130, 272, 110, 31);
-		panel_1.add(btnSearchSkier);
 		
 		JLabel lblSearchLastName = new JLabel("Last name:");
 		lblSearchLastName.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -197,7 +221,7 @@ public class SearchASkier extends JFrame {
 			}
 		});
 		btnResetSearch.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		btnResetSearch.setBounds(10, 272, 110, 31);
+		btnResetSearch.setBounds(130, 271, 110, 31);
 		panel_1.add(btnResetSearch);
 		
 		JLabel lblSearchBirthdate = new JLabel("Birthdate:");
@@ -266,32 +290,6 @@ public class SearchASkier extends JFrame {
 		cancelBtn.setBackground(new Color(255, 57, 57));
 		cancelBtn.setBounds(20, 10, 154, 52);
 		contentPane.add(cancelBtn);
-		
-		JButton btnDeleteSkier = new JButton("Delete");
-		btnDeleteSkier.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(!ObjectValidator.hasValue(selectedSkier)) {
-					warnThereIsNoSkierSlected();
-					return;
-				}
-				
-				final int userResponse = askConfirmationBeforeDeletion();
-				if (userResponse != 0) {
-					return;
-				}
-				
-				final boolean isDeleted = skierDAO.delete(selectedSkier.getId());
-				if(!isDeleted) {
-					sendErrorWhileDeleting();
-				}
-				
-				confirmDeletion();
-			}
-		});
-		btnDeleteSkier.setFont(FontStyles.BUTTON);
-		btnDeleteSkier.setBackground(ColorStyles.RED);
-		btnDeleteSkier.setBounds(292, 388, 110, 31);
-		contentPane.add(btnDeleteSkier);
 				
 		loadSkierMap();
 		displaySkiersInTable(skierMap.values());
