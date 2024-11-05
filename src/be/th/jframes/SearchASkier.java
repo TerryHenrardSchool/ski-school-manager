@@ -26,6 +26,7 @@ import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Address;
+import be.th.models.Instructor;
 import be.th.models.Person;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
@@ -96,7 +97,7 @@ public class SearchASkier extends JFrame {
 		
 		DefaultTableModel tableModel = new DefaultTableModel(
 		    new Object[][] {},
-		    new String[] { "Id", "Names", "Birthdate", "Address", "Phone number", "Email" }
+		    new String[] { "Id", "Full name", "Birthdate", "Address", "Phone number", "Email" }
 		) {
 			private static final long serialVersionUID = -4108980079580312070L;
 
@@ -144,6 +145,8 @@ public class SearchASkier extends JFrame {
 				}
 				
 				confirmDeletion();
+				removeSkierFromSkiermap(selectedSkier.getId());
+				displaySkiersInTable(skierMap.values());
 			}
 		});
 		btnDeleteSkier.setFont(FontStyles.BUTTON);
@@ -152,7 +155,7 @@ public class SearchASkier extends JFrame {
 		JButton btnUpdateInformation = new JButton("Update skier");
 		btnUpdateInformation.setBounds(130, 271, 110, 31);
 		panel.add(btnUpdateInformation);
-		btnUpdateInformation.addActionListener(new ActionListener() {
+		btnUpdateInformation.addActionListener(new ActionListener() {			
 			public void actionPerformed(ActionEvent e) {
 				openUpdateSkierWindow();
 			}
@@ -301,7 +304,7 @@ public class SearchASkier extends JFrame {
 			selectedSkier.getLastnameFormattedForDisplay() + " " + 
 			selectedSkier.getFirstNameFormattedForDisplay() + " has been successfully deleted.",
 			"Success",
-			JOptionPane.WARNING_MESSAGE
+			JOptionPane.PLAIN_MESSAGE
 		);
 	}
 	
@@ -338,6 +341,11 @@ public class SearchASkier extends JFrame {
 	
 	private void loadSkierMap() {	
 		List<Skier> skiers = skierDAO.findAll();
+		
+		if(!skierMap.isEmpty()) {
+			skierMap.clear();			
+		}
+		
 		for (final Skier skier : skiers) {
             skierMap.put(skier.getId(), skier);
         }
@@ -538,5 +546,11 @@ public class SearchASkier extends JFrame {
 		
 		UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier, SearchASkier.this::handleUpdateResult);
 		updateASkierFrame.setVisible(true);
+	}
+	
+	private boolean removeSkierFromSkiermap(int id) {
+		return skierMap.remove(id) != null 
+			? true 
+			: false;
 	}
 }
