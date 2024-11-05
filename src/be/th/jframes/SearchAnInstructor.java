@@ -71,6 +71,7 @@ public class SearchAnInstructor extends JFrame {
 	
 	private Instructor selectedInstructor;
 
+	// Release 1.2.0 nothing to say, clean code, good job
 	public SearchAnInstructor() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1539, 1003);
