@@ -42,7 +42,6 @@ public class SkierDAO extends DAO<Skier>{
 	        pstmt.setString(7, DatabaseFormatter.format(skier.getAddress().getPostcode()));
 	        pstmt.setString(8, DatabaseFormatter.format(skier.getAddress().getStreetName()));
 	        pstmt.setString(9, DatabaseFormatter.format(skier.getAddress().getStreetNumber()));
-	        pstmt.setInt(10, skier.getId());  
 	        
 	        return pstmt.executeUpdate() > 0;
 	    } catch (SQLException e) {

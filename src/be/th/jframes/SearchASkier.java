@@ -96,7 +96,7 @@ public class SearchASkier extends JFrame {
 		
 		DefaultTableModel tableModel = new DefaultTableModel(
 		    new Object[][] {},
-		    new String[] { "Id", "Names", "Birthdate", "Address", "Phone number", "Email" }
+		    new String[] { "Id", "Full name", "Birthdate", "Address", "Phone number", "Email" }
 		) {
 			private static final long serialVersionUID = -4108980079580312070L;
 
@@ -144,6 +144,8 @@ public class SearchASkier extends JFrame {
 				}
 				
 				confirmDeletion();
+				loadSkierMap();
+				displaySkiersInTable(skierMap.values());
 			}
 		});
 		btnDeleteSkier.setFont(FontStyles.BUTTON);
@@ -338,6 +340,11 @@ public class SearchASkier extends JFrame {
 	
 	private void loadSkierMap() {	
 		List<Skier> skiers = skierDAO.findAll();
+		
+		if(!skierMap.isEmpty()) {
+			skierMap.clear();			
+		}
+		
 		for (final Skier skier : skiers) {
             skierMap.put(skier.getId(), skier);
         }
