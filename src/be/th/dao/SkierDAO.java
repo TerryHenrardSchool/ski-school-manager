@@ -108,23 +108,22 @@ public class SkierDAO extends DAO<Skier>{
 	    
 	    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 	        stmt.setInt(1, id);
-	        
-	        try (ResultSet rs = stmt.executeQuery()) {
-	            if (rs.next()) {
-	                return new Skier(
-	                    rs.getInt("skier_id"),
-	                    rs.getString("last_name"),
-	                    rs.getString("first_name"),
-	                    rs.getDate("date_of_birth").toLocalDate(),
-	                    rs.getString("city"),
-	                    rs.getString("postcode"),
-	                    rs.getString("street_name"),
-	                    rs.getString("street_number"),
-	                    rs.getString("phone_number"),
-	                    rs.getString("email")
-	                );
-	            }
-	        }
+	        ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new Skier(
+                    rs.getInt("skier_id"),
+                    rs.getString("last_name"),
+                    rs.getString("first_name"),
+                    rs.getDate("date_of_birth").toLocalDate(),
+                    rs.getString("city"),
+                    rs.getString("postcode"),
+                    rs.getString("street_name"),
+                    rs.getString("street_number"),
+                    rs.getString("phone_number"),
+                    rs.getString("email")
+                );
+            }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }

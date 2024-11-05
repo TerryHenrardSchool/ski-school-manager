@@ -1,7 +1,5 @@
 package be.th.jframes;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -9,12 +7,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
-import java.awt.Font;
 import com.toedter.calendar.JDateChooser;
 
-import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
-import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
@@ -25,11 +20,7 @@ import java.awt.Color;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.lang.invoke.StringConcatFactory;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.function.Consumer;
 import java.awt.event.ActionEvent;
 
@@ -48,26 +39,7 @@ public class UpdateASkier extends JFrame {
 	private JTextField streetNameField;
 	private JTextField streetNumberField;
 
-	/**
-	 * Launch the application.
-	 */
-	/*public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					UpdateASkier frame = new UpdateASkier();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}*/
-
-	/**
-	 * Create the frame.
-	 */
-	public UpdateASkier(Skier skierToUpdate, Consumer<Boolean> onUpdateCallBack) {		
+	UpdateASkier(Skier skierToUpdate, Consumer<Boolean> onUpdateCallBack) {		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 630, 554);
 		contentPane = new JPanel();

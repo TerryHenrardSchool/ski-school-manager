@@ -41,25 +41,6 @@ public class AddAnInstructor extends JFrame {
 	private JTextField streetNameField;
 	private JTextField streetNumberField;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					AddAnInstructor frame = new AddAnInstructor();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
-	 * Create the frame.
-	 */
 	public AddAnInstructor() {
 		// I'll add some library
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
