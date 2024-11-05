@@ -9,13 +9,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
-import java.awt.Font;
 import com.toedter.calendar.JDateChooser;
 
-import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
-import be.th.dao.SkierDAO;
-import be.th.formatters.DatabaseFormatter;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
 import be.th.styles.ColorStyles;
@@ -25,10 +21,7 @@ import java.awt.Color;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.lang.invoke.StringConcatFactory;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.awt.event.ActionEvent;
 
 public class AddASkier extends JFrame {
@@ -46,25 +39,6 @@ public class AddASkier extends JFrame {
 	private JTextField streetNameField;
 	private JTextField streetNumberField;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					AddASkier frame = new AddASkier();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
-	 * Create the frame.
-	 */
 	public AddASkier() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 630, 554);
@@ -203,19 +177,19 @@ public class AddASkier extends JFrame {
 		cancelBtn.setBounds(121, 360, 154, 51);
 		panel.add(cancelBtn);
 		
-		JButton submitBtn = new JButton("Submit");
-		submitBtn.addActionListener(new ActionListener() {
+		JButton addBtn = new JButton("Add");
+		addBtn.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        try {		            
-		            String skierLastName = DatabaseFormatter.format(lastNameField.getText());
-		            String skierFirstName = DatabaseFormatter.format(firstNameField.getText());
+		            String skierLastName = lastNameField.getText();
+		            String skierFirstName = firstNameField.getText();
 		            LocalDate skierDateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
-		            String phoneNumber = DatabaseFormatter.format(phoneNumberField.getText());
-		            String email = DatabaseFormatter.format(emailField.getText());
-		            String city = DatabaseFormatter.format(cityField.getText());
-		            String postcode = DatabaseFormatter.format(postcodeField.getText());
-		            String streetName = DatabaseFormatter.format(streetNameField.getText());
-		            String streetNumber = DatabaseFormatter.format(streetNumberField.getText());
+		            String phoneNumber = phoneNumberField.getText();
+		            String email = emailField.getText();
+		            String city = cityField.getText();
+		            String postcode = postcodeField.getText();
+		            String streetName = streetNameField.getText();
+		            String streetNumber = streetNumberField.getText();
 		            
 		            Skier skier = new Skier(skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
 		            
@@ -233,13 +207,13 @@ public class AddASkier extends JFrame {
 		    }
 		});
 
-		submitBtn.setFont(FontStyles.BUTTON);
-		submitBtn.setContentAreaFilled(true);
-		submitBtn.setOpaque(true);
-		submitBtn.setBorderPainted(false);
-		submitBtn.setBackground(ColorStyles.GREEN);
-		submitBtn.setBounds(304, 360, 154, 51);
-		panel.add(submitBtn);
+		addBtn.setFont(FontStyles.BUTTON);
+		addBtn.setContentAreaFilled(true);
+		addBtn.setOpaque(true);
+		addBtn.setBorderPainted(false);
+		addBtn.setBackground(ColorStyles.GREEN);
+		addBtn.setBounds(304, 360, 154, 51);
+		panel.add(addBtn);
 		
 		JLabel lblNewLabel_1 = new JLabel("Add a new skier");
 		lblNewLabel_1.setFont(FontStyles.TITLE);
