@@ -29,9 +29,11 @@ import java.lang.invoke.StringConcatFactory;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Date;
+import java.util.function.Consumer;
 import java.awt.event.ActionEvent;
 
-public class AddASkier extends JFrame {
+public class UpdateASkier extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -49,24 +51,24 @@ public class AddASkier extends JFrame {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					AddASkier frame = new AddASkier();
+					UpdateASkier frame = new UpdateASkier();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
-	}
+	}*/
 
 	/**
 	 * Create the frame.
 	 */
-	public AddASkier() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	public UpdateASkier(Skier skierToUpdate, Consumer<Boolean> onUpdateCallBack) {		
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 630, 554);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -189,9 +191,6 @@ public class AddASkier extends JFrame {
 		JButton cancelBtn = new JButton("Cancel");
 		cancelBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				MainMenu mainMenu = new MainMenu();
-				mainMenu.setVisible(true);
-				
 				dispose();
 			}
 		});
@@ -203,29 +202,30 @@ public class AddASkier extends JFrame {
 		cancelBtn.setBounds(121, 360, 154, 51);
 		panel.add(cancelBtn);
 		
-		JButton addBtn = new JButton("Add");
-		addBtn.addActionListener(new ActionListener() {
+		JButton updateBtn = new JButton("Update");
+		updateBtn.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
-		        try {		            
-		            String skierLastName = lastNameField.getText();
-		            String skierFirstName = firstNameField.getText();
+		        try {		   
+		        	int skierId = skierToUpdate.getId();
+		            String skierLastName = DatabaseFormatter.format(lastNameField.getText());
+		            String skierFirstName = DatabaseFormatter.format(firstNameField.getText());
 		            LocalDate skierDateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
-		            String phoneNumber = phoneNumberField.getText();
-		            String email = emailField.getText();
-		            String city = cityField.getText();
-		            String postcode = postcodeField.getText();
-		            String streetName = streetNameField.getText();
-		            String streetNumber = streetNumberField.getText();
+		            String phoneNumber = DatabaseFormatter.format(phoneNumberField.getText());
+		            String email = DatabaseFormatter.format(emailField.getText());
+		            String city = DatabaseFormatter.format(cityField.getText());
+		            String postcode = DatabaseFormatter.format(postcodeField.getText());
+		            String streetName = DatabaseFormatter.format(streetNameField.getText());
+		            String streetNumber = DatabaseFormatter.format(streetNumberField.getText());
 		            
-		            Skier skier = new Skier(skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+		            Skier skier = new Skier(skierId, skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
 		            
-		            boolean isAdded = new DAOFactory().getSkierDAO().create(skier);
+		            boolean isUpdated = new DAOFactory().getSkierDAO().update(skier);
 		            
-		            if (isAdded) {
-		                JOptionPane.showMessageDialog(null, "Skier added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-		                resetFormFields();
+		            if (isUpdated) {
+		                onUpdateCallBack.accept(isUpdated);
+		                dispose();
 		            } else {
-		                JOptionPane.showMessageDialog(null, "Failed to add skier. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+		                JOptionPane.showMessageDialog(null, "Failed to update skier's information. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
 		            }
 		        } catch (Exception ex) {
 		            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -233,32 +233,34 @@ public class AddASkier extends JFrame {
 		    }
 		});
 
-		addBtn.setFont(FontStyles.BUTTON);
-		addBtn.setContentAreaFilled(true);
-		addBtn.setOpaque(true);
-		addBtn.setBorderPainted(false);
-		addBtn.setBackground(ColorStyles.GREEN);
-		addBtn.setBounds(304, 360, 154, 51);
-		panel.add(addBtn);
+		updateBtn.setFont(FontStyles.BUTTON);
+		updateBtn.setContentAreaFilled(true);
+		updateBtn.setOpaque(true);
+		updateBtn.setBorderPainted(false);
+		updateBtn.setBackground(ColorStyles.GREEN);
+		updateBtn.setBounds(304, 360, 154, 51);
+		panel.add(updateBtn);
 		
-		JLabel lblNewLabel_1 = new JLabel("Add a new skier");
+		JLabel lblNewLabel_1 = new JLabel("Updating " + skierToUpdate.getLastnameFormattedForDisplay() +  " " + skierToUpdate.getFirstNameFormattedForDisplay() + " information");
 		lblNewLabel_1.setFont(FontStyles.TITLE);
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_1.setBackground(new Color(0, 153, 255));
 		lblNewLabel_1.setOpaque(true);
 		lblNewLabel_1.setBounds(10, 10, 600, 52);
 		contentPane.add(lblNewLabel_1);
+		
+		preFillTexteFields(skierToUpdate);
 	}
 	
-	private void resetFormFields() {
-	    lastNameField.setText("");
-	    firstNameField.setText("");
-	    dateOfBirthField.setDate(null);
-	    phoneNumberField.setText("");
-	    emailField.setText("");
-	    cityField.setText("");
-	    postcodeField.setText("");
-	    streetNameField.setText("");
-	    streetNumberField.setText("");
+	private void preFillTexteFields(Skier skier) {
+		lastNameField.setText(skier.getLastName());
+	    firstNameField.setText(skier.getFirstName());
+	    dateOfBirthField.setDate(DateParser.toDate(skier.getDateOfBirth()));
+	    phoneNumberField.setText(skier.getPhoneNumber());
+	    emailField.setText(skier.getEmail());
+	    cityField.setText(skier.getAddress().getCity());
+	    postcodeField.setText(skier.getAddress().getPostcode());
+	    streetNameField.setText(skier.getAddress().getStreetName());
+	    streetNumberField.setText(skier.getAddress().getStreetNumber());
 	}
 }

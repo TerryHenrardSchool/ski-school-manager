@@ -24,7 +24,6 @@ import javax.swing.table.DefaultTableModel;
 
 import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
-import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Address;
 import be.th.models.Person;
@@ -40,12 +39,13 @@ import be.th.validators.StringValidator;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.awt.geom.Area;
-import java.security.KeyStore.PrivateKeyEntry;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.awt.event.ActionEvent;
 import javax.swing.border.EtchedBorder;
@@ -60,7 +60,6 @@ public class SearchASkier extends JFrame {
 	private JPanel contentPane;
 	private JTable table;
 	private JTextField idSearchTxtField;
-	
 	private LinkedHashMap<Integer, Skier> skierMap = new LinkedHashMap<>();
 	private JTextField lastNameSearchTxtField;
 	private JTextField firstNameSearchTxtField;
@@ -100,52 +99,13 @@ public class SearchASkier extends JFrame {
 		panel.setLayout(null);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 24, 1219, 279);
+		scrollPane.setBounds(10, 24, 1219, 242);
 		panel.add(scrollPane);
 		
 		table = new JTable();
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.getSelectionModel().addListSelectionListener(e -> {
-		    if (e.getValueIsAdjusting()) {
-		        return;
-		    }
-		    
-		    int selectedRow = table.getSelectedRow();
-		    
-		    if (selectedRow < 0) { 
-		        return;
-		    }
-		    
-		    try {
-		        Integer id = (Integer) table.getValueAt(selectedRow, 0);
-		        Map<String, String> nameMap = Person.splitLastNameAndFirstName((String) table.getValueAt(selectedRow, 1));
-		        LocalDate birthdate = DateParser.toLocalDate((String) table.getValueAt(selectedRow, 2));
-		        Map<String, String> addressMap = Address.destructureFormattedAddress((String) table.getValueAt(selectedRow, 3));
-		        String phoneNumber = (String) table.getValueAt(selectedRow, 4);
-		        String email = (String) table.getValueAt(selectedRow, 5);
-		        
-		        selectedSkier = new Skier(
-	        		id, 
-	        		nameMap.get("lastName"), 
-	        		nameMap.get("firstName"), 
-	        		birthdate, 
-	        		addressMap.get("city"), 
-	        		addressMap.get("postcode"), 
-	        		addressMap.get("streetName"), 
-	        		addressMap.get("streetNumber"), 
-	        		phoneNumber, 
-	        		email
-        		);
-		        
-		        // TODO: Add delete button
-		        // TODO: Add update button that opens a form like create skier with pre-filled fields and a button to submit
-		        // TODO: Add JTable with the upcoming lessons
-		    } catch (Exception ex) {
-		        ex.printStackTrace();
-		        JOptionPane.showMessageDialog(null, "Error while fetching skier data.", "Erreur", JOptionPane.ERROR_MESSAGE);
-		    }
-		});
-
+		table.getTableHeader().setReorderingAllowed(false);
+		table.getSelectionModel().addListSelectionListener(this::handleClickOnRows);
 		
 		DefaultTableModel tableModel = new DefaultTableModel(
 		    new Object[][] {},
@@ -167,7 +127,55 @@ public class SearchASkier extends JFrame {
 		table.getColumnModel().getColumn(4).setPreferredWidth(80); 
 		table.getColumnModel().getColumn(5).setPreferredWidth(180); 
 		
+		table.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		    	 handleDoubleClickOnRows(e);
+		    }
+		});
+		
 		scrollPane.setViewportView(table);
+		
+		JButton btnDeleteSkier = new JButton("Delete skier");
+		btnDeleteSkier.setBounds(10, 271, 110, 31);
+		panel.add(btnDeleteSkier);
+		btnDeleteSkier.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(!ObjectValidator.hasValue(selectedSkier)) {
+					warnThereIsNoSkierSlected();
+					return;
+				}
+				
+				final int userResponse = askConfirmationBeforeDeletion();
+				if (userResponse != 0) {
+					return;
+				}
+				
+				final boolean isDeleted = skierDAO.delete(selectedSkier.getId());
+				if(!isDeleted) {
+					sendErrorWhileDeleting();
+				}
+				
+				confirmDeletion();
+			}
+		});
+		btnDeleteSkier.setFont(FontStyles.BUTTON);
+		btnDeleteSkier.setBackground(ColorStyles.RED);
+		
+		JButton btnUpdateInformation = new JButton("Update skier");
+		btnUpdateInformation.setBounds(130, 271, 110, 31);
+		panel.add(btnUpdateInformation);
+		btnUpdateInformation.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openUpdateSkierWindow();
+			}
+		});
+		btnUpdateInformation.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnUpdateInformation.setBackground(ColorStyles.ORANGE);
+		
+		JLabel lblNewLabel = new JLabel("(or double click on the row...)");
+		lblNewLabel.setBounds(250, 281, 196, 14);
+		panel.add(lblNewLabel);
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new TitledBorder(null, "Search criteria", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -180,61 +188,21 @@ public class SearchASkier extends JFrame {
 		lblSearchSkierId.setBounds(10, 24, 64, 25);
 		panel_1.add(lblSearchSkierId);
 		
-		idSearchTxtField = new JTextField();
+		idSearchTxtField = createFilterTextField();
 		idSearchTxtField.setToolTipText("");
 		idSearchTxtField.setBounds(130, 24, 110, 31);
 		panel_1.add(idSearchTxtField);
 		idSearchTxtField.setColumns(10);
-		
-		JButton btnSearchSkier = new JButton("Search");
-		btnSearchSkier.setFont(FontStyles.BUTTON);
-		btnSearchSkier.setBackground(ColorStyles.GREEN);
-		btnSearchSkier.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				final Integer id = getNumberField(idSearchTxtField, "id");
-				final String lastName = getTextField(lastNameSearchTxtField);
-				final String firstName = getTextField(firstNameSearchTxtField);
-				final LocalDate birthdate = DateParser.toLocalDate(birthDateTextField.getDate());
-				final String email = getTextField(emailSearchTxtField);
-				final String address = getTextField(addressSearchTxtField);
-				final String phoneNumber = getTextField(phoneNumberTextField);
-
-				displaySkiersInTable(searchSkiers(id, lastName, firstName, birthdate, email, address, phoneNumber));
-			}
-		});
-		btnSearchSkier.setBounds(130, 272, 110, 31);
-		panel_1.add(btnSearchSkier);
 		
 		JLabel lblSearchLastName = new JLabel("Last name:");
 		lblSearchLastName.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lblSearchLastName.setBounds(10, 60, 85, 25);
 		panel_1.add(lblSearchLastName);
 		
-		lastNameSearchTxtField = new JTextField();
+		lastNameSearchTxtField = createFilterTextField();
 		lastNameSearchTxtField.setToolTipText("");
 		lastNameSearchTxtField.setColumns(10);
 		lastNameSearchTxtField.setBounds(130, 60, 110, 31);
-		/*lastNameSearchTxtField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                onTextChanged();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                onTextChanged();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                onTextChanged();
-            }
-
-            // Méthode pour exécuter une action à chaque modification
-            private void onTextChanged() {
-                System.out.println("Texte actuel : " + lastNameSearchTxtField.getText());
-            }
-        });*/
 		panel_1.add(lastNameSearchTxtField);
 		
 		JLabel lblSearchFirstName = new JLabel("First name:");
@@ -242,7 +210,7 @@ public class SearchASkier extends JFrame {
 		lblSearchFirstName.setBounds(10, 96, 85, 25);
 		panel_1.add(lblSearchFirstName);
 		
-		firstNameSearchTxtField = new JTextField();
+		firstNameSearchTxtField = createFilterTextField();
 		firstNameSearchTxtField.setToolTipText("");
 		firstNameSearchTxtField.setColumns(10);
 		firstNameSearchTxtField.setBounds(130, 96, 110, 31);
@@ -257,7 +225,7 @@ public class SearchASkier extends JFrame {
 			}
 		});
 		btnResetSearch.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		btnResetSearch.setBounds(10, 272, 110, 31);
+		btnResetSearch.setBounds(130, 271, 110, 31);
 		panel_1.add(btnResetSearch);
 		
 		JLabel lblSearchBirthdate = new JLabel("Birthdate:");
@@ -270,7 +238,7 @@ public class SearchASkier extends JFrame {
 		panel_1.add(lblSearchAddress);
 		lblSearchAddress.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		
-		addressSearchTxtField = new JTextField();
+		addressSearchTxtField = createFilterTextField();
 		addressSearchTxtField.setBounds(130, 166, 110, 31);
 		panel_1.add(addressSearchTxtField);
 		addressSearchTxtField.setToolTipText("");
@@ -281,7 +249,7 @@ public class SearchASkier extends JFrame {
 		panel_1.add(lblSearchPhoneNumber);
 		lblSearchPhoneNumber.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		
-		phoneNumberTextField = new JTextField();
+		phoneNumberTextField = createFilterTextField();
 		phoneNumberTextField.setBounds(130, 201, 110, 31);
 		panel_1.add(phoneNumberTextField);
 		phoneNumberTextField.setToolTipText("");
@@ -292,13 +260,13 @@ public class SearchASkier extends JFrame {
 		panel_1.add(lblSearchEmailAddress);
 		lblSearchEmailAddress.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		
-		emailSearchTxtField = new JTextField();
+		emailSearchTxtField = createFilterTextField();
 		emailSearchTxtField.setBounds(130, 236, 110, 31);
 		panel_1.add(emailSearchTxtField);
 		emailSearchTxtField.setToolTipText("");
 		emailSearchTxtField.setColumns(10);
 		
-		birthDateTextField = new JDateChooser();
+		birthDateTextField = createFilterJDateChooser();
 		birthDateTextField.setBounds(130, 131, 110, 31);
 		panel_1.add(birthDateTextField);
 		
@@ -326,32 +294,6 @@ public class SearchASkier extends JFrame {
 		cancelBtn.setBackground(new Color(255, 57, 57));
 		cancelBtn.setBounds(20, 10, 154, 52);
 		contentPane.add(cancelBtn);
-		
-		JButton btnDeleteSkier = new JButton("Delete");
-		btnDeleteSkier.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(!ObjectValidator.hasValue(selectedSkier)) {
-					warnThereIsNoSkierSlected();
-					return;
-				}
-				
-				final int userResponse = askConfirmationBeforeDeletion();
-				if (userResponse != 0) {
-					return;
-				}
-				
-				final boolean isDeleted = skierDAO.delete(selectedSkier.getId());
-				if(!isDeleted) {
-					sendErrorWhileDeleting();
-				}
-				
-				confirmDeletion();
-			}
-		});
-		btnDeleteSkier.setFont(FontStyles.BUTTON);
-		btnDeleteSkier.setBackground(ColorStyles.RED);
-		btnDeleteSkier.setBounds(292, 388, 110, 31);
-		contentPane.add(btnDeleteSkier);
 				
 		loadSkierMap();
 		displaySkiersInTable(skierMap.values());
@@ -383,7 +325,8 @@ public class SearchASkier extends JFrame {
 			selectedSkier.getLastnameFormattedForDisplay() + " " + 
 			selectedSkier.getFirstNameFormattedForDisplay(),
 			"Are you sure?",
-			JOptionPane.YES_NO_OPTION
+			JOptionPane.YES_NO_OPTION,
+			JOptionPane.WARNING_MESSAGE
 		);
 	}
 	
@@ -458,6 +401,18 @@ public class SearchASkier extends JFrame {
 
         return stream.filter(skier -> getter.apply(skier).equals(searchValue));
     }
+	 
+	 private void applyFilters() {
+		    final Integer id = getNumberField(idSearchTxtField, "id");
+		    final String lastName = getTextField(lastNameSearchTxtField);
+		    final String firstName = getTextField(firstNameSearchTxtField);
+		    final LocalDate birthdate = DateParser.toLocalDate(birthDateTextField.getDate());
+		    final String email = getTextField(emailSearchTxtField);
+		    final String address = getTextField(addressSearchTxtField);
+		    final String phoneNumber = getTextField(phoneNumberTextField);
+
+		    displaySkiersInTable(searchSkiers(id, lastName, firstName, birthdate, email, address, phoneNumber));
+		}
 
 	
 	private Object[] getPreparedSkierInfoForTableModel(Skier skier) {
@@ -474,7 +429,7 @@ public class SearchASkier extends JFrame {
 	private String getTextField(JTextField textField) {
 		final String texte = textField.getText();
 		
-		return texte.isBlank() ? null : texte;
+		return texte.isBlank() ? null : texte.trim();
 	}
 	
 	private Integer getNumberField(JTextField textField, String fieldName) {
@@ -485,9 +440,9 @@ public class SearchASkier extends JFrame {
 		}
 		
 		try {
-			return Integer.parseInt(texte);
+			return Integer.parseInt(texte.trim());
 		} catch (NumberFormatException ex) {
-			JOptionPane.showMessageDialog(null, "The field " + fieldName + " must be a number.", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "The field " + fieldName + " must be a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
 	        return null;
 	    }
 	}
@@ -500,5 +455,101 @@ public class SearchASkier extends JFrame {
 		emailSearchTxtField.setText("");
 		addressSearchTxtField.setText("");
 		phoneNumberTextField.setText("");
+	}
+	
+	private JTextField createFilterTextField() {
+	    JTextField textField = new JTextField();
+	    textField.getDocument().addDocumentListener(new DocumentListener() {
+	        @Override
+	        public void insertUpdate(DocumentEvent e) {
+	            applyFilters();
+	        }
+
+	        @Override
+	        public void removeUpdate(DocumentEvent e) {
+	            applyFilters();
+	        }
+
+	        @Override
+	        public void changedUpdate(DocumentEvent e) {
+	            applyFilters();
+	        }
+	    });
+	    
+	    return textField;
+	}
+	
+	private JDateChooser createFilterJDateChooser() {
+	    JDateChooser dateChooser = new JDateChooser();
+	    dateChooser.getDateEditor().addPropertyChangeListener("date", evt -> {
+	        applyFilters();
+	    });
+	    
+	    return dateChooser;
+	}
+	
+	private void handleDoubleClickOnRows(MouseEvent e) {
+		if(e.getClickCount() != 2) {
+			return;
+		}
+		
+		int row = table.rowAtPoint(e.getPoint());
+		if (row != -1) { 
+			openUpdateSkierWindow();
+		}
+	}
+	
+	private void handleClickOnRows(ListSelectionEvent ev) {
+	    if (ev.getValueIsAdjusting()) {
+	        return;
+	    }
+	    
+	    int selectedRow = table.getSelectedRow();
+	    
+	    if (selectedRow < 0) { 
+	        return;
+	    }
+	    
+	    try {
+	        Integer id = (Integer) table.getValueAt(selectedRow, 0);
+	        Map<String, String> nameMap = Person.splitLastNameAndFirstName((String) table.getValueAt(selectedRow, 1));
+	        LocalDate birthdate = DateParser.toLocalDate((String) table.getValueAt(selectedRow, 2));
+	        Map<String, String> addressMap = Address.destructureFormattedAddress((String) table.getValueAt(selectedRow, 3));
+	        String phoneNumber = (String) table.getValueAt(selectedRow, 4);
+	        String email = (String) table.getValueAt(selectedRow, 5);
+	        
+	        selectedSkier = new Skier(
+        		id, 
+        		nameMap.get("lastName"), 
+        		nameMap.get("firstName"), 
+        		birthdate, 
+        		addressMap.get("city"), 
+        		addressMap.get("postcode"), 
+        		addressMap.get("streetName"), 
+        		addressMap.get("streetNumber"), 
+        		phoneNumber, 
+        		email
+    		);
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	        JOptionPane.showMessageDialog(null, "Error while fetching skier data.", "Erreur", JOptionPane.ERROR_MESSAGE);
+	    }
+	}
+	
+	private void handleUpdateResult(Boolean isUpdated) {
+        if (isUpdated) {
+        	loadSkierMap();
+    		displaySkiersInTable(skierMap.values());
+        } 
+    }
+	
+	private void openUpdateSkierWindow() {
+		if(!ObjectValidator.hasValue(selectedSkier)) {
+			warnThereIsNoSkierSlected();
+			return;
+		}
+		
+		UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier, SearchASkier.this::handleUpdateResult);
+		updateASkierFrame.setVisible(true);
 	}
 }
