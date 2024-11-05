@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.function.Consumer;
 import java.awt.event.ActionEvent;
 
 public class UpdateASkier extends JFrame {
@@ -66,7 +67,7 @@ public class UpdateASkier extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public UpdateASkier(Skier skierToUpdate) {
+	public UpdateASkier(Skier skierToUpdate, Consumer<Boolean> onUpdateCallBack) {		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 630, 554);
 		contentPane = new JPanel();
@@ -221,8 +222,8 @@ public class UpdateASkier extends JFrame {
 		            boolean isUpdated = new DAOFactory().getSkierDAO().update(skier);
 		            
 		            if (isUpdated) {
-		                JOptionPane.showMessageDialog(null, "Skier's information successfully updated!", "Success", JOptionPane.INFORMATION_MESSAGE);
-		                resetFormFields();
+		                onUpdateCallBack.accept(isUpdated);
+		                dispose();
 		            } else {
 		                JOptionPane.showMessageDialog(null, "Failed to update skier's information. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
 		            }
@@ -249,18 +250,6 @@ public class UpdateASkier extends JFrame {
 		contentPane.add(lblNewLabel_1);
 		
 		preFillTexteFields(skierToUpdate);
-	}
-	
-	private void resetFormFields() {
-	    lastNameField.setText("");
-	    firstNameField.setText("");
-	    dateOfBirthField.setDate(null);
-	    phoneNumberField.setText("");
-	    emailField.setText("");
-	    cityField.setText("");
-	    postcodeField.setText("");
-	    streetNameField.setText("");
-	    streetNumberField.setText("");
 	}
 	
 	private void preFillTexteFields(Skier skier) {

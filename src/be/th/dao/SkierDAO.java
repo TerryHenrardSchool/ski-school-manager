@@ -51,7 +51,6 @@ public class SkierDAO extends DAO<Skier>{
 	    }
 	}
 
-
 	@Override
 	public boolean delete(int id) {
 	    String sql = "DELETE FROM skiers WHERE skier_id = ?";
@@ -65,7 +64,6 @@ public class SkierDAO extends DAO<Skier>{
 	        return false;
 	    }
 	}
-
 
 	@Override
 	public boolean update(Skier skier) {
@@ -93,9 +91,7 @@ public class SkierDAO extends DAO<Skier>{
 	        pstmt.setString(8, DatabaseFormatter.format(skier.getAddress().getStreetName()));
 	        pstmt.setString(9, DatabaseFormatter.format(skier.getAddress().getStreetNumber()));
 	        pstmt.setInt(10, skier.getId());  
-	        
-	        System.out.println(skier.getId());
-	        	        
+	        	        	        
 	        return pstmt.executeUpdate() > 0;
 	    } catch (SQLException e) {
 	    	e.printStackTrace();
@@ -105,7 +101,6 @@ public class SkierDAO extends DAO<Skier>{
 	    	return false;	    	
 	    }
 	}
-
 
 	@Override
 	public Skier find(int id) {

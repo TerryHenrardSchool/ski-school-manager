@@ -16,7 +16,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.Color;
-import java.awt.Event;
 import java.awt.Font;
 import javax.swing.SwingConstants;
 import javax.swing.JTable;
@@ -41,12 +40,12 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.awt.event.ActionEvent;
 import javax.swing.border.EtchedBorder;
@@ -106,7 +105,7 @@ public class SearchASkier extends JFrame {
 		table = new JTable();
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.getTableHeader().setReorderingAllowed(false);
-		table.getSelectionModel().addListSelectionListener(this::handleEventOnSkiersTableRows);
+		table.getSelectionModel().addListSelectionListener(this::handleClickOnRows);
 		
 		DefaultTableModel tableModel = new DefaultTableModel(
 		    new Object[][] {},
@@ -127,6 +126,13 @@ public class SearchASkier extends JFrame {
 		table.getColumnModel().getColumn(3).setPreferredWidth(200); 
 		table.getColumnModel().getColumn(4).setPreferredWidth(80); 
 		table.getColumnModel().getColumn(5).setPreferredWidth(180); 
+		
+		table.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		    	 handleDoubleClickOnRows(e);
+		    }
+		});
 		
 		scrollPane.setViewportView(table);
 		
@@ -161,17 +167,15 @@ public class SearchASkier extends JFrame {
 		panel.add(btnUpdateInformation);
 		btnUpdateInformation.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(!ObjectValidator.hasValue(selectedSkier)) {
-					warnThereIsNoSkierSlected();
-					return;
-				}
-				
-				UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier);
-				updateASkierFrame.setVisible(true);
+				openUpdateSkierWindow();
 			}
 		});
 		btnUpdateInformation.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnUpdateInformation.setBackground(ColorStyles.ORANGE);
+		
+		JLabel lblNewLabel = new JLabel("(or double click on the row...)");
+		lblNewLabel.setBounds(250, 281, 196, 14);
+		panel.add(lblNewLabel);
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new TitledBorder(null, "Search criteria", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -321,7 +325,8 @@ public class SearchASkier extends JFrame {
 			selectedSkier.getLastnameFormattedForDisplay() + " " + 
 			selectedSkier.getFirstNameFormattedForDisplay(),
 			"Are you sure?",
-			JOptionPane.YES_NO_OPTION
+			JOptionPane.YES_NO_OPTION,
+			JOptionPane.WARNING_MESSAGE
 		);
 	}
 	
@@ -483,7 +488,18 @@ public class SearchASkier extends JFrame {
 	    return dateChooser;
 	}
 	
-	private void handleEventOnSkiersTableRows(ListSelectionEvent ev) {
+	private void handleDoubleClickOnRows(MouseEvent e) {
+		if(e.getClickCount() != 2) {
+			return;
+		}
+		
+		int row = table.rowAtPoint(e.getPoint());
+		if (row != -1) { 
+			openUpdateSkierWindow();
+		}
+	}
+	
+	private void handleClickOnRows(ListSelectionEvent ev) {
 	    if (ev.getValueIsAdjusting()) {
 	        return;
 	    }
@@ -514,13 +530,26 @@ public class SearchASkier extends JFrame {
         		phoneNumber, 
         		email
     		);
-	        
-	        // TODO: Add delete button
-	        // TODO: Add update button that opens a form like create skier with pre-filled fields and a button to submit
-	        // TODO: Add JTable with the upcoming lessons
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
 	        JOptionPane.showMessageDialog(null, "Error while fetching skier data.", "Erreur", JOptionPane.ERROR_MESSAGE);
 	    }
+	}
+	
+	private void handleUpdateResult(Boolean isUpdated) {
+        if (isUpdated) {
+        	loadSkierMap();
+    		displaySkiersInTable(skierMap.values());
+        } 
+    }
+	
+	private void openUpdateSkierWindow() {
+		if(!ObjectValidator.hasValue(selectedSkier)) {
+			warnThereIsNoSkierSlected();
+			return;
+		}
+		
+		UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier, SearchASkier.this::handleUpdateResult);
+		updateASkierFrame.setVisible(true);
 	}
 }
