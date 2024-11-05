@@ -1,7 +1,5 @@
 package be.th.jframes;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -12,7 +10,8 @@ import javax.swing.border.TitledBorder;
 import com.toedter.calendar.JDateChooser;
 
 import be.th.dao.DAOFactory;
-import be.th.models.Skier;
+import be.th.formatters.DatabaseFormatter;
+import be.th.models.Instructor;
 import be.th.parsers.DateParser;
 import be.th.styles.ColorStyles;
 import be.th.styles.FontStyles;
@@ -22,9 +21,10 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
+import java.util.function.Consumer;
 import java.awt.event.ActionEvent;
 
-public class AddASkier extends JFrame {
+public class UpdateAnInstructor extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -39,8 +39,8 @@ public class AddASkier extends JFrame {
 	private JTextField streetNameField;
 	private JTextField streetNumberField;
 
-	public AddASkier() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	public UpdateAnInstructor(Instructor instructorToUpdate, Consumer<Boolean> onUpdateCallBack) {		
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 630, 554);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -49,7 +49,7 @@ public class AddASkier extends JFrame {
 		contentPane.setLayout(null);
 		
 		JPanel panel = new JPanel();
-		panel.setBorder(new TitledBorder(null, "Skier information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel.setBorder(new TitledBorder(null, "Instructor information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panel.setBounds(10, 72, 600, 435);
 		contentPane.add(panel);
 		panel.setLayout(null);
@@ -163,9 +163,6 @@ public class AddASkier extends JFrame {
 		JButton cancelBtn = new JButton("Cancel");
 		cancelBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				MainMenu mainMenu = new MainMenu();
-				mainMenu.setVisible(true);
-				
 				dispose();
 			}
 		});
@@ -177,62 +174,75 @@ public class AddASkier extends JFrame {
 		cancelBtn.setBounds(121, 360, 154, 51);
 		panel.add(cancelBtn);
 		
-		JButton addBtn = new JButton("Add");
-		addBtn.addActionListener(new ActionListener() {
+		JButton updateBtn = new JButton("Update");
+		updateBtn.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
-		        try {		            
-		            String skierLastName = lastNameField.getText();
-		            String skierFirstName = firstNameField.getText();
-		            LocalDate skierDateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
-		            String phoneNumber = phoneNumberField.getText();
-		            String email = emailField.getText();
-		            String city = cityField.getText();
-		            String postcode = postcodeField.getText();
-		            String streetName = streetNameField.getText();
-		            String streetNumber = streetNumberField.getText();
+		        try {		   
+		        	int id = instructorToUpdate.getId();
+		            String lastName = DatabaseFormatter.format(lastNameField.getText());
+		            String firstName = DatabaseFormatter.format(firstNameField.getText());
+		            LocalDate dateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
+		            String phoneNumber = DatabaseFormatter.format(phoneNumberField.getText());
+		            String email = DatabaseFormatter.format(emailField.getText());
+		            String city = DatabaseFormatter.format(cityField.getText());
+		            String postcode = DatabaseFormatter.format(postcodeField.getText());
+		            String streetName = DatabaseFormatter.format(streetNameField.getText());
+		            String streetNumber = DatabaseFormatter.format(streetNumberField.getText());
 		            
-		            Skier skier = new Skier(skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+		            Instructor instructor = new Instructor(id, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
 		            
-		            boolean isAdded = new DAOFactory().getSkierDAO().create(skier);
+		            boolean isUpdated = new DAOFactory().getInstructorDAO().update(instructor);
 		            
-		            if (isAdded) {
-		                JOptionPane.showMessageDialog(null, "Skier added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-		                resetFormFields();
-		            } else {
-		                JOptionPane.showMessageDialog(null, "Failed to add skier. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+		            if (!isUpdated) {
+		            	JOptionPane.showMessageDialog(
+	                		null, 
+	                		"Failed to update instructor's information. Please try again.", 
+	                		"Error", 
+	                		JOptionPane.ERROR_MESSAGE
+                		);
 		            }
+		            
+		            onUpdateCallBack.accept(isUpdated);
+		            dispose();
 		        } catch (Exception ex) {
-		            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		            JOptionPane.showMessageDialog(
+	            		null, 
+	            		ex.getMessage(), 
+	            		"Error", 
+	            		JOptionPane.ERROR_MESSAGE
+            		);
 		        }
 		    }
 		});
 
-		addBtn.setFont(FontStyles.BUTTON);
-		addBtn.setContentAreaFilled(true);
-		addBtn.setOpaque(true);
-		addBtn.setBorderPainted(false);
-		addBtn.setBackground(ColorStyles.GREEN);
-		addBtn.setBounds(304, 360, 154, 51);
-		panel.add(addBtn);
+		updateBtn.setFont(FontStyles.BUTTON);
+		updateBtn.setContentAreaFilled(true);
+		updateBtn.setOpaque(true);
+		updateBtn.setBorderPainted(false);
+		updateBtn.setBackground(ColorStyles.GREEN);
+		updateBtn.setBounds(304, 360, 154, 51);
+		panel.add(updateBtn);
 		
-		JLabel lblNewLabel_1 = new JLabel("Add a new skier");
+		JLabel lblNewLabel_1 = new JLabel("Updating " + instructorToUpdate.getLastnameFormattedForDisplay() +  " " + instructorToUpdate.getFirstNameFormattedForDisplay() + " information");
 		lblNewLabel_1.setFont(FontStyles.TITLE);
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_1.setBackground(new Color(0, 153, 255));
 		lblNewLabel_1.setOpaque(true);
 		lblNewLabel_1.setBounds(10, 10, 600, 52);
 		contentPane.add(lblNewLabel_1);
+		
+		preFillTexteFields(instructorToUpdate);
 	}
 	
-	private void resetFormFields() {
-	    lastNameField.setText("");
-	    firstNameField.setText("");
-	    dateOfBirthField.setDate(null);
-	    phoneNumberField.setText("");
-	    emailField.setText("");
-	    cityField.setText("");
-	    postcodeField.setText("");
-	    streetNameField.setText("");
-	    streetNumberField.setText("");
+	private void preFillTexteFields(Instructor instructor) {
+		lastNameField.setText(instructor.getLastName());
+	    firstNameField.setText(instructor.getFirstName());
+	    dateOfBirthField.setDate(DateParser.toDate(instructor.getDateOfBirth()));
+	    phoneNumberField.setText(instructor.getPhoneNumber());
+	    emailField.setText(instructor.getEmail());
+	    cityField.setText(instructor.getAddress().getCity());
+	    postcodeField.setText(instructor.getAddress().getPostcode());
+	    streetNameField.setText(instructor.getAddress().getStreetName());
+	    streetNumberField.setText(instructor.getAddress().getStreetNumber());
 	}
 }

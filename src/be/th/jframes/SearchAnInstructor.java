@@ -26,8 +26,8 @@ import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Address;
+import be.th.models.Instructor;
 import be.th.models.Person;
-import be.th.models.Skier;
 import be.th.parsers.DateParser;
 import be.th.styles.ColorStyles;
 import be.th.styles.FontStyles;
@@ -51,16 +51,16 @@ import java.awt.event.ActionEvent;
 import javax.swing.border.EtchedBorder;
 import com.toedter.calendar.JDateChooser;
 
-public class SearchASkier extends JFrame {
+public class SearchAnInstructor extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	
-	private DAO<Skier> skierDAO = new DAOFactory().getSkierDAO();
+	private DAO<Instructor> instructorDao = new DAOFactory().getInstructorDAO();
 	
 	private JPanel contentPane;
 	private JTable table;
 	private JTextField idSearchTxtField;
-	private LinkedHashMap<Integer, Skier> skierMap = new LinkedHashMap<>();
+	private LinkedHashMap<Integer, Instructor> instructorMap = new LinkedHashMap<>();
 	private JTextField lastNameSearchTxtField;
 	private JTextField firstNameSearchTxtField;
 	private JDateChooser birthDateTextField;
@@ -68,9 +68,9 @@ public class SearchASkier extends JFrame {
 	private JTextField addressSearchTxtField;
 	private JTextField phoneNumberTextField;
 	
-	private Skier selectedSkier;
+	private Instructor selectedInstructor;
 
-	public SearchASkier() {
+	public SearchAnInstructor() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1539, 1003);
 
@@ -80,7 +80,7 @@ public class SearchASkier extends JFrame {
 		contentPane.setLayout(null);
 		
 		JPanel panel = new JPanel();
-		panel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Skiers", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+		panel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Instructors", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
 		panel.setBounds(282, 64, 1239, 313);
 		contentPane.add(panel);
 		panel.setLayout(null);
@@ -123,13 +123,13 @@ public class SearchASkier extends JFrame {
 		
 		scrollPane.setViewportView(table);
 		
-		JButton btnDeleteSkier = new JButton("Delete skier");
-		btnDeleteSkier.setBounds(10, 271, 110, 31);
-		panel.add(btnDeleteSkier);
-		btnDeleteSkier.addActionListener(new ActionListener() {
+		JButton btnDeleteInstructor = new JButton("Delete instructor");
+		btnDeleteInstructor.setBounds(10, 271, 110, 31);
+		panel.add(btnDeleteInstructor);
+		btnDeleteInstructor.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(!ObjectValidator.hasValue(selectedSkier)) {
-					warnThereIsNoSkierSlected();
+				if(!ObjectValidator.hasValue(selectedInstructor)) {
+					warnThereIsNoInstructorSlected();
 					return;
 				}
 				
@@ -138,7 +138,7 @@ public class SearchASkier extends JFrame {
 					return;
 				}
 				
-				final boolean isDeleted = skierDAO.delete(selectedSkier.getId());
+				final boolean isDeleted = instructorDao.delete(selectedInstructor.getId());
 				if(!isDeleted) {
 					sendErrorWhileDeleting();
 				}
@@ -146,15 +146,15 @@ public class SearchASkier extends JFrame {
 				confirmDeletion();
 			}
 		});
-		btnDeleteSkier.setFont(FontStyles.BUTTON);
-		btnDeleteSkier.setBackground(ColorStyles.RED);
+		btnDeleteInstructor.setFont(FontStyles.BUTTON);
+		btnDeleteInstructor.setBackground(ColorStyles.RED);
 		
-		JButton btnUpdateInformation = new JButton("Update skier");
+		JButton btnUpdateInformation = new JButton("Update instructor");
 		btnUpdateInformation.setBounds(130, 271, 110, 31);
 		panel.add(btnUpdateInformation);
 		btnUpdateInformation.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				openUpdateSkierWindow();
+				openUpdateInstructorWindow();
 			}
 		});
 		btnUpdateInformation.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -170,10 +170,10 @@ public class SearchASkier extends JFrame {
 		contentPane.add(panel_1);
 		panel_1.setLayout(null);
 		
-		JLabel lblSearchSkierId = new JLabel("Id:");
-		lblSearchSkierId.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblSearchSkierId.setBounds(10, 24, 64, 25);
-		panel_1.add(lblSearchSkierId);
+		JLabel lblSearchInstructorId = new JLabel("Id:");
+		lblSearchInstructorId.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblSearchInstructorId.setBounds(10, 24, 64, 25);
+		panel_1.add(lblSearchInstructorId);
 		
 		idSearchTxtField = createFilterTextField();
 		idSearchTxtField.setToolTipText("");
@@ -207,7 +207,7 @@ public class SearchASkier extends JFrame {
 		btnResetSearch.setBackground(ColorStyles.BLUE);
 		btnResetSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				displaySkiersInTable(skierMap.values());
+				displayInstructorsInTable(instructorMap.values());
 				resetTextFields();
 			}
 		});
@@ -257,7 +257,7 @@ public class SearchASkier extends JFrame {
 		birthDateTextField.setBounds(130, 131, 110, 31);
 		panel_1.add(birthDateTextField);
 		
-		JLabel lblTitle = new JLabel("Search for a skier");
+		JLabel lblTitle = new JLabel("Search for a instructor");
 		lblTitle.setBounds(20, 10, 1501, 52);
 		contentPane.add(lblTitle);
 		lblTitle.setOpaque(true);
@@ -282,14 +282,14 @@ public class SearchASkier extends JFrame {
 		cancelBtn.setBounds(20, 10, 154, 52);
 		contentPane.add(cancelBtn);
 				
-		loadSkierMap();
-		displaySkiersInTable(skierMap.values());
+		loadInstructorMap();
+		displayInstructorsInTable(instructorMap.values());
 	}
 	
-	private void warnThereIsNoSkierSlected() {
+	private void warnThereIsNoInstructorSlected() {
 		JOptionPane.showMessageDialog(
 			null, 
-			"Please, select a skier.", 
+			"Please, select an instructor.", 
 			"Watch out!",
 			JOptionPane.WARNING_MESSAGE
 		);
@@ -298,8 +298,8 @@ public class SearchASkier extends JFrame {
 	private void confirmDeletion() {
 		JOptionPane.showMessageDialog(
 			null, 
-			selectedSkier.getLastnameFormattedForDisplay() + " " + 
-			selectedSkier.getFirstNameFormattedForDisplay() + " has been successfully deleted.",
+			selectedInstructor.getLastnameFormattedForDisplay() + " " + 
+			selectedInstructor.getFirstNameFormattedForDisplay() + " has been successfully deleted.",
 			"Success",
 			JOptionPane.WARNING_MESSAGE
 		);
@@ -309,8 +309,8 @@ public class SearchASkier extends JFrame {
 		return JOptionPane.showConfirmDialog(
 			null, 
 			"This is a critical operation. Are you sure that you want to delete " + 
-			selectedSkier.getLastnameFormattedForDisplay() + " " + 
-			selectedSkier.getFirstNameFormattedForDisplay(),
+			selectedInstructor.getLastnameFormattedForDisplay() + " " + 
+			selectedInstructor.getFirstNameFormattedForDisplay(),
 			"Are you sure?",
 			JOptionPane.YES_NO_OPTION,
 			JOptionPane.WARNING_MESSAGE
@@ -321,29 +321,29 @@ public class SearchASkier extends JFrame {
 		JOptionPane.showMessageDialog(
 			null, 
 			"Error while deleting " + 
-			selectedSkier.getLastnameFormattedForDisplay() + " " + 
-			selectedSkier.getFirstNameFormattedForDisplay() + 
+			selectedInstructor.getLastnameFormattedForDisplay() + " " + 
+			selectedInstructor.getFirstNameFormattedForDisplay() + 
 			".Please, try again later."
 		);
 	}
 	
-	private void displaySkiersInTable(Collection<Skier> skiers) {
+	private void displayInstructorsInTable(Collection<Instructor> instructors) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		model.setRowCount(0);
 		
-		for (final Skier skier : skiers) {
-			model.addRow(getPreparedSkierInfoForTableModel(skier));
+		for (final Instructor instructor : instructors) {
+			model.addRow(getPreparedInstructorInfoForTableModel(instructor));
 		}
 	}
 	
-	private void loadSkierMap() {	
-		List<Skier> skiers = skierDAO.findAll();
-		for (final Skier skier : skiers) {
-            skierMap.put(skier.getId(), skier);
+	private void loadInstructorMap() {	
+		List<Instructor> instructors = instructorDao.findAll();
+		for (final Instructor instructor : instructors) {
+            instructorMap.put(instructor.getId(), instructor);
         }
 	}
 	
-	private List<Skier> searchSkiers(
+	private List<Instructor> searchInstructors(
 		Integer id, 
 		String lastName, 
 		String firstName, 
@@ -353,40 +353,40 @@ public class SearchASkier extends JFrame {
 		String phoneNumber
 	) {
 	    if (IntegerValidator.hasValue(id)) {
-	        final Skier skier = skierMap.get(id);
+	        final Instructor instructor = instructorMap.get(id);
 	        
-	        return ObjectValidator.hasValue(skier) 
-        		? List.of(skier) 
+	        return ObjectValidator.hasValue(instructor) 
+        		? List.of(instructor) 
 				: List.of();
 	    }
 
-	    Stream<Skier> stream = skierMap.values().stream();
+	    Stream<Instructor> stream = instructorMap.values().stream();
 
-	    stream = applyFilter(stream, lastName, Skier::getLastName);
-	    stream = applyFilter(stream, firstName, Skier::getFirstName);
-	    stream = applyFilter(stream, birthdate, Skier::getDateOfBirth);
-	    stream = applyFilter(stream, email, Skier::getEmail);
-	    stream = applyFilter(stream, address, skier -> skier.getAddress().getAddressFormattedForDisplay());
-	    stream = applyFilter(stream, phoneNumber, Skier::getPhoneNumber);
+	    stream = applyFilter(stream, lastName, Instructor::getLastName);
+	    stream = applyFilter(stream, firstName, Instructor::getFirstName);
+	    stream = applyFilter(stream, birthdate, Instructor::getDateOfBirth);
+	    stream = applyFilter(stream, email, Instructor::getEmail);
+	    stream = applyFilter(stream, address, instructor -> instructor.getAddress().getAddressFormattedForDisplay());
+	    stream = applyFilter(stream, phoneNumber, Instructor::getPhoneNumber);
 
 	    return stream.collect(Collectors.toList());
 	}
 
-	private Stream<Skier> applyFilter(Stream<Skier> stream, String searchValue, Function<Skier, String> getter) {
+	private Stream<Instructor> applyFilter(Stream<Instructor> stream, String searchValue, Function<Instructor, String> getter) {
 	    if (!StringValidator.hasValue(searchValue)) {
 	    	return stream;
 	    }
 	    
 	    String searchValueLower = searchValue.toLowerCase();
-        return stream.filter(skier -> getter.apply(skier).toLowerCase().contains(searchValueLower));
+        return stream.filter(instructor -> getter.apply(instructor).toLowerCase().contains(searchValueLower));
 	}
 	
-	 private Stream<Skier> applyFilter(Stream<Skier> stream, LocalDate searchValue, Function<Skier, LocalDate> getter) {
+	 private Stream<Instructor> applyFilter(Stream<Instructor> stream, LocalDate searchValue, Function<Instructor, LocalDate> getter) {
         if (!DateValidator.hasValue(searchValue)) {
             return stream;
         }
 
-        return stream.filter(skier -> getter.apply(skier).equals(searchValue));
+        return stream.filter(instructor -> getter.apply(instructor).equals(searchValue));
     }
 	 
 	 private void applyFilters() {
@@ -398,25 +398,27 @@ public class SearchASkier extends JFrame {
 		    final String address = getTextField(addressSearchTxtField);
 		    final String phoneNumber = getTextField(phoneNumberTextField);
 
-		    displaySkiersInTable(searchSkiers(id, lastName, firstName, birthdate, email, address, phoneNumber));
+		    displayInstructorsInTable(searchInstructors(id, lastName, firstName, birthdate, email, address, phoneNumber));
 		}
 
 	
-	private Object[] getPreparedSkierInfoForTableModel(Skier skier) {
+	private Object[] getPreparedInstructorInfoForTableModel(Instructor instructor) {
 		return new Object[] {
-			skier.getId(),
-			skier.getLastnameFormattedForDisplay() + " " + skier.getFirstNameFormattedForDisplay(),
-			DatabaseFormatter.toBelgianFormat(skier.getDateOfBirth()),
-			skier.getAddress().getAddressFormattedForDisplay(),
-			skier.getPhoneNumber(),
-			skier.getEmail()
+			instructor.getId(),
+			instructor.getLastnameFormattedForDisplay() + " " + instructor.getFirstNameFormattedForDisplay(),
+			DatabaseFormatter.toBelgianFormat(instructor.getDateOfBirth()),
+			instructor.getAddress().getAddressFormattedForDisplay(),
+			instructor.getPhoneNumber(),
+			instructor.getEmail()
 		};
 	}
 	
 	private String getTextField(JTextField textField) {
 		final String texte = textField.getText();
 		
-		return texte.isBlank() ? null : texte.trim();
+		return texte.isBlank() 
+			? null 
+			: texte.trim();
 	}
 	
 	private Integer getNumberField(JTextField textField, String fieldName) {
@@ -482,7 +484,7 @@ public class SearchASkier extends JFrame {
 		
 		int row = table.rowAtPoint(e.getPoint());
 		if (row != -1) { 
-			openUpdateSkierWindow();
+			openUpdateInstructorWindow();
 		}
 	}
 	
@@ -505,7 +507,7 @@ public class SearchASkier extends JFrame {
 	        String phoneNumber = (String) table.getValueAt(selectedRow, 4);
 	        String email = (String) table.getValueAt(selectedRow, 5);
 	        
-	        selectedSkier = new Skier(
+	        selectedInstructor = new Instructor(
         		id, 
         		nameMap.get("lastName"), 
         		nameMap.get("firstName"), 
@@ -519,24 +521,29 @@ public class SearchASkier extends JFrame {
     		);
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
-	        JOptionPane.showMessageDialog(null, "Error while fetching skier data.", "Erreur", JOptionPane.ERROR_MESSAGE);
+	        JOptionPane.showMessageDialog(
+        		null, 
+        		"Error while fetching instructor data.", 
+        		"Erreur", 
+        		JOptionPane.ERROR_MESSAGE
+    		);
 	    }
 	}
 	
 	private void handleUpdateResult(Boolean isUpdated) {
         if (isUpdated) {
-        	loadSkierMap();
-    		displaySkiersInTable(skierMap.values());
+        	loadInstructorMap();
+    		displayInstructorsInTable(instructorMap.values());
         } 
     }
 	
-	private void openUpdateSkierWindow() {
-		if(!ObjectValidator.hasValue(selectedSkier)) {
-			warnThereIsNoSkierSlected();
+	private void openUpdateInstructorWindow() {
+		if(!ObjectValidator.hasValue(selectedInstructor)) {
+			warnThereIsNoInstructorSlected();
 			return;
 		}
 		
-		UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier, SearchASkier.this::handleUpdateResult);
-		updateASkierFrame.setVisible(true);
+		UpdateAnInstructor updateAnInstructorFrame = new UpdateAnInstructor(selectedInstructor, SearchAnInstructor.this::handleUpdateResult);
+		updateAnInstructorFrame.setVisible(true);
 	}
 }

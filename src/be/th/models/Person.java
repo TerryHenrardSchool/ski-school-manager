@@ -154,6 +154,7 @@ public abstract class Person implements Serializable {
         }
         
         if (!StringValidator.isValidUsingRegex(phoneNumber, PHONE_NUMBER_REGEX)) {
+        	System.out.println(phoneNumber);
         	throw new IllegalArgumentException("The phone number format is invalid. Please enter a phone number in Belgian format.");
         }
         this.phoneNumber = phoneNumber;

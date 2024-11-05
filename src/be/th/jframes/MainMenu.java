@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Font;
 import java.awt.Color;
+import java.awt.EventQueue;
+
 import javax.swing.border.TitledBorder;
 
 import be.th.styles.FontStyles;
@@ -60,26 +62,34 @@ public class MainMenu extends JFrame {
         lblNewLabel_1.setBounds(10, 10, 983, 52);
         getContentPane().add(lblNewLabel_1);
                 
-                JPanel panel_1 = new JPanel();
-                panel_1.setBorder(new TitledBorder(null, "Skier actions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-                panel_1.setBounds(20, 218, 973, 136);
-                getContentPane().add(panel_1);
-                panel_1.setLayout(new GridLayout(0, 2, 0, 0));
-                
-                        JButton btnAddInstructor = new JButton("Add an instructor");
-                        panel_1.add(btnAddInstructor);
-                        btnAddInstructor.setFont(FontStyles.BUTTON);
-                        
-                        JButton btnNewButton_1 = new JButton("Search an instructor");
-                        btnNewButton_1.setFont(FontStyles.BUTTON);
-                        panel_1.add(btnNewButton_1);
-                btnAddInstructor.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        AddAnInstructor addInstructorFrame = new AddAnInstructor();
-                        addInstructorFrame.setVisible(true);
-                        dispose();  
-                    }
-                });
+        JPanel panel_1 = new JPanel();
+        panel_1.setBorder(new TitledBorder(null, "Skier actions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panel_1.setBounds(20, 218, 973, 136);
+        getContentPane().add(panel_1);
+        panel_1.setLayout(new GridLayout(0, 2, 0, 0));
+        
+	    JButton btnAddInstructor = new JButton("Add an instructor");
+	    panel_1.add(btnAddInstructor);
+	    btnAddInstructor.setFont(FontStyles.BUTTON);
+	    
+	    JButton btnNewButton_1 = new JButton("Search an instructor");
+	    btnNewButton_1.addActionListener(new ActionListener() {
+	    	public void actionPerformed(ActionEvent e) {
+	    		SearchAnInstructor searchAnInstructorFrame = new SearchAnInstructor();
+	    		searchAnInstructorFrame.setVisible(true);
+                dispose();
+	    	}
+	    });
+	    
+	    btnNewButton_1.setFont(FontStyles.BUTTON);
+	    panel_1.add(btnNewButton_1);
+        btnAddInstructor.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AddAnInstructor addInstructorFrame = new AddAnInstructor();
+                addInstructorFrame.setVisible(true);
+                dispose();  
+            }
+        });
     }
 
     public static void main(String[] args) {
