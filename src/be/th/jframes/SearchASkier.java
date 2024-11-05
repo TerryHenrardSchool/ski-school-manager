@@ -26,6 +26,7 @@ import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Address;
+import be.th.models.Instructor;
 import be.th.models.Person;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
@@ -144,7 +145,7 @@ public class SearchASkier extends JFrame {
 				}
 				
 				confirmDeletion();
-				loadSkierMap();
+				removeSkierFromSkiermap(selectedSkier.getId());
 				displaySkiersInTable(skierMap.values());
 			}
 		});
@@ -154,7 +155,7 @@ public class SearchASkier extends JFrame {
 		JButton btnUpdateInformation = new JButton("Update skier");
 		btnUpdateInformation.setBounds(130, 271, 110, 31);
 		panel.add(btnUpdateInformation);
-		btnUpdateInformation.addActionListener(new ActionListener() {
+		btnUpdateInformation.addActionListener(new ActionListener() {			
 			public void actionPerformed(ActionEvent e) {
 				openUpdateSkierWindow();
 			}
@@ -303,7 +304,7 @@ public class SearchASkier extends JFrame {
 			selectedSkier.getLastnameFormattedForDisplay() + " " + 
 			selectedSkier.getFirstNameFormattedForDisplay() + " has been successfully deleted.",
 			"Success",
-			JOptionPane.WARNING_MESSAGE
+			JOptionPane.PLAIN_MESSAGE
 		);
 	}
 	
@@ -545,5 +546,11 @@ public class SearchASkier extends JFrame {
 		
 		UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier, SearchASkier.this::handleUpdateResult);
 		updateASkierFrame.setVisible(true);
+	}
+	
+	private boolean removeSkierFromSkiermap(int id) {
+		return skierMap.remove(id) != null 
+			? true 
+			: false;
 	}
 }

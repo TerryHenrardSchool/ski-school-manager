@@ -40,6 +40,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TreeSelectionEvent;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.JButton;
@@ -124,7 +125,7 @@ public class SearchAnInstructor extends JFrame {
 		scrollPane.setViewportView(table);
 		
 		JButton btnDeleteInstructor = new JButton("Delete instructor");
-		btnDeleteInstructor.setBounds(10, 271, 140, 31);
+		btnDeleteInstructor.setBounds(10, 271, 150, 31);
 		panel.add(btnDeleteInstructor);
 		btnDeleteInstructor.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -144,7 +145,7 @@ public class SearchAnInstructor extends JFrame {
 				}
 				
 				confirmDeletion();
-				loadInstructorMap();
+				removeInstructorFromInstructorMap(selectedInstructor.getId());
 				displayInstructorsInTable(instructorMap.values());
 			}
 		});
@@ -152,7 +153,7 @@ public class SearchAnInstructor extends JFrame {
 		btnDeleteInstructor.setBackground(ColorStyles.RED);
 		
 		JButton btnUpdateInformation = new JButton("Update instructor");
-		btnUpdateInformation.setBounds(160, 271, 140, 31);
+		btnUpdateInformation.setBounds(170, 271, 150, 31);
 		panel.add(btnUpdateInformation);
 		btnUpdateInformation.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -163,7 +164,7 @@ public class SearchAnInstructor extends JFrame {
 		btnUpdateInformation.setBackground(ColorStyles.ORANGE);
 		
 		JLabel lblNewLabel = new JLabel("(or double click on the row...)");
-		lblNewLabel.setBounds(310, 281, 196, 14);
+		lblNewLabel.setBounds(330, 281, 196, 14);
 		panel.add(lblNewLabel);
 		
 		JPanel panel_1 = new JPanel();
@@ -551,5 +552,11 @@ public class SearchAnInstructor extends JFrame {
 		
 		UpdateAnInstructor updateAnInstructorFrame = new UpdateAnInstructor(selectedInstructor, SearchAnInstructor.this::handleUpdateResult);
 		updateAnInstructorFrame.setVisible(true);
+	}
+	
+	private boolean removeInstructorFromInstructorMap(int id) {
+		return instructorMap.remove(id) != null 
+			? true 
+			: false;
 	}
 }
