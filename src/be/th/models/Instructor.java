@@ -3,6 +3,8 @@ package be.th.models;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+import be.th.dao.InstructorDAO;
+
 public class Instructor extends Person {
 	
 	// Static attributes
@@ -21,21 +23,43 @@ public class Instructor extends Person {
 		String phoneNumber, 
 		String email
 	) {
-        super(id, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+        super(
+    		id, 
+    		lastName, 
+    		firstName, 
+    		dateOfBirth, 
+    		city, 
+    		postcode, 
+    		streetName, 
+    		streetNumber, 
+    		phoneNumber, 
+    		email
+		);
     }
     
     public Instructor(
-    		String lastName, 
-    		String firstName, 
-    		LocalDate dateOfBirth,
-    		String city, 
-    		String postcode, 
-    		String streetName, 
-    		String streetNumber,
-    		String phoneNumber, 
-    		String email
+		String lastName, 
+		String firstName, 
+		LocalDate dateOfBirth,
+		String city, 
+		String postcode, 
+		String streetName, 
+		String streetNumber,
+		String phoneNumber, 
+		String email
 	) {
-        this(0, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+        this(
+    		0, 
+    		lastName, 
+    		firstName,
+    		dateOfBirth, 
+    		city,
+    		postcode,
+    		streetName,
+    		streetNumber,
+    		phoneNumber, 
+    		email
+		);
     }
 
     // Methods
@@ -51,14 +75,19 @@ public class Instructor extends Person {
         return new ArrayList<>(); //TODO
     }
     
-  //Override methods
+    // Database methods
+    public boolean insertIntoDatabase(InstructorDAO instructorDAO) {
+    	return instructorDAO.create(this);
+    }
+    
+    //Override methods
     @Override
     public boolean equals(Object object) {
     	if(!(object instanceof Person)) {
     		return false;
     	}
     	
-    	return super.equals(((Person) object));
+    	return super.equals((Person) object);
     }
     
     @Override

@@ -3,6 +3,8 @@ package be.th.models;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+import be.th.dao.SkierDAO;
+
 public class Skier extends Person {
 
 	// Static attributes
@@ -25,24 +27,29 @@ public class Skier extends Person {
     }
     
     public Skier(
-    		String lastName, 
-    		String firstName, 
-    		LocalDate dateOfBirth,
-    		String city, 
-    		String postcode, 
-    		String streetName, 
-    		String streetNumber,
-    		String phoneNumber, 
-    		String email
-    		) {
+		String lastName, 
+		String firstName, 
+		LocalDate dateOfBirth,
+		String city, 
+		String postcode, 
+		String streetName, 
+		String streetNumber,
+		String phoneNumber, 
+		String email
+	) {
     	this(0, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+    }
+
+    // Database methods
+    public boolean insertIntoDatabase(SkierDAO skierDAO) {
+    	return skierDAO.create(this);
     }
 
     // Methods
     public boolean hasScheduledLesson() {
         return false; //TODO
     }
-    
+
     //Override methods
     @Override
     public boolean equals(Object object) {
@@ -50,7 +57,7 @@ public class Skier extends Person {
     		return false;
     	}
     	
-    	return super.equals(((Person) object));
+    	return super.equals((Person) object);
     }
     
     @Override

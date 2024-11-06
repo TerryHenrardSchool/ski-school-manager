@@ -1,7 +1,5 @@
 package be.th.jframes;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -9,11 +7,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
-import java.awt.Font;
 import com.toedter.calendar.JDateChooser;
 
 import be.th.dao.DAOFactory;
-import be.th.formatters.DatabaseFormatter;
+import be.th.dao.InstructorDAO;
 import be.th.models.Instructor;
 import be.th.parsers.DateParser;
 import be.th.styles.ColorStyles;
@@ -22,7 +19,6 @@ import be.th.styles.FontStyles;
 import java.awt.Color;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
-import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.awt.event.ActionEvent;
 
@@ -164,14 +160,7 @@ public class AddAnInstructor extends JFrame {
 		panel.add(lblStreetNumber);
 		
 		JButton cancelBtn = new JButton("Cancel");
-		cancelBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				MainMenu mainMenu = new MainMenu();
-				mainMenu.setVisible(true);
-				
-				dispose();
-			}
-		});
+		cancelBtn.addActionListener(this::handleCLickOnCancelButton);
 		cancelBtn.setFont(FontStyles.BUTTON);
 		cancelBtn.setContentAreaFilled(true);
 		cancelBtn.setOpaque(true);
@@ -180,35 +169,8 @@ public class AddAnInstructor extends JFrame {
 		cancelBtn.setBounds(121, 360, 154, 51);
 		panel.add(cancelBtn);
 		
-		JButton submitBtn = new JButton("Submit");
-		submitBtn.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        try {
-		            String lastName = DatabaseFormatter.format(lastNameField.getText());
-		            String firstName = DatabaseFormatter.format(firstNameField.getText());
-		            LocalDate dateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
-		            String phoneNumber = DatabaseFormatter.format(phoneNumberField.getText());
-		            String email = DatabaseFormatter.format(emailField.getText());
-		            String city = DatabaseFormatter.format(cityField.getText());
-		            String postcode = DatabaseFormatter.format(postcodeField.getText());
-		            String streetName = DatabaseFormatter.format(streetNameField.getText());
-		            String streetNumber = DatabaseFormatter.format(streetNumberField.getText());
-		            
-		            Instructor instructor = new Instructor(lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
-		            
-		            boolean isAdded = new DAOFactory().getInstructorDAO().create(instructor);
-		            
-		            if (isAdded) {
-		                JOptionPane.showMessageDialog(null, "Instructor added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-		                resetFormFields();
-		            } else {
-		                JOptionPane.showMessageDialog(null, "Failed to add instructor. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
-		            }
-		        } catch (Exception ex) {
-		            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-		        }
-		    }
-		});
+		JButton submitBtn = new JButton("Add");
+		submitBtn.addActionListener(this::handleClickOnAddButton);
 
 		submitBtn.setFont(FontStyles.BUTTON);
 		submitBtn.setContentAreaFilled(true);
@@ -225,7 +187,60 @@ public class AddAnInstructor extends JFrame {
 		lblNewLabel_1.setOpaque(true);
 		lblNewLabel_1.setBounds(10, 10, 600, 52);
 		contentPane.add(lblNewLabel_1);
-	}    
+	}
+	
+	private void handleCLickOnCancelButton(ActionEvent ev) {
+		openMainMenu();
+		dispose();
+	}
+	
+	private void handleClickOnAddButton(ActionEvent ev) {
+		try {
+	        Instructor instructor = buildInstructorFromTextFields();
+	        boolean isAdded = insertInstructorIntoDatabase(instructor);	 
+	        
+	        if(isAdded) {
+	        	displayAddInstructorSuccess(JOptionPane.INFORMATION_MESSAGE);
+	        } else {
+	        	displayAddInstructorFailure(JOptionPane.ERROR_MESSAGE);
+	        }
+	        resetFormFields();
+	    } catch (Exception ex) {
+	        JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	    }
+	}
+	
+	private void openMainMenu() {
+		MainMenu mainMenu = new MainMenu();
+		mainMenu.setVisible(true);		
+	}
+	
+	private void displayAddInstructorSuccess(int messageType) {
+        JOptionPane.showMessageDialog(null, "Instructor added successfully!", "Success", messageType);
+	}
+	
+	private void displayAddInstructorFailure(int messageType) {
+        JOptionPane.showMessageDialog(null, "Failed to add instructor. Please try again.", "Error", messageType);
+	}
+	
+	private Instructor buildInstructorFromTextFields() {
+		String lastName = lastNameField.getText();
+        String firstName = firstNameField.getText();
+        LocalDate dateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
+        String phoneNumber = phoneNumberField.getText();
+        String email = emailField.getText();
+        String city = cityField.getText();
+        String postcode = postcodeField.getText();
+        String streetName = streetNameField.getText();
+        String streetNumber = streetNumberField.getText();
+
+        return new Instructor(lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+	}
+	
+	private boolean insertInstructorIntoDatabase(Instructor instructor) {
+	    InstructorDAO instructorDAO = (InstructorDAO) new DAOFactory().getInstructorDAO();
+	    return instructor.insertIntoDatabase(instructorDAO);
+	}
 	    
 	private void resetFormFields() {
 	    lastNameField.setText("");

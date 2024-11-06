@@ -1,7 +1,5 @@
 package be.th.jframes;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -12,15 +10,16 @@ import javax.swing.border.TitledBorder;
 import com.toedter.calendar.JDateChooser;
 
 import be.th.dao.DAOFactory;
+import be.th.dao.SkierDAO;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
 import be.th.styles.ColorStyles;
 import be.th.styles.FontStyles;
 
 import java.awt.Color;
+
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
-import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.awt.event.ActionEvent;
 
@@ -161,14 +160,7 @@ public class AddASkier extends JFrame {
 		panel.add(lblStreetNumber);
 		
 		JButton cancelBtn = new JButton("Cancel");
-		cancelBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				MainMenu mainMenu = new MainMenu();
-				mainMenu.setVisible(true);
-				
-				dispose();
-			}
-		});
+		cancelBtn.addActionListener(this::handleCLickOnCancelButton);
 		cancelBtn.setFont(FontStyles.BUTTON);
 		cancelBtn.setContentAreaFilled(true);
 		cancelBtn.setOpaque(true);
@@ -178,34 +170,7 @@ public class AddASkier extends JFrame {
 		panel.add(cancelBtn);
 		
 		JButton addBtn = new JButton("Add");
-		addBtn.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        try {		            
-		            String skierLastName = lastNameField.getText();
-		            String skierFirstName = firstNameField.getText();
-		            LocalDate skierDateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
-		            String phoneNumber = phoneNumberField.getText();
-		            String email = emailField.getText();
-		            String city = cityField.getText();
-		            String postcode = postcodeField.getText();
-		            String streetName = streetNameField.getText();
-		            String streetNumber = streetNumberField.getText();
-		            
-		            Skier skier = new Skier(skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
-		            
-		            boolean isAdded = new DAOFactory().getSkierDAO().create(skier);
-		            
-		            if (isAdded) {
-		                JOptionPane.showMessageDialog(null, "Skier added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-		                resetFormFields();
-		            } else {
-		                JOptionPane.showMessageDialog(null, "Failed to add skier. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
-		            }
-		        } catch (Exception ex) {
-		            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-		        }
-		    }
-		});
+		addBtn.addActionListener(this::handleClickOnAddButton);
 
 		addBtn.setFont(FontStyles.BUTTON);
 		addBtn.setContentAreaFilled(true);
@@ -222,6 +187,59 @@ public class AddASkier extends JFrame {
 		lblNewLabel_1.setOpaque(true);
 		lblNewLabel_1.setBounds(10, 10, 600, 52);
 		contentPane.add(lblNewLabel_1);
+	}
+	
+	private void handleCLickOnCancelButton(ActionEvent ev) {
+		openMainMenu();
+		dispose();
+	}
+	
+	private void handleClickOnAddButton(ActionEvent ev) {
+		try {
+	        Skier skier = buildSkierFromTextFields();
+	        boolean isAdded = insertSkierIntoDatabase(skier);	 
+	        
+	        if(isAdded) {
+	        	displayAddSkierSuccess(JOptionPane.INFORMATION_MESSAGE);
+	        } else {
+	        	displayAddSkierFailure(JOptionPane.ERROR_MESSAGE);
+	        }
+	        resetFormFields();
+	    } catch (Exception ex) {
+	        JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	    }
+	}
+	
+	private void openMainMenu() {
+		MainMenu mainMenu = new MainMenu();
+		mainMenu.setVisible(true);		
+	}
+	
+	private void displayAddSkierSuccess(int messageType) {
+        JOptionPane.showMessageDialog(null, "Skier added successfully!", "Success", messageType);
+	}
+	
+	private void displayAddSkierFailure(int messageType) {
+        JOptionPane.showMessageDialog(null, "Failed to add skier. Please try again.", "Error", messageType);
+	}
+	
+	private Skier buildSkierFromTextFields() {
+		String lastName = lastNameField.getText();
+        String firstName = firstNameField.getText();
+        LocalDate dateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
+        String phoneNumber = phoneNumberField.getText();
+        String email = emailField.getText();
+        String city = cityField.getText();
+        String postcode = postcodeField.getText();
+        String streetName = streetNameField.getText();
+        String streetNumber = streetNumberField.getText();
+
+        return new Skier(lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+	}
+	
+	private boolean insertSkierIntoDatabase(Skier skier) {
+	    SkierDAO skierDAO = (SkierDAO) new DAOFactory().getSkierDAO();
+	    return skier.insertIntoDatabase(skierDAO);
 	}
 	
 	private void resetFormFields() {
