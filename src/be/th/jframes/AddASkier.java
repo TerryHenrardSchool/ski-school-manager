@@ -17,11 +17,9 @@ import be.th.styles.ColorStyles;
 import be.th.styles.FontStyles;
 
 import java.awt.Color;
-import java.awt.Event;
 
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
-import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.awt.event.ActionEvent;
 
@@ -199,7 +197,7 @@ public class AddASkier extends JFrame {
 	private void handleClickOnAddButton(ActionEvent ev) {
 		try {
 	        Skier skier = buildSkierFromTextFields();
-	        boolean isAdded = insertSkierToDatabase(skier);	 
+	        boolean isAdded = insertSkierIntoDatabase(skier);	 
 	        
 	        if(isAdded) {
 	        	displayAddSkierSuccess(JOptionPane.INFORMATION_MESSAGE);
@@ -226,9 +224,9 @@ public class AddASkier extends JFrame {
 	}
 	
 	private Skier buildSkierFromTextFields() {
-		String skierLastName = lastNameField.getText();
-        String skierFirstName = firstNameField.getText();
-        LocalDate skierDateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
+		String lastName = lastNameField.getText();
+        String firstName = firstNameField.getText();
+        LocalDate dateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
         String phoneNumber = phoneNumberField.getText();
         String email = emailField.getText();
         String city = cityField.getText();
@@ -236,10 +234,10 @@ public class AddASkier extends JFrame {
         String streetName = streetNameField.getText();
         String streetNumber = streetNumberField.getText();
 
-        return  new Skier(skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+        return new Skier(lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
 	}
 	
-	private boolean insertSkierToDatabase(Skier skier) {
+	private boolean insertSkierIntoDatabase(Skier skier) {
 	    SkierDAO skierDAO = (SkierDAO) new DAOFactory().getSkierDAO();
 	    return skier.insertIntoDatabase(skierDAO);
 	}
