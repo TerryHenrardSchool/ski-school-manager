@@ -23,6 +23,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.awt.event.ActionEvent;
 
@@ -43,7 +44,7 @@ public class UpdateASkier extends JFrame {
 	
 	Skier skierToUpdate;
 
-	UpdateASkier(Skier skierToUpdate, Consumer<Boolean> onUpdateCallBack) {
+	UpdateASkier(Skier skierToUpdate, BiConsumer<Boolean, Skier> onUpdateCallBack) {
 		this.skierToUpdate = skierToUpdate;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -214,7 +215,7 @@ public class UpdateASkier extends JFrame {
 		dispose();
 	}
 	
-	private void handleCLickOnUpdateButton(Skier skierToUpdate, Consumer<Boolean> onUpdateCallBack) {
+	private void handleCLickOnUpdateButton(Skier skierToUpdate, BiConsumer<Boolean, Skier> onUpdateCallBack) {
         try {		   
         	int skierId = skierToUpdate.getId();
             String skierLastName = DatabaseFormatter.format(lastNameField.getText());
@@ -233,7 +234,7 @@ public class UpdateASkier extends JFrame {
             boolean isUpdated = skierWithNewData.updateInDatabase((SkierDAO) skierDAO);
             
             if (isUpdated) {
-                onUpdateCallBack.accept(isUpdated);
+                onUpdateCallBack.accept(isUpdated, skierWithNewData);
                 dispose();
             } else {
                 JOptionPane.showMessageDialog(null, "Failed to update skier's information. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);

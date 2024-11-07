@@ -478,9 +478,9 @@ public class SearchASkier extends JFrame {
 	    }
 	}
 	
-	private void handleUpdateResult(Boolean isUpdated) {
-        if (isUpdated) {
-        	loadSkierMap();
+	private void handleUpdateResult(Boolean isUpdated, Skier updatedSkier) {
+        if (isUpdated) {        	
+        	skierMap.replace(updatedSkier.getId(), updatedSkier);
     		displaySkiersInTable(skierMap.values());
         } 
     }
@@ -495,7 +495,7 @@ public class SearchASkier extends JFrame {
 			return;
 		}
 		
-		UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier, SearchASkier.this::handleUpdateResult);
+		UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier, this::handleUpdateResult);
 		updateASkierFrame.setVisible(true);
 	}
 	
@@ -505,7 +505,7 @@ public class SearchASkier extends JFrame {
 			: false;
 	}
 	
-	public JTable createJTable(
+	private JTable createJTable(
 	    Object[][] data,
 	    String[] columnNames,
 	    int[] columnWidths
@@ -537,15 +537,15 @@ public class SearchASkier extends JFrame {
 	    return table;
 	}
 	
-    public void addRowSelectionListener(JTable table, ListSelectionListener selectionListener) {
+	private void addRowSelectionListener(JTable table, ListSelectionListener selectionListener) {
         table.getSelectionModel().addListSelectionListener(selectionListener);
     }
 
-    public void addDoubleClickListener(JTable table, MouseListener doubleClickListener) {
+	private void addDoubleClickListener(JTable table, MouseListener doubleClickListener) {
         table.addMouseListener(doubleClickListener);
     }
     
-    public void handleClickOnDeleteButton(ActionEvent ev) {
+	private void handleClickOnDeleteButton(ActionEvent ev) {
 		if(!ObjectValidator.hasValue(selectedSkier)) {
 			warnThereIsNoSkierSlected();
 			return;
@@ -566,12 +566,12 @@ public class SearchASkier extends JFrame {
 		displaySkiersInTable(skierMap.values());
 	}
     
-    public void handleClickOnResetFiltersButton(ActionEvent ev) {
+	private void handleClickOnResetFiltersButton(ActionEvent ev) {
 		displaySkiersInTable(skierMap.values());
 		resetTextFields();
 	}
     
-    public void handleClickOnBackButton(ActionEvent e) {
+	private void handleClickOnBackButton(ActionEvent e) {
 		MainMenu mainMenuFrame = new MainMenu();
 		mainMenuFrame.setVisible(true);
 		
