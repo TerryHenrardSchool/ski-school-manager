@@ -95,9 +95,6 @@ public class SkierDAO extends DAO<Skier>{
 	    } catch (SQLException e) {
 	    	e.printStackTrace();
 	    	return false;
-	    } catch (Exception e) {
-	    	e.printStackTrace();
-	    	return false;	    	
 	    }
 	}
 

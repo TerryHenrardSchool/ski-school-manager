@@ -2,6 +2,7 @@ package be.th.models;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 import be.th.dao.SkierDAO;
 
@@ -43,6 +44,18 @@ public class Skier extends Person {
     // Database methods
     public boolean insertIntoDatabase(SkierDAO skierDAO) {
     	return skierDAO.create(this);
+    }
+    
+    public boolean updateInDatabase(SkierDAO skierDAO) {
+    	return skierDAO.update(this);
+    }
+    
+    public boolean deleteInDatabase(SkierDAO skierDAO) {
+    	return skierDAO.delete(getId());
+    }
+    
+    public static List<Skier> findAll(SkierDAO skierDAO){
+    	return skierDAO.findAll();
     }
 
     // Methods

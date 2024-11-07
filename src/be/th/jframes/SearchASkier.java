@@ -1,6 +1,5 @@
 package be.th.jframes;
 
-import java.awt.EventQueue;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,9 +23,9 @@ import javax.swing.table.DefaultTableModel;
 
 import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
+import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Address;
-import be.th.models.Instructor;
 import be.th.models.Person;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
@@ -41,12 +40,14 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.time.LocalDate;
 import java.awt.event.ActionEvent;
 import javax.swing.border.EtchedBorder;
@@ -90,76 +91,34 @@ public class SearchASkier extends JFrame {
 		scrollPane.setBounds(10, 24, 1219, 242);
 		panel.add(scrollPane);
 		
-		table = new JTable();
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.getTableHeader().setReorderingAllowed(false);
-		table.getSelectionModel().addListSelectionListener(this::handleClickOnRows);
-		
-		DefaultTableModel tableModel = new DefaultTableModel(
-		    new Object[][] {},
-		    new String[] { "Id", "Full name", "Birthdate", "Address", "Phone number", "Email" }
-		) {
-			private static final long serialVersionUID = -4108980079580312070L;
+		Object[][] data = {}; 
+		String[] columnNames = { "Id", "Full name", "Birthdate", "Address", "Phone number", "Email" };
+		int[] columnWidths = { 10, 75, 50, 200, 80, 180 };
 
-			@Override
-		    public boolean isCellEditable(int row, int column) {
-		        return false;
-		    }
-		};
-		table.setModel(tableModel);
-		
-		table.getColumnModel().getColumn(0).setPreferredWidth(10); 
-		table.getColumnModel().getColumn(1).setPreferredWidth(75);
-		table.getColumnModel().getColumn(2).setPreferredWidth(50); 
-		table.getColumnModel().getColumn(3).setPreferredWidth(200); 
-		table.getColumnModel().getColumn(4).setPreferredWidth(80); 
-		table.getColumnModel().getColumn(5).setPreferredWidth(180); 
-		
-		table.addMouseListener(new MouseAdapter() {
+		table = createJTable(data, columnNames, columnWidths);
+		MouseListener doubleClickListener = new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
-		    	 handleDoubleClickOnRows(e);
+		        handleDoubleClickOnRows(e);
 		    }
-		});
-		
+		};
+		addRowSelectionListener(table, this::handleClickOnRows);
+		addDoubleClickListener(table, doubleClickListener);
+
+
 		scrollPane.setViewportView(table);
 		
 		JButton btnDeleteSkier = new JButton("Delete skier");
 		btnDeleteSkier.setBounds(10, 271, 110, 31);
 		panel.add(btnDeleteSkier);
-		btnDeleteSkier.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(!ObjectValidator.hasValue(selectedSkier)) {
-					warnThereIsNoSkierSlected();
-					return;
-				}
-				
-				final int userResponse = askConfirmationBeforeDeletion();
-				if (userResponse != 0) {
-					return;
-				}
-				
-				final boolean isDeleted = skierDAO.delete(selectedSkier.getId());
-				if(!isDeleted) {
-					sendErrorWhileDeleting();
-				}
-				
-				confirmDeletion();
-				removeSkierFromSkiermap(selectedSkier.getId());
-				displaySkiersInTable(skierMap.values());
-			}
-		});
+		btnDeleteSkier.addActionListener(this::handleClickOnDeleteButton);
 		btnDeleteSkier.setFont(FontStyles.BUTTON);
 		btnDeleteSkier.setBackground(ColorStyles.RED);
 		
 		JButton btnUpdateInformation = new JButton("Update skier");
 		btnUpdateInformation.setBounds(130, 271, 110, 31);
 		panel.add(btnUpdateInformation);
-		btnUpdateInformation.addActionListener(new ActionListener() {			
-			public void actionPerformed(ActionEvent e) {
-				openUpdateSkierWindow();
-			}
-		});
+		btnUpdateInformation.addActionListener(this::handleClickOnUpdateButton);
 		btnUpdateInformation.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnUpdateInformation.setBackground(ColorStyles.ORANGE);
 		
@@ -208,12 +167,7 @@ public class SearchASkier extends JFrame {
 		
 		JButton btnResetSearch = new JButton("Reset");
 		btnResetSearch.setBackground(ColorStyles.BLUE);
-		btnResetSearch.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				displaySkiersInTable(skierMap.values());
-				resetTextFields();
-			}
-		});
+		btnResetSearch.addActionListener(this::handleClickOnResetFiltersButton);
 		btnResetSearch.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnResetSearch.setBounds(130, 271, 110, 31);
 		panel_1.add(btnResetSearch);
@@ -269,14 +223,7 @@ public class SearchASkier extends JFrame {
 		lblTitle.setBackground(new Color(0, 153, 255));
 		
 		JButton cancelBtn = new JButton("Back");
-		cancelBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				MainMenu mainMenuFrame = new MainMenu();
-				mainMenuFrame.setVisible(true);
-				
-				dispose();
-			}
-		});
+		cancelBtn.addActionListener(this::handleClickOnBackButton);
 		cancelBtn.setOpaque(true);
 		cancelBtn.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		cancelBtn.setContentAreaFilled(true);
@@ -340,7 +287,7 @@ public class SearchASkier extends JFrame {
 	}
 	
 	private void loadSkierMap() {	
-		List<Skier> skiers = skierDAO.findAll();
+		List<Skier> skiers = Skier.findAll((SkierDAO) skierDAO);
 		
 		if(!skierMap.isEmpty()) {
 			skierMap.clear();			
@@ -531,12 +478,16 @@ public class SearchASkier extends JFrame {
 	    }
 	}
 	
-	private void handleUpdateResult(Boolean isUpdated) {
-        if (isUpdated) {
-        	loadSkierMap();
+	private void handleUpdateResult(Boolean isUpdated, Skier updatedSkier) {
+        if (isUpdated) {        	
+        	skierMap.replace(updatedSkier.getId(), updatedSkier);
     		displaySkiersInTable(skierMap.values());
         } 
     }
+	
+	private void handleClickOnUpdateButton(ActionEvent ev) {
+		openUpdateSkierWindow();
+	}
 	
 	private void openUpdateSkierWindow() {
 		if(!ObjectValidator.hasValue(selectedSkier)) {
@@ -544,7 +495,7 @@ public class SearchASkier extends JFrame {
 			return;
 		}
 		
-		UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier, SearchASkier.this::handleUpdateResult);
+		UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier, this::handleUpdateResult);
 		updateASkierFrame.setVisible(true);
 	}
 	
@@ -552,5 +503,78 @@ public class SearchASkier extends JFrame {
 		return skierMap.remove(id) != null 
 			? true 
 			: false;
+	}
+	
+	private JTable createJTable(
+	    Object[][] data,
+	    String[] columnNames,
+	    int[] columnWidths
+	) {
+	    JTable table = new JTable();
+
+	    DefaultTableModel tableModel = new DefaultTableModel(data, columnNames) {
+	        private static final long serialVersionUID = -4108980079580312070L;
+
+	        @Override
+	        public boolean isCellEditable(int row, int column) {
+	            return false;
+	        }
+	    };
+	    table.setModel(tableModel);
+
+	    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	    table.getTableHeader().setReorderingAllowed(false);
+
+	    int columnCount = table.getColumnModel().getColumnCount();
+	    int widthCount = columnWidths.length;
+	    int columnsToConfigure = Math.min(columnCount, widthCount);
+
+	    for (int i = 0; i < columnsToConfigure; i++) {
+	        table.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
+	    }
+
+
+	    return table;
+	}
+	
+	private void addRowSelectionListener(JTable table, ListSelectionListener selectionListener) {
+        table.getSelectionModel().addListSelectionListener(selectionListener);
+    }
+
+	private void addDoubleClickListener(JTable table, MouseListener doubleClickListener) {
+        table.addMouseListener(doubleClickListener);
+    }
+    
+	private void handleClickOnDeleteButton(ActionEvent ev) {
+		if(!ObjectValidator.hasValue(selectedSkier)) {
+			warnThereIsNoSkierSlected();
+			return;
+		}
+		
+		final int userResponse = askConfirmationBeforeDeletion();
+		if (userResponse != 0) {
+			return;
+		}
+		
+		final boolean isDeleted = selectedSkier.deleteInDatabase((SkierDAO) skierDAO);
+		if(!isDeleted) {
+			sendErrorWhileDeleting();
+		}
+		
+		confirmDeletion();
+		removeSkierFromSkiermap(selectedSkier.getId());
+		displaySkiersInTable(skierMap.values());
+	}
+    
+	private void handleClickOnResetFiltersButton(ActionEvent ev) {
+		displaySkiersInTable(skierMap.values());
+		resetTextFields();
+	}
+    
+	private void handleClickOnBackButton(ActionEvent e) {
+		MainMenu mainMenuFrame = new MainMenu();
+		mainMenuFrame.setVisible(true);
+		
+		dispose();
 	}
 }
