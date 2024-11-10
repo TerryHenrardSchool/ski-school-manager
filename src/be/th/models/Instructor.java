@@ -2,15 +2,22 @@ package be.th.models;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import be.th.dao.InstructorDAO;
-import be.th.dao.SkierDAO;
+import be.th.validators.ObjectValidator;
 
 public class Instructor extends Person {
 	
 	// Static attributes
 	private static final long serialVersionUID = -5724827101822519690L;
+	
+	// References
+	private Set<Accreditation> accreditations;
 
 	// Constructors
     public Instructor(
@@ -23,7 +30,8 @@ public class Instructor extends Person {
 		String streetName, 
 		String streetNumber,
 		String phoneNumber, 
-		String email
+		String email,
+		Accreditation accreditation
 	) {
         super(
     		id, 
@@ -37,6 +45,9 @@ public class Instructor extends Person {
     		phoneNumber, 
     		email
 		);
+        
+        accreditations = new HashSet<Accreditation>();
+        addAccreditation(accreditation);
     }
     
     public Instructor(
@@ -48,7 +59,8 @@ public class Instructor extends Person {
 		String streetName, 
 		String streetNumber,
 		String phoneNumber, 
-		String email
+		String email,
+		Accreditation accreditation
 	) {
         this(
     		0, 
@@ -60,13 +72,36 @@ public class Instructor extends Person {
     		streetName,
     		streetNumber,
     		phoneNumber, 
-    		email
+    		email,
+    		accreditation
 		);
     }
+    
+    // Getters
+    public Collection<Accreditation> getAccreditations(){
+        return Collections.unmodifiableCollection(accreditations);
+    }
+    
+    // Setters
 
     // Methods
-    public boolean isAccreditate() {
-        return false;
+    public boolean removeAccreditation(Accreditation accreditation) {
+        if (!ObjectValidator.hasValue(accreditation)) {
+            throw new IllegalArgumentException("Accreditation must have value");
+        }
+        return accreditations.remove(accreditation);
+    }
+
+    public boolean addAccreditation(Accreditation accreditation) {
+    	if (!ObjectValidator.hasValue(accreditation)) {
+    		throw new IllegalArgumentException("Accreditation must have value");
+    	}
+    	
+    	return accreditations.add(accreditation); 
+    }
+    
+    public boolean isAccreditate(Accreditation accreditationToCheck) {
+        return accreditations.stream().anyMatch(accreditation -> accreditation.equals(accreditationToCheck));
     }
 
     public boolean hasScheduledLesson() {

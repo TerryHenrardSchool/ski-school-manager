@@ -5,9 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import be.th.models.Accreditation;
 import be.th.models.Instructor;
 
 public class InstructorDAO extends DAO<Instructor> {
@@ -18,11 +20,23 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	@Override
 	public boolean create(Instructor instructor) {
-		String sql = 
-			"INSERT INTO instructors (last_name, first_name, date_of_birth, phone_number, email, city, postcode, street_name, street_number) " + 
-	 		"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-		try (PreparedStatement pstmt = super.connection.prepareStatement(sql)) {
+		String sql = """
+		    INSERT INTO instructors (
+		        last_name, 
+		        first_name, 
+		        date_of_birth, 
+		        phone_number, 
+		        email, 
+		        city, 
+		        postcode, 
+		        street_name, 
+		        street_number
+		    ) 
+		    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	    """;
+	
+	
+	try (PreparedStatement pstmt = super.connection.prepareStatement(sql)) {
 			pstmt.setString(1, instructor.getLastName());
 			pstmt.setString(2, instructor.getFirstName());
 			pstmt.setDate(3, java.sql.Date.valueOf(instructor.getDateOfBirth()));
@@ -42,7 +56,10 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	@Override
 	public boolean delete(int id) {
-		String sql = "DELETE FROM instructors WHERE instructor_id = ?";
+		String sql = """
+		    DELETE FROM instructors 
+		    WHERE instructor_id = ?
+	    """;
 	    
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setInt(1, id);
@@ -56,11 +73,20 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	@Override
 	public boolean update(Instructor instructor) {
-		String sql = 
-			"UPDATE instructors " + 
-			"SET last_name = ?, first_name = ?, date_of_birth = ?, phone_number = ?, email = ?, " +
-			"city = ?, postcode = ?, street_name = ?, street_number = ? " +
-			"WHERE instructor_id = ?";
+		String sql = """
+		    UPDATE instructors
+		    SET last_name = ?, 
+		        first_name = ?, 
+		        date_of_birth = ?, 
+		        phone_number = ?, 
+		        email = ?, 
+		        city = ?, 
+		        postcode = ?, 
+		        street_name = ?, 
+		        street_number = ?
+		    WHERE instructor_id = ?
+	    """;
+
 	    
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setString(1, instructor.getLastName());
@@ -83,66 +109,115 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	@Override
 	public Instructor find(int id) {
-		String sql = "SELECT * FROM instructors WHERE instructor_id = ?";
+	    String sql = """
+	        SELECT * 
+	        FROM instructors 
+	        NATURAL JOIN instructor_accreditation_details 
+	        NATURAL JOIN accreditations 
+	        WHERE instructor_id = ?
+	    """;
+
+	    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+	        stmt.setInt(1, id);
+	        
+	        ResultSet rs = stmt.executeQuery();
+	        
+	        Instructor instructor = null;
+	        
+	        while (rs.next()) {
+	            Accreditation accreditation = new Accreditation(
+	                rs.getInt("accreditation_id"),
+	                rs.getString("sport"),
+	                rs.getString("age_category_name"),
+	                rs.getInt("min_age"),
+	                rs.getInt("max_age")
+	            );
+	            
+	            if (instructor == null) {
+	                instructor = new Instructor(
+	                    rs.getInt("instructor_id"),
+	                    rs.getString("last_name"),
+	                    rs.getString("first_name"),
+	                    rs.getDate("date_of_birth").toLocalDate(),
+	                    rs.getString("city"),
+	                    rs.getString("postcode"),
+	                    rs.getString("street_name"),
+	                    rs.getString("street_number"),
+	                    rs.getString("phone_number"),
+	                    rs.getString("email"),
+	                    accreditation
+	                );
+	            } else {
+	                instructor.addAccreditation(accreditation);
+	            }
+	        }
+	        
+	        return instructor;
+	        
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
 	    
-		try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-			stmt.setInt(1, id);
-			
-			ResultSet rs = stmt.executeQuery();
-			
-			if (rs.next()) {
-				return new Instructor(
-					rs.getInt("instructor_id"),
-					rs.getString("last_name"),
-					rs.getString("first_name"),
-					rs.getDate("date_of_birth").toLocalDate(),
-					rs.getString("city"),
-					rs.getString("postcode"),
-					rs.getString("street_name"),
-					rs.getString("street_number"),
-					rs.getString("phone_number"),
-					rs.getString("email")
-				);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	    
-		return null;
+	    return null;
 	}
 
 	@Override
 	public List<Instructor> findAll() {
-		String sql = "SELECT * FROM instructors ORDER BY instructor_id DESC";
-		List<Instructor> instructors = new ArrayList<>();
+	    String sql = """
+	        SELECT * 
+	        FROM instructors 
+	        NATURAL JOIN instructor_accreditation_details 
+	        NATURAL JOIN accreditations 
+	        ORDER BY instructor_id DESC
+	    """;
 	    
-		try (ResultSet rs = connection.prepareStatement(sql).executeQuery()) {
-			while (rs.next()) {
-				Instructor instructor = new Instructor(
-					rs.getInt("instructor_id"),
-					rs.getString("last_name"),
-					rs.getString("first_name"),
-					rs.getDate("date_of_birth").toLocalDate(),
-					rs.getString("city"),
-					rs.getString("postcode"),
-					rs.getString("street_name"),
-					rs.getString("street_number"),
-					rs.getString("phone_number"),
-					rs.getString("email")
-				);
-	            
-				instructors.add(instructor);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	    List<Instructor> instructors = new ArrayList<>();
+	    Map<Integer, Instructor> instructorMap = new HashMap<>();
 	    
-		return instructors;
+	    try (ResultSet rs = connection.prepareStatement(sql).executeQuery()) {
+	        while (rs.next()) {
+	            int instructorId = rs.getInt("instructor_id");
+
+	            Accreditation accreditation = new Accreditation(
+	                rs.getInt("accreditation_id"),
+	                rs.getString("sport"),
+	                rs.getString("age_category_name"),
+	                rs.getInt("min_age"),
+	                rs.getInt("max_age")
+	            );
+
+	            Instructor instructor = instructorMap.get(instructorId);
+	            if (instructor == null) {
+	                instructor = new Instructor(
+	                    instructorId,
+	                    rs.getString("last_name"),
+	                    rs.getString("first_name"),
+	                    rs.getDate("date_of_birth").toLocalDate(),
+	                    rs.getString("city"),
+	                    rs.getString("postcode"),
+	                    rs.getString("street_name"),
+	                    rs.getString("street_number"),
+	                    rs.getString("phone_number"),
+	                    rs.getString("email"),
+	                    accreditation
+	                );
+	                instructorMap.put(instructorId, instructor);
+	                instructors.add(instructor);
+	            } else {
+	                instructor.addAccreditation(accreditation);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return instructors;
 	}
 
 	@Override
 	public List<Instructor> findAll(Map<String, Object> criteria) {
-		// Implementation can be done as needed based on specific criteria
-		return null; 
+		// TODO Auto-generated method stub
+		return null;
 	}
+
 }

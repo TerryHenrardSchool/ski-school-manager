@@ -2,6 +2,7 @@ package be.th.dao;
 
 import java.sql.Connection;
 
+import be.th.models.Accreditation;
 import be.th.models.Booking;
 import be.th.models.Instructor;
 import be.th.models.Lesson;
@@ -34,5 +35,9 @@ public class DAOFactory {
 	
 	public DAO<LessonType> getLessonTypesDAO(){
 		return new LessonTypesDAO(CONNECTION);
+	}
+	
+	public DAO<Accreditation> getAccreditationDAO(){
+		return new AccreditationDAO(CONNECTION);
 	}
 }
