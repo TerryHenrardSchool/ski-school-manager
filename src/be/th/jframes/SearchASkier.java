@@ -287,7 +287,7 @@ public class SearchASkier extends JFrame {
 	}
 	
 	private void loadSkierMap() {	
-		List<Skier> skiers = Skier.findAll((SkierDAO) skierDAO);
+		List<Skier> skiers = Skier.findAllInDatabase((SkierDAO) skierDAO);
 		
 		if(!skierMap.isEmpty()) {
 			skierMap.clear();			
@@ -556,7 +556,7 @@ public class SearchASkier extends JFrame {
 			return;
 		}
 		
-		final boolean isDeleted = selectedSkier.deleteInDatabase((SkierDAO) skierDAO);
+		final boolean isDeleted = selectedSkier.deleteFromDatabase((SkierDAO) skierDAO);
 		if(!isDeleted) {
 			sendErrorWhileDeleting();
 		}

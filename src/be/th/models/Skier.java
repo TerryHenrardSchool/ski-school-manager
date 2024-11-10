@@ -50,11 +50,11 @@ public class Skier extends Person {
     	return skierDAO.update(this);
     }
     
-    public boolean deleteInDatabase(SkierDAO skierDAO) {
+    public boolean deleteFromDatabase(SkierDAO skierDAO) {
     	return skierDAO.delete(getId());
     }
     
-    public static List<Skier> findAll(SkierDAO skierDAO){
+    public static List<Skier> findAllInDatabase(SkierDAO skierDAO){
     	return skierDAO.findAll();
     }
 
