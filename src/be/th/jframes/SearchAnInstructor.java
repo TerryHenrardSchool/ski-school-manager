@@ -453,25 +453,8 @@ public class SearchAnInstructor extends JFrame {
 	    }
 	    
 	    try {
-	        Integer id = (Integer) table.getValueAt(selectedRow, 0);
-	        Map<String, String> nameMap = Person.splitLastNameAndFirstName((String) table.getValueAt(selectedRow, 1));
-	        LocalDate birthdate = DateParser.toLocalDate((String) table.getValueAt(selectedRow, 2));
-	        Map<String, String> addressMap = Address.destructureFormattedAddress((String) table.getValueAt(selectedRow, 3));
-	        String phoneNumber = (String) table.getValueAt(selectedRow, 4);
-	        String email = (String) table.getValueAt(selectedRow, 5);
-	        
-	        selectedInstructor = new Instructor(
-        		id, 
-        		nameMap.get("lastName"), 
-        		nameMap.get("firstName"), 
-        		birthdate, 
-        		addressMap.get("city"), 
-        		addressMap.get("postcode"), 
-        		addressMap.get("streetName"), 
-        		addressMap.get("streetNumber"), 
-        		phoneNumber, 
-        		email
-    		);
+	        int id = (int) table.getValueAt(selectedRow, 0);
+	        selectedInstructor = instructorMap.get(id);
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
 	        JOptionPane.showMessageDialog(
@@ -563,8 +546,10 @@ public class SearchAnInstructor extends JFrame {
 		}
 		
 		final boolean isDeleted = selectedInstructor.deleteFromDatabase((InstructorDAO) instructorDao);
+		System.out.println(selectedInstructor);
 		if(!isDeleted) {
 			sendErrorWhileDeleting();
+			return;
 		}
 		
 		confirmDeletion();

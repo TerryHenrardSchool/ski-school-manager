@@ -201,10 +201,10 @@ public class AddASkier extends JFrame {
 	        
 	        if(isAdded) {
 	        	displayAddSkierSuccess(JOptionPane.INFORMATION_MESSAGE);
+	        	resetFormFields();
 	        } else {
 	        	displayAddSkierFailure(JOptionPane.ERROR_MESSAGE);
 	        }
-	        resetFormFields();
 	    } catch (Exception ex) {
 	        JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 	    }

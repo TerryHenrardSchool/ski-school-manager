@@ -453,25 +453,9 @@ public class SearchASkier extends JFrame {
 	    }
 	    
 	    try {
-	        Integer id = (Integer) table.getValueAt(selectedRow, 0);
-	        Map<String, String> nameMap = Person.splitLastNameAndFirstName((String) table.getValueAt(selectedRow, 1));
-	        LocalDate birthdate = DateParser.toLocalDate((String) table.getValueAt(selectedRow, 2));
-	        Map<String, String> addressMap = Address.destructureFormattedAddress((String) table.getValueAt(selectedRow, 3));
-	        String phoneNumber = (String) table.getValueAt(selectedRow, 4);
-	        String email = (String) table.getValueAt(selectedRow, 5);
+	        int id = (int) table.getValueAt(selectedRow, 0);
 	        
-	        selectedSkier = new Skier(
-        		id, 
-        		nameMap.get("lastName"), 
-        		nameMap.get("firstName"), 
-        		birthdate, 
-        		addressMap.get("city"), 
-        		addressMap.get("postcode"), 
-        		addressMap.get("streetName"), 
-        		addressMap.get("streetNumber"), 
-        		phoneNumber, 
-        		email
-    		);
+	        selectedSkier = skierMap.get(id);
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
 	        JOptionPane.showMessageDialog(null, "Error while fetching skier data.", "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -559,6 +543,7 @@ public class SearchASkier extends JFrame {
 		final boolean isDeleted = selectedSkier.deleteFromDatabase((SkierDAO) skierDAO);
 		if(!isDeleted) {
 			sendErrorWhileDeleting();
+			return;
 		}
 		
 		confirmDeletion();
