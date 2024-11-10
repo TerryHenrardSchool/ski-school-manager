@@ -2,8 +2,10 @@ package be.th.models;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 import be.th.dao.InstructorDAO;
+import be.th.dao.SkierDAO;
 
 public class Instructor extends Person {
 	
@@ -78,6 +80,18 @@ public class Instructor extends Person {
     // Database methods
     public boolean insertIntoDatabase(InstructorDAO instructorDAO) {
     	return instructorDAO.create(this);
+    }
+    
+    public boolean updateInDatabase(InstructorDAO instructorDAO) {
+    	return instructorDAO.update(this);
+    }
+    
+    public boolean deleteFromDatabase(InstructorDAO instructorDAO) {
+    	return instructorDAO.delete(getId());
+    }
+    
+    public static List<Instructor> findAllInDatabase(InstructorDAO instructorDAO){
+    	return instructorDAO.findAll();
     }
     
     //Override methods
