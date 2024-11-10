@@ -26,7 +26,12 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.awt.event.ActionEvent;
 import java.awt.Font;
 import javax.swing.JList;
@@ -52,6 +57,7 @@ public class AddAnInstructor extends JFrame {
 	private JTextField postcodeField;
 	private JTextField streetNameField;
 	private JTextField streetNumberField;
+	private Map<JCheckBox, Accreditation> checkBoxMap;
 
 	public AddAnInstructor() {
 		DAOFactory daoFactory = new DAOFactory();
@@ -61,7 +67,7 @@ public class AddAnInstructor extends JFrame {
 		
 		// I'll add some library
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 630, 662);
+		setBounds(100, 100, 630, 666);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -70,7 +76,7 @@ public class AddAnInstructor extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Instructor information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 72, 600, 540);
+		panel.setBounds(10, 72, 600, 544);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -206,10 +212,10 @@ public class AddAnInstructor extends JFrame {
 		lblAccreditation.setBounds(10, 292, 114, 31);
 		panel.add(lblAccreditation);
 		
-		List<Accreditation> accreditations = Accreditation.findAllInDatabase((AccreditationDAO) accreditationDAO);
-		List<JCheckBox> checkBoxes = createAccreditationCheckBoxes(accreditations, FontStyles.CHECK_BOX, 121, 294, 180, 31, 26);
+		List<Accreditation> accreditations = getAccreditationsFromDatabase();
+		checkBoxMap = createAccreditationCheckBoxes(accreditations, FontStyles.CHECK_BOX, 121, 294, 180, 31, 26);
 		
-		addComponentsIntoPanel(checkBoxes, panel);
+		addComponentsIntoPanel(checkBoxMap.keySet(), panel);
 		repaintPanel(panel);
 		
 		JLabel lblNewLabel_1 = new JLabel("Add a new instructor");
@@ -226,13 +232,28 @@ public class AddAnInstructor extends JFrame {
 		panel.repaint();
 	}
 	
-	private void addComponentsIntoPanel(List<? extends Component> components, JPanel panel) {
+	private void addComponentsIntoPanel(Set<? extends Component> components, JPanel panel) {
 		for (Component component : components) {
 		    panel.add(component);
 		}
 	}
 	
-	public List<JCheckBox> createAccreditationCheckBoxes(
+	public Set<Accreditation> getSelectedAccreditations(Map<JCheckBox, Accreditation> checkBoxMap) {
+	    Set<Accreditation> selectedAccreditations = new HashSet<>();
+
+	    for (Entry<JCheckBox, Accreditation> entry : checkBoxMap.entrySet()) {
+	        JCheckBox checkBox = entry.getKey();
+	        Accreditation accreditation = entry.getValue();
+
+	        if (checkBox.isSelected()) {
+	            selectedAccreditations.add(accreditation);
+	        }
+	    }
+
+	    return selectedAccreditations;
+	}
+	
+	public Map<JCheckBox, Accreditation> createAccreditationCheckBoxes(
 	    List<Accreditation> accreditations, 
 	    Font font,
 	    int startX, 
@@ -241,7 +262,7 @@ public class AddAnInstructor extends JFrame {
 	    int height, 
 	    int columnGap
 	) {
-	    List<JCheckBox> checkBoxes = new ArrayList<>();
+	    Map<JCheckBox, Accreditation> checkBoxMap = new HashMap<>();
 	    int yPosition = startY;
 
 	    for (Accreditation accreditation : accreditations) {
@@ -251,12 +272,13 @@ public class AddAnInstructor extends JFrame {
 	        checkBox.setFont(font); 
 	        checkBox.setBounds(startX, yPosition, width, height); 
 
-	        checkBoxes.add(checkBox);
+	        checkBoxMap.put(checkBox, accreditation);
 	        yPosition += columnGap; 
 	    }
 
-	    return checkBoxes;
+	    return checkBoxMap;
 	}
+
 	
 	private void handleCLickOnCancelButton(ActionEvent ev) {
 		openMainMenu();
@@ -265,15 +287,15 @@ public class AddAnInstructor extends JFrame {
 	
 	private void handleClickOnAddButton(ActionEvent ev) {
 		try {
-	        Instructor instructor = buildInstructorFromTextFields();
+	        Instructor instructor = buildInstructorFromFields();
 	        boolean isAdded = insertInstructorIntoDatabase(instructor);	 
 	        
 	        if(isAdded) {
 	        	displayAddInstructorSuccess(JOptionPane.INFORMATION_MESSAGE);
+	        	resetFormFields();
 	        } else {
 	        	displayAddInstructorFailure(JOptionPane.ERROR_MESSAGE);
 	        }
-	        resetFormFields();
 	    } catch (Exception ex) {
 	        JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 	    }
@@ -296,11 +318,7 @@ public class AddAnInstructor extends JFrame {
 		return Accreditation.findAllInDatabase((AccreditationDAO) accreditationDAO);
 	}
 	
-	/*private Accreditation buildAccreditationFromCheckBoxes() {
-		
-	}*/
-	
-	private Instructor buildInstructorFromTextFields() {
+	private Instructor buildInstructorFromFields() {
 		String lastName = lastNameField.getText();
         String firstName = firstNameField.getText();
         LocalDate dateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
@@ -310,13 +328,14 @@ public class AddAnInstructor extends JFrame {
         String postcode = postcodeField.getText();
         String streetName = streetNameField.getText();
         String streetNumber = streetNumberField.getText();
-
-        return new Instructor(lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+        
+        Set<Accreditation> selectedAccreditations = getSelectedAccreditations(checkBoxMap);
+        
+        return new Instructor(lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email, selectedAccreditations);
 	}
 	
 	private boolean insertInstructorIntoDatabase(Instructor instructor) {
-	    InstructorDAO instructorDAO = (InstructorDAO) new DAOFactory().getInstructorDAO();
-	    return instructor.insertIntoDatabase(instructorDAO);
+	    return instructor.insertIntoDatabase((InstructorDAO) instructorDAO);
 	}
 	    
 	private void resetFormFields() {

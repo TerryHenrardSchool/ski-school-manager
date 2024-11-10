@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import be.th.dao.InstructorDAO;
+import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
 
 public class Instructor extends Person {
@@ -31,23 +32,27 @@ public class Instructor extends Person {
 		String streetNumber,
 		String phoneNumber, 
 		String email,
-		Accreditation accreditation
+		Set<Accreditation> accreditations
 	) {
-        super(
-    		id, 
-    		lastName, 
-    		firstName, 
-    		dateOfBirth, 
-    		city, 
-    		postcode, 
-    		streetName, 
-    		streetNumber, 
-    		phoneNumber, 
-    		email
-		);
+        super(id, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
         
-        accreditations = new HashSet<Accreditation>();
-        addAccreditation(accreditation);
+        this.accreditations = new HashSet<Accreditation>();
+        setAccreditations(accreditations);
+    }
+    
+    public Instructor(
+    		String lastName, 
+    		String firstName, 
+    		LocalDate dateOfBirth,
+    		String city, 
+    		String postcode, 
+    		String streetName, 
+    		String streetNumber,
+    		String phoneNumber, 
+    		String email,
+    		Set<Accreditation> accreditations
+    		) {
+    	this(0, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email, accreditations);
     }
     
     public Instructor(
@@ -62,27 +67,28 @@ public class Instructor extends Person {
 		String email,
 		Accreditation accreditation
 	) {
-        this(
-    		0, 
-    		lastName, 
-    		firstName,
-    		dateOfBirth, 
-    		city,
-    		postcode,
-    		streetName,
-    		streetNumber,
-    		phoneNumber, 
-    		email,
-    		accreditation
-		);
+        this(0, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email, Set.of(accreditation));
     }
     
     // Getters
-    public Collection<Accreditation> getAccreditations(){
-        return Collections.unmodifiableCollection(accreditations);
+    public Set<Accreditation> getAccreditations(){
+        return Collections.unmodifiableSet(accreditations);
     }
     
     // Setters
+    public void setAccreditations(Set<Accreditation> accreditations) {
+    	if(!ObjectValidator.hasValue(accreditations)) {
+    		throw new IllegalArgumentException("Accreditations must be set.");
+    	}
+    	
+    	if(!IntegerValidator.isGreaterOrEqual(accreditations.size(), 1)) {
+        	throw new IllegalArgumentException("Accreditations must have at least one value.");
+        }
+    	
+    	for(Accreditation accreditation: accreditations) {
+        	addAccreditation(accreditation);
+        }
+    }
 
     // Methods
     public boolean removeAccreditation(Accreditation accreditation) {
@@ -146,6 +152,15 @@ public class Instructor extends Person {
     
     @Override
     public String toString() {
-    	return super.toString();
+    	String result = "";
+    	
+    	result += super.toString() + " ";
+    	
+    	result += "List of accreditations:";
+    	for(Accreditation accreditation: accreditations) {
+    		result += accreditation;
+    	}
+    	
+    	return result;
     }
 }
