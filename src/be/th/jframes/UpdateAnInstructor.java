@@ -7,6 +7,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
+
 import com.toedter.calendar.JDateChooser;
 
 import be.th.dao.AccreditationDAO;
@@ -45,6 +46,8 @@ public class UpdateAnInstructor extends JFrame {
 	DAO<Instructor> instructorDAO;
 	DAO<Accreditation> accreditationDAO;
 	
+	private Instructor instructorToUpdate;
+	
 	private JPanel contentPane;
 	private JTextField lastNameField;
 	private JTextField firstNameField;
@@ -62,6 +65,8 @@ public class UpdateAnInstructor extends JFrame {
 		
 		instructorDAO = daoFactory.getInstructorDAO();
 		accreditationDAO = daoFactory.getAccreditationDAO();
+		
+		this.instructorToUpdate = instructorToUpdate;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 630, 666);
@@ -198,34 +203,7 @@ public class UpdateAnInstructor extends JFrame {
 		panel.add(cancelBtn);
 		
 		JButton updateBtn = new JButton("Update");
-		updateBtn.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        try {		   
-		            Instructor instructor = buildInstructorFromFields();
-		            
-		            boolean isUpdated = instructor.updateInDatabase((InstructorDAO) instructorDAO);
-		            
-		            if (!isUpdated) {
-		            	JOptionPane.showMessageDialog(
-	                		null, 
-	                		"Failed to update instructor's information. Please try again.", 
-	                		"Error", 
-	                		JOptionPane.ERROR_MESSAGE
-                		);
-		            }
-		            
-		            onUpdateCallBack.accept(isUpdated);
-		            dispose();
-		        } catch (Exception ex) {
-		            JOptionPane.showMessageDialog(
-	            		null, 
-	            		ex.getMessage(), 
-	            		"Error", 
-	            		JOptionPane.ERROR_MESSAGE
-            		);
-		        }
-		    }
-		});
+		updateBtn.addActionListener(e -> handleClickOnUpdateButton(onUpdateCallBack));
 
 		updateBtn.setFont(FontStyles.BUTTON);
 		updateBtn.setContentAreaFilled(true);
@@ -310,6 +288,7 @@ public class UpdateAnInstructor extends JFrame {
 		}
 	
 	private Instructor buildInstructorFromFields() {
+		int id = instructorToUpdate.getId();
 		String lastName = lastNameField.getText();
         String firstName = firstNameField.getText();
         LocalDate dateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
@@ -322,7 +301,7 @@ public class UpdateAnInstructor extends JFrame {
         
         Set<Accreditation> selectedAccreditations = getSelectedAccreditations(checkBoxMap);
         
-        return new Instructor(lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email, selectedAccreditations);
+        return new Instructor(id, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email, selectedAccreditations);
 	}
 	
 	private void preFillFields(Instructor instructor) {
@@ -344,5 +323,50 @@ public class UpdateAnInstructor extends JFrame {
 	
 	private List<Accreditation> getAccreditationsFromDatabase() {
 		return Accreditation.findAllInDatabase((AccreditationDAO) accreditationDAO);
+	}
+	
+	private void handleClickOnUpdateButton(Consumer<Boolean> onUpdateCallBack) {
+        try {		   
+            Instructor instructorWithNewData = buildInstructorFromFields();
+            
+            boolean isUpdated = instructorWithNewData.updateInDatabase((InstructorDAO) instructorDAO);
+            
+            if (!isUpdated) {
+            	displayFailedToUpdateMessage();
+            }
+            
+            displaySuccessToUpdateMessage(instructorWithNewData);
+            onUpdateCallBack.accept(isUpdated);
+            dispose();
+        } catch (Exception ex) {
+        	displayErrorMessage(ex);
+        }
+    }
+	
+	private void displaySuccessToUpdateMessage(Instructor instructor) {
+		JOptionPane.showMessageDialog(
+    		null, 
+    		instructor.getLastnameFormattedForDisplay() + " " + instructor.getFirstNameFormattedForDisplay() + " successfully updated.", 
+    		"Success", 
+    		JOptionPane.PLAIN_MESSAGE
+		);
+	}
+	
+	private void displayErrorMessage(Exception ex) {
+		JOptionPane.showMessageDialog(
+    		null, 
+    		ex.getMessage(), 
+    		"Error", 
+    		JOptionPane.ERROR_MESSAGE
+		);
+	}
+	
+	private void displayFailedToUpdateMessage() {
+		JOptionPane.showMessageDialog(
+    		null, 
+    		"Failed to update instructor's information. Please try again.", 
+    		"Error", 
+    		JOptionPane.ERROR_MESSAGE
+		);
 	}
 }

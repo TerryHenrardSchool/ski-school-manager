@@ -6,9 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Accreditation;
@@ -52,21 +54,11 @@ public class InstructorDAO extends DAO<Instructor> {
 	        
 	        return true;
 	    } catch (SQLException e) {
-	        try {
-	            connection.rollback();
-	        } catch (SQLException rollbackEx) {
-	            rollbackEx.printStackTrace();
-	        }
-	        
+            DatabaseTransaction.rollbackTransaction(connection);
 	        e.printStackTrace();
-	        
 	        return false;
 	    } finally {
-	        try {
-	            connection.setAutoCommit(true);
-	        } catch (SQLException autoCommitEx) {
-	            autoCommitEx.printStackTrace();
-	        }
+            DatabaseTransaction.restoreAutoCommit(connection);
 	    }
 	}
 
@@ -92,59 +84,44 @@ public class InstructorDAO extends DAO<Instructor> {
 	        connection.commit();
 	        return true;
 		} catch (SQLException e) {
-			try {
-	            connection.rollback();
-	        } catch (SQLException rollbackEx) {
-	            rollbackEx.printStackTrace();
-	        }
-	        
+            DatabaseTransaction.rollbackTransaction(connection);
 	        e.printStackTrace();
-	        
 	        return false;
 		} finally {
-	        try {
-	            connection.setAutoCommit(true);
-	        } catch (SQLException autoCommitEx) {
-	            autoCommitEx.printStackTrace();
-	        }
+            DatabaseTransaction.restoreAutoCommit(connection);
 	    }
 	}
 
 	@Override
 	public boolean update(Instructor instructor) {
-		String sql = """
-		    UPDATE instructors
-		    SET last_name = ?, 
-		        first_name = ?, 
-		        date_of_birth = ?, 
-		        phone_number = ?, 
-		        email = ?, 
-		        city = ?, 
-		        postcode = ?, 
-		        street_name = ?, 
-		        street_number = ?
-		    WHERE instructor_id = ?
-	    """;
+	    try {
+	        connection.setAutoCommit(false);
 
-	    
-		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-			pstmt.setString(1, DatabaseFormatter.format(instructor.getLastName()));
-			pstmt.setString(2, DatabaseFormatter.format(instructor.getFirstName()));
-			pstmt.setDate(3, java.sql.Date.valueOf(instructor.getDateOfBirth()));
-			pstmt.setString(4, DatabaseFormatter.format(instructor.getPhoneNumber()));
-			pstmt.setString(5, DatabaseFormatter.format(instructor.getEmail()));
-			pstmt.setString(6, DatabaseFormatter.format(instructor.getAddress().getCity()));
-			pstmt.setString(7, DatabaseFormatter.format(instructor.getAddress().getPostcode()));
-			pstmt.setString(8, DatabaseFormatter.format(instructor.getAddress().getStreetName()));
-			pstmt.setString(9, DatabaseFormatter.format(instructor.getAddress().getStreetNumber()));
-			pstmt.setInt(10, instructor.getId());
-	        
-			return pstmt.executeUpdate() > 0;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
+	        boolean isUpdated = updateInstructorInfo(instructor);
+	        if (!isUpdated) {
+	            DatabaseTransaction.rollbackTransaction(connection);
+	            return false;
+	        }
+
+	        Set<Integer> currentAccreditations = getCurrentAccreditations(instructor.getId());
+	        Set<Integer> newAccreditations = instructor.getAccreditations().stream()
+	                .map(Accreditation::getId)
+	                .collect(Collectors.toSet());
+
+	        deleteObsoleteAccreditations(instructor.getId(), currentAccreditations, newAccreditations);
+	        insertNewAccreditations(instructor.getId(), currentAccreditations, newAccreditations);
+
+	        connection.commit();
+	        return true;
+	    } catch (SQLException e) {
+            DatabaseTransaction.rollbackTransaction(connection);
+	        e.printStackTrace();
+	        return false;
+	    } finally {
+            DatabaseTransaction.restoreAutoCommit(connection);
+	    }
 	}
+
 
 	@Override
 	public Instructor find(int id) {
@@ -323,4 +300,84 @@ public class InstructorDAO extends DAO<Instructor> {
 	    }
 	}
 
+	private boolean updateInstructorInfo(Instructor instructor) {
+	    String sql = """
+	        UPDATE instructors
+	        SET last_name = ?, 
+	            first_name = ?, 
+	            date_of_birth = ?, 
+	            phone_number = ?, 
+	            email = ?, 
+	            city = ?, 
+	            postcode = ?, 
+	            street_name = ?, 
+	            street_number = ?
+	        WHERE instructor_id = ?
+	    """;
+
+	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	        pstmt.setString(1, DatabaseFormatter.format(instructor.getLastName()));
+	        pstmt.setString(2, DatabaseFormatter.format(instructor.getFirstName()));
+	        pstmt.setDate(3, java.sql.Date.valueOf(instructor.getDateOfBirth()));
+	        pstmt.setString(4, DatabaseFormatter.format(instructor.getPhoneNumber()));
+	        pstmt.setString(5, DatabaseFormatter.format(instructor.getEmail()));
+	        pstmt.setString(6, DatabaseFormatter.format(instructor.getAddress().getCity()));
+	        pstmt.setString(7, DatabaseFormatter.format(instructor.getAddress().getPostcode()));
+	        pstmt.setString(8, DatabaseFormatter.format(instructor.getAddress().getStreetName()));
+	        pstmt.setString(9, DatabaseFormatter.format(instructor.getAddress().getStreetNumber()));
+	        pstmt.setInt(10, instructor.getId());
+
+	        return pstmt.executeUpdate() > 0;
+	    } catch (SQLException e) {
+	        return false;
+	    }
+	}
+
+	private Set<Integer> getCurrentAccreditations(int instructorId) throws SQLException {
+	    String selectSql = "SELECT accreditation_id FROM instructor_accreditation_details WHERE instructor_id = ?";
+	    Set<Integer> accreditations = new HashSet<>();
+
+	    try (PreparedStatement selectStmt = connection.prepareStatement(selectSql)) {
+	        selectStmt.setInt(1, instructorId);
+	        ResultSet rs = selectStmt.executeQuery();
+	        while (rs.next()) {
+	            accreditations.add(rs.getInt("accreditation_id"));
+	        }
+	    } catch (SQLException e) {
+	        throw new SQLException("Error while getting current accreditations. Error: " + e.getMessage());
+	    }
+	    return accreditations;
+	}
+
+	private void deleteObsoleteAccreditations(int instructorId, Set<Integer> currentAccreditations, Set<Integer> newAccreditations) throws SQLException {
+	    String deleteSql = "DELETE FROM instructor_accreditation_details WHERE instructor_id = ? AND accreditation_id = ?";
+
+	    try (PreparedStatement deleteStmt = connection.prepareStatement(deleteSql)) {
+	        for (Integer currentAccreditation : currentAccreditations) {
+	            if (!newAccreditations.contains(currentAccreditation)) {
+	                deleteStmt.setInt(1, instructorId);
+	                deleteStmt.setInt(2, currentAccreditation);
+	                deleteStmt.executeUpdate();
+	            }
+	        }
+	    } catch (SQLException e) {
+	        throw new SQLException("Error while deleting obslete accreditations. Error: " + e.getMessage());
+	    }
+	}
+
+	private void insertNewAccreditations(int instructorId, Set<Integer> currentAccreditations, Set<Integer> newAccreditations) throws SQLException {
+	    String insertSql = "INSERT INTO instructor_accreditation_details (instructor_id, accreditation_id) VALUES (?, ?)";
+
+	    try (PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
+	        for (Integer newAccreditation : newAccreditations) {
+	            if (!currentAccreditations.contains(newAccreditation)) {
+	                insertStmt.setInt(1, instructorId);
+	                insertStmt.setInt(2, newAccreditation);
+	                insertStmt.executeUpdate();
+	            }
+	        }
+	    } catch (SQLException e) {
+	        throw new SQLException("Error while inserting new accreditations. Error: " + e.getMessage());
+	    }
+	}
 }

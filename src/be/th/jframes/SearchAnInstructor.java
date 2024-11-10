@@ -546,7 +546,6 @@ public class SearchAnInstructor extends JFrame {
 		}
 		
 		final boolean isDeleted = selectedInstructor.deleteFromDatabase((InstructorDAO) instructorDao);
-		System.out.println(selectedInstructor);
 		if(!isDeleted) {
 			sendErrorWhileDeleting();
 			return;
