@@ -33,8 +33,8 @@ public class DAOFactory {
 		return new SecretaryDAO(CONNECTION);
 	}
 	
-	public DAO<LessonType> getLessonTypesDAO(){
-		return new LessonTypesDAO(CONNECTION);
+	public DAO<LessonType> getLessonTypeDAO(){
+		return new LessonTypeDAO(CONNECTION);
 	}
 	
 	public DAO<Accreditation> getAccreditationDAO(){

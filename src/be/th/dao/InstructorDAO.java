@@ -144,9 +144,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	            Accreditation accreditation = new Accreditation(
 	                rs.getInt("accreditation_id"),
 	                rs.getString("sport"),
-	                rs.getString("age_category_name"),
-	                rs.getInt("min_age"),
-	                rs.getInt("max_age")
+	                rs.getString("age_category_name")
 	            );
 	            
 	            if (instructor == null) {
@@ -197,9 +195,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	            Accreditation accreditation = new Accreditation(
 	                rs.getInt("accreditation_id"),
 	                rs.getString("sport"),
-	                rs.getString("age_category_name"),
-	                rs.getInt("min_age"),
-	                rs.getInt("max_age")
+	                rs.getString("age_category_name")
 	            );
 
 	            Instructor instructor = instructorMap.get(instructorId);

@@ -27,7 +27,7 @@ public class CreateCollectifLesson extends JFrame {
 	private List<LessonType> lessonTypes;
     
     public CreateCollectifLesson() {
-    	DAO<LessonType> lessonTypeDAO = DAO_FACTORY.getLessonTypesDAO();
+    	DAO<LessonType> lessonTypeDAO = DAO_FACTORY.getLessonTypeDAO();
     	
     	lessonTypes = lessonTypeDAO.findAll();
     	

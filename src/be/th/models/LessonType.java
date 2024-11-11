@@ -1,9 +1,14 @@
 package be.th.models;
 
+import java.lang.foreign.Linker.Option;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
 import be.th.dao.DatabaseConstants;
+import be.th.dao.LessonTypeDAO;
 import be.th.validators.IntegerValidator;
+import be.th.validators.ObjectValidator;
 import be.th.validators.StringValidator;
 
 public class LessonType {
@@ -17,9 +22,11 @@ public class LessonType {
     private double price;
     private String name;
     private String ageCategoryName;
+    private int minAge;
+    private Optional<Integer> maxAge;
 
     // Constructor
-    public LessonType(int id, String level, double price, String name, String ageCategoryName) {
+    public LessonType(int id, String level, double price, String name, String ageCategoryName, int minAge, Optional<Integer> maxAge) {
         setId(id);
         setLevel(level);
         setPrice(price);
@@ -46,6 +53,14 @@ public class LessonType {
     
     public String getAgeCategoryName() {
         return ageCategoryName;
+    }
+    
+    public int getMinAge() {
+    	return minAge;
+    }
+    
+    public Optional<Integer> getMaxAge(){
+    	return maxAge;
     }
 
     // Setters
@@ -95,6 +110,27 @@ public class LessonType {
         }
         this.ageCategoryName = ageCategoryName;
     }
+    
+    public void setMinAge(int minAge) {
+    	if(!IntegerValidator.isGreaterOrEqual(minAge, 1)) {
+    		throw new IllegalArgumentException("Min age must be a positive number.");    		
+    	}
+    	
+    	this.minAge = minAge;
+    }
+    
+    public void setMaxAge(Optional<Integer> maxAge) {
+    	if(ObjectValidator.hasValue(maxAge) && !IntegerValidator.isGreaterOrEqual(maxAge, 1)) {
+    		throw new IllegalArgumentException("Max age must be a positive number.");    		
+    	}
+    	
+    	this.maxAge = maxAge;
+    }
+    
+    // Database methods
+    public static Collection<LessonType> findAllInDatabase(LessonTypeDAO lessonTypeDao){
+    	return lessonTypeDao.findAll();
+    }
 
     // Override methods
     @Override
@@ -109,15 +145,17 @@ public class LessonType {
 
         LessonType lessonType = (LessonType) object;
         return id == lessonType.id &&
-           Double.compare(lessonType.price, price) == 0 &&
-           Objects.equals(level, lessonType.level) &&
-           Objects.equals(name, lessonType.name) &&
-           Objects.equals(ageCategoryName, lessonType.ageCategoryName);
+    		minAge == lessonType.minAge &&
+    		Objects.equals(maxAge, lessonType.maxAge) &&
+            Double.compare(lessonType.price, price) == 0 &&
+            Objects.equals(level, lessonType.level) &&
+            Objects.equals(name, lessonType.name) &&
+            Objects.equals(ageCategoryName, lessonType.ageCategoryName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, level, price, name, ageCategoryName);
+        return Objects.hash(id, level, price, name, ageCategoryName, minAge, maxAge);
     }
 
     @Override
@@ -127,6 +165,8 @@ public class LessonType {
            ", level='" + level + '\'' +
            ", price=" + price +
            ", name='" + name + '\'' +
-           ", ageCategoryName='" + ageCategoryName + '\'';
+           ", ageCategoryName='" + ageCategoryName + '\'' + 
+           ", minAge'" + minAge + '\'' + 
+           ", maxAge'" + maxAge + '\'';
     }
 }
