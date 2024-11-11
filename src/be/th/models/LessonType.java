@@ -1,6 +1,5 @@
 package be.th.models;
 
-import java.lang.foreign.Linker.Option;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,14 +23,30 @@ public class LessonType {
     private String ageCategoryName;
     private int minAge;
     private Optional<Integer> maxAge;
+    private int minBookings;
+    private int maxBookings;
 
     // Constructor
-    public LessonType(int id, String level, double price, String name, String ageCategoryName, int minAge, Optional<Integer> maxAge) {
+    public LessonType(
+		int id, 
+		String level, 
+		double price, 
+		String name, 
+		String ageCategoryName, 
+		int minAge, 
+		Optional<Integer> maxAge, 
+		int minBookings, 
+		int maxBookings
+	) {
         setId(id);
         setLevel(level);
         setPrice(price);
         setName(name);
         setAgeCategoryName(ageCategoryName);
+        setMinAge(minAge);
+        setMaxAge(maxAge);
+        setMinBookings(minBookings);
+        setMaxBookings(maxBookings);
     }
 
     // Getters
@@ -61,6 +76,14 @@ public class LessonType {
     
     public Optional<Integer> getMaxAge(){
     	return maxAge;
+    }
+    
+    public int getMinBookings() {
+    	return minBookings;
+    }
+    
+    public int getMaxBookings() {
+    	return maxBookings;
     }
 
     // Setters
@@ -120,16 +143,32 @@ public class LessonType {
     }
     
     public void setMaxAge(Optional<Integer> maxAge) {
-    	if(ObjectValidator.hasValue(maxAge) && !IntegerValidator.isGreaterOrEqual(maxAge, 1)) {
+    	if(maxAge.isPresent() && !IntegerValidator.isGreaterOrEqual(maxAge, 1)) {
     		throw new IllegalArgumentException("Max age must be a positive number.");    		
     	}
     	
     	this.maxAge = maxAge;
     }
     
+    public void setMinBookings(int minBookings) {
+    	if(!IntegerValidator.isPositiveOrEqualToZero(minBookings)) {
+    		throw new IllegalArgumentException("Min bookings must be positive or equal to zero.");    		    		
+    	}
+    	
+    	this.minBookings = minBookings;
+    }
+    
+    public void setMaxBookings(int maxBookings) {
+    	if(!IntegerValidator.isPositiveOrEqualToZero(maxBookings)) {
+    		throw new IllegalArgumentException("Max bookings must be positive or equal to zero.");    		    		
+    	}
+    	
+    	this.maxBookings = maxBookings;
+    }
+    
     // Methods 
     public String getLessonTypeInfoFormattedForDisplay() {
-    	return level + " " + ageCategoryName + " - " + name;
+    	return name + " " + ageCategoryName  + " - " + level;
     }
     
     // Database methods
@@ -151,6 +190,8 @@ public class LessonType {
         LessonType lessonType = (LessonType) object;
         return id == lessonType.id &&
     		minAge == lessonType.minAge &&
+    		minBookings == lessonType.minBookings && 
+    		maxBookings == lessonType.maxBookings &&
     		Objects.equals(maxAge, lessonType.maxAge) &&
             Double.compare(lessonType.price, price) == 0 &&
             Objects.equals(level, lessonType.level) &&
@@ -160,7 +201,7 @@ public class LessonType {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, level, price, name, ageCategoryName, minAge, maxAge);
+        return Objects.hash(id, level, price, name, ageCategoryName, minAge, maxAge, minBookings, maxBookings);
     }
 
     @Override
@@ -172,6 +213,8 @@ public class LessonType {
            ", name='" + name + '\'' +
            ", ageCategoryName='" + ageCategoryName + '\'' + 
            ", minAge'" + minAge + '\'' + 
-           ", maxAge'" + maxAge + '\'';
+           ", maxAge'" + maxAge + '\'' +
+           ", minBookings'" + minBookings + '\'' +
+           ", maxBookings'" + maxBookings + '\'';
     }
 }

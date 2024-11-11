@@ -52,7 +52,9 @@ public class LessonTypeDAO extends DAO<LessonType>{
   		  		skill_level, 
   		  		age_category_name, 
   		  		min_age, 
-  		  		max_age 
+  		  		max_age ,
+  		  		min_bookings,
+  		  		max_bookings
 	  		FROM 
 		 		lesson_types 
 	 		ORDER BY 
@@ -71,8 +73,10 @@ public class LessonTypeDAO extends DAO<LessonType>{
                 int minAge = rs.getInt("min_age");
                 int maxAgeDatabase = rs.getInt("max_age");
                 Optional<Integer> maxAge = rs.wasNull() ? Optional.empty() : Optional.of(maxAgeDatabase);    
+                int minBookings = rs.getInt("min_bookings");
+                int maxBookings = rs.getInt("max_bookings");
                 
-                LessonType lessonType = new LessonType(lessonTypeId, name, price, skillLevel, ageCategoryName, minAge, maxAge);
+                LessonType lessonType = new LessonType(lessonTypeId, skillLevel, price, name, ageCategoryName, minAge, maxAge, minBookings, maxBookings);
                 lessonTypes.add(lessonType);
             }
         } catch (SQLException e) {

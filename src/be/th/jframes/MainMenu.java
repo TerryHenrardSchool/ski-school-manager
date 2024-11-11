@@ -12,6 +12,7 @@ import javax.swing.border.TitledBorder;
 import be.th.styles.FontStyles;
 
 import java.awt.GridLayout;
+import javax.swing.border.EtchedBorder;
 
 public class MainMenu extends JFrame {
     
@@ -75,7 +76,7 @@ public class MainMenu extends JFrame {
 	    panel_1.add(btnNewButton_1);
 	    
 	    JPanel panel_1_1 = new JPanel();
-	    panel_1_1.setBorder(new TitledBorder(null, "Skier actions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+	    panel_1_1.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Lesson Actions", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
 	    panel_1_1.setBounds(20, 365, 973, 136);
 	    getContentPane().add(panel_1_1);
 	    panel_1_1.setLayout(new GridLayout(0, 2, 0, 0));
@@ -83,6 +84,7 @@ public class MainMenu extends JFrame {
 	    JButton btnAddLesson = new JButton("Add a lesson");
 	    btnAddLesson.addActionListener(e -> {
 	    	openFrame(new AddALesson());
+	    	dispose();
 	    });
 	    btnAddLesson.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	    panel_1_1.add(btnAddLesson);

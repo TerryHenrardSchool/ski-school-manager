@@ -25,6 +25,7 @@ import javax.swing.JList;
 import javax.swing.AbstractListModel;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JTextField;
 
 public class AddALesson extends JFrame {
 
@@ -34,6 +35,7 @@ public class AddALesson extends JFrame {
 	
 	private JPanel contentPane;
 	private Map<String, LessonType> lessonTypeMap;
+	private JTextField textField;
 
 	/**
 	 * Create the frame.
@@ -79,6 +81,31 @@ public class AddALesson extends JFrame {
 		
 		loadLessonTypeMap();
 		setModelToJComboBox(comboBox, lessonTypeMap.keySet().stream().sorted((key1, key2) -> key1.compareTo(key2)).toArray(String[]::new));
+		comboBox.setSelectedIndex(-1); 
+		comboBox.addActionListener(e -> {
+			if(comboBox.getSelectedIndex() == -1) {
+				return;
+			}
+			
+			Object key = comboBox.getSelectedItem();
+			System.out.println(lessonTypeMap.get(key));
+		});
+		
+		JLabel lblPrice = new JLabel("Price");
+		lblPrice.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		lblPrice.setBounds(10, 70, 90, 31);
+		panel.add(lblPrice);
+		
+		textField = new JTextField();
+		textField.setEnabled(false);
+		textField.setEditable(false);
+		textField.setBounds(110, 70, 167, 31);
+		panel.add(textField);
+		textField.setColumns(10);
+		
+		JLabel lblNewLabel = new JLabel("Aller chercher les accréditations et proposer uniquement les instructor avec l'accrédition requise pour ce LessonType");
+		lblNewLabel.setBounds(256, 233, 575, 162);
+		panel.add(lblNewLabel);
 	}
 	
 	private void setModelToJComboBox(JComboBox<String> comboBox, String[] values) {
