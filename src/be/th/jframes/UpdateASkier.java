@@ -185,7 +185,7 @@ public class UpdateASkier extends JFrame {
 		panel.add(cancelBtn);
 		
 		JButton updateBtn = new JButton("Update");
-		updateBtn.addActionListener(ev -> handleCLickOnUpdateButton(skierToUpdate, onUpdateCallBack));
+		updateBtn.addActionListener(ev -> handleCLickOnUpdateButton(onUpdateCallBack));
 
 		updateBtn.setFont(FontStyles.BUTTON);
 		updateBtn.setContentAreaFilled(true);
@@ -237,7 +237,7 @@ public class UpdateASkier extends JFrame {
         return new Skier(skierId, skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
 	}
 	
-	private void handleCLickOnUpdateButton(Skier skierToUpdate, BiConsumer<Boolean, Skier> onUpdateCallBack) {
+	private void handleCLickOnUpdateButton(BiConsumer<Boolean, Skier> onUpdateCallBack) {
         try {		   
             Skier skierWithNewData = buildSkierFromFields();
             

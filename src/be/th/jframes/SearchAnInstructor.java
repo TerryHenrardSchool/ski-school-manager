@@ -1,9 +1,10 @@
 package be.th.jframes;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,9 +26,8 @@ import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
 import be.th.dao.InstructorDAO;
 import be.th.formatters.DatabaseFormatter;
-import be.th.models.Address;
+import be.th.models.Accreditation;
 import be.th.models.Instructor;
-import be.th.models.Person;
 import be.th.parsers.DateParser;
 import be.th.styles.ColorStyles;
 import be.th.styles.FontStyles;
@@ -44,7 +44,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.JButton;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -60,7 +59,8 @@ public class SearchAnInstructor extends JFrame {
 	private DAO<Instructor> instructorDao = new DAOFactory().getInstructorDAO();
 	
 	private JPanel contentPane;
-	private JTable table;
+	private JTable instructorsTable;
+	private JTable accreditationsTable;
 	private JTextField idSearchTxtField;
 	private LinkedHashMap<Integer, Instructor> instructorMap = new LinkedHashMap<>();
 	private JTextField lastNameSearchTxtField;
@@ -81,49 +81,49 @@ public class SearchAnInstructor extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JPanel panel = new JPanel();
-		panel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Instructors", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel.setBounds(282, 64, 1239, 313);
-		contentPane.add(panel);
-		panel.setLayout(null);
+		JPanel instructorsPanel = new JPanel();
+		instructorsPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Instructors", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+		instructorsPanel.setBounds(282, 64, 977, 313);
+		contentPane.add(instructorsPanel);
+		instructorsPanel.setLayout(null);
 		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 24, 1219, 242);
-		panel.add(scrollPane);
+		JScrollPane instructorsJScrollPane = new JScrollPane();
+		instructorsJScrollPane.setBounds(10, 24, 957, 242);
+		instructorsPanel.add(instructorsJScrollPane);
 		
-		Object[][] data = {}; 
-		String[] columnNames = { "Id", "Full name", "Birthdate", "Address", "Phone number", "Email" };
-		int[] columnWidths = { 10, 75, 50, 200, 80, 180 };
+		Object[][] instructorsTableData = {}; 
+		String[] instructorsTableColumnNames = { "Id", "Full name", "Birthdate", "Address", "Phone number", "Email" };
+		int[] instructorsTableColumnWidths = { 10, 75, 50, 200, 80, 180 };
 
-		table = createJTable(data, columnNames, columnWidths);
+		instructorsTable = createJTable(instructorsTableData, instructorsTableColumnNames, instructorsTableColumnWidths);
 		MouseListener doubleClickListener = new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
 		        handleDoubleClickOnRows(e);
 		    }
 		};
-		addRowSelectionListener(table, this::handleClickOnRows);
-		addDoubleClickListener(table, doubleClickListener);
+		addRowSelectionListener(instructorsTable, this::handleClickOnRows);
+		addDoubleClickListener(instructorsTable, doubleClickListener);
 		
-		scrollPane.setViewportView(table);
+		instructorsJScrollPane.setViewportView(instructorsTable);
 		
 		JButton btnDeleteInstructor = new JButton("Delete instructor");
 		btnDeleteInstructor.setBounds(10, 271, 150, 31);
-		panel.add(btnDeleteInstructor);
+		instructorsPanel.add(btnDeleteInstructor);
 		btnDeleteInstructor.addActionListener(this::handleClickOnDeleteButton);
 		btnDeleteInstructor.setFont(FontStyles.BUTTON);
 		btnDeleteInstructor.setBackground(ColorStyles.RED);
 		
 		JButton btnUpdateInformation = new JButton("Update instructor");
 		btnUpdateInformation.setBounds(170, 271, 150, 31);
-		panel.add(btnUpdateInformation);
+		instructorsPanel.add(btnUpdateInformation);
 		btnUpdateInformation.addActionListener(this::handleClickOnUpdateButton);
 		btnUpdateInformation.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnUpdateInformation.setBackground(ColorStyles.ORANGE);
 		
 		JLabel lblNewLabel = new JLabel("(or double click on the row...)");
 		lblNewLabel.setBounds(330, 281, 196, 14);
-		panel.add(lblNewLabel);
+		instructorsPanel.add(lblNewLabel);
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new TitledBorder(null, "Search criteria", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -230,6 +230,37 @@ public class SearchAnInstructor extends JFrame {
 		cancelBtn.setBackground(new Color(255, 57, 57));
 		cancelBtn.setBounds(20, 10, 154, 52);
 		contentPane.add(cancelBtn);
+		
+		JPanel accreditationsPanel = new JPanel();
+		accreditationsPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Accreditations", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+		accreditationsPanel.setBounds(1269, 64, 252, 313);
+		contentPane.add(accreditationsPanel);
+		accreditationsPanel.setLayout(null);
+		
+		JScrollPane accreditationsJScrollPane = new JScrollPane();
+		accreditationsJScrollPane.setBounds(10, 21, 232, 281);
+		accreditationsPanel.add(accreditationsJScrollPane);
+		
+		accreditationsTable = new JTable();
+		accreditationsTable.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"Sport", "Category"
+			}
+		) {
+
+			private static final long serialVersionUID = 1L;
+			boolean[] columnEditables = new boolean[] {
+				false, false
+			};
+			public boolean isCellEditable(int row, int column) {
+				return columnEditables[column];
+			}
+		});
+		accreditationsTable.getColumnModel().getColumn(0).setResizable(false);
+		accreditationsTable.getColumnModel().getColumn(1).setResizable(false);
+		accreditationsJScrollPane.setViewportView(accreditationsTable);
 				
 		loadInstructorMap();
 		displayInstructorsInTable(instructorMap.values());
@@ -276,14 +307,23 @@ public class SearchAnInstructor extends JFrame {
 		);
 	}
 	
+	private void displayAccreditaionsInTable(Collection<Accreditation> accreditations) {		
+		DefaultTableModel model = (DefaultTableModel) accreditationsTable.getModel();
+		model.setRowCount(0);
+		
+		for (final Accreditation accreditation : accreditations) {
+			model.addRow(getPreparedAccreditationsInfoForTableModel(accreditation));
+		}
+	}
+	
 	private void displayInstructorsInTable(Collection<Instructor> instructors) {
-		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		DefaultTableModel model = (DefaultTableModel) instructorsTable.getModel();
 		model.setRowCount(0);
 		
 		for (final Instructor instructor : instructors) {
 			model.addRow(getPreparedInstructorInfoForTableModel(instructor));
 		}
-	}
+	}	
 	
 	private void loadInstructorMap() {	
 		List<Instructor> instructors = instructorDao.findAll();
@@ -366,6 +406,13 @@ public class SearchAnInstructor extends JFrame {
 		};
 	}
 	
+	private Object[] getPreparedAccreditationsInfoForTableModel(Accreditation accreditation) {
+		return new Object[] {
+			accreditation.getSportType(),
+			accreditation.getAgeCategory()
+		};
+	}
+	
 	private String getTextField(JTextField textField) {
 		final String texte = textField.getText();
 		
@@ -435,7 +482,7 @@ public class SearchAnInstructor extends JFrame {
 			return;
 		}
 		
-		int row = table.rowAtPoint(e.getPoint());
+		int row = instructorsTable.rowAtPoint(e.getPoint());
 		if (row != -1) { 
 			openUpdateInstructorWindow();
 		}
@@ -446,16 +493,17 @@ public class SearchAnInstructor extends JFrame {
 	        return;
 	    }
 	    
-	    int selectedRow = table.getSelectedRow();
+	    int selectedRow = instructorsTable.getSelectedRow();
 	    
 	    if (selectedRow < 0) { 
 	        return;
 	    }
 	    
 	    try {
-	        int id = (int) table.getValueAt(selectedRow, 0);
+	        int id = (int) instructorsTable.getValueAt(selectedRow, 0);
 	        selectedInstructor = instructorMap.get(id);
-	    } catch (Exception ex) {
+	        displayAccreditaionsInTable(selectedInstructor.getAccreditations());    
+        } catch (Exception ex) {
 	        ex.printStackTrace();
 	        JOptionPane.showMessageDialog(
         		null, 
@@ -466,10 +514,11 @@ public class SearchAnInstructor extends JFrame {
 	    }
 	}
 	
-	private void handleUpdateResult(Boolean isUpdated) {
+	private void handleUpdateResult(Boolean isUpdated, Instructor updatedInstructor) {
         if (isUpdated) {
-        	loadInstructorMap();
+        	instructorMap.replace(updatedInstructor.getId(), updatedInstructor);
     		displayInstructorsInTable(instructorMap.values());
+    		displayAccreditaionsInTable(updatedInstructor.getAccreditations());
         } 
     }
 	
@@ -484,7 +533,7 @@ public class SearchAnInstructor extends JFrame {
 			return;
 		}
 		
-		UpdateAnInstructor updateAnInstructorFrame = new UpdateAnInstructor(selectedInstructor, SearchAnInstructor.this::handleUpdateResult);
+		UpdateAnInstructor updateAnInstructorFrame = new UpdateAnInstructor(selectedInstructor, this::handleUpdateResult);
 		updateAnInstructorFrame.setVisible(true);
 	}
 	
@@ -492,33 +541,33 @@ public class SearchAnInstructor extends JFrame {
 		    Object[][] data,
 		    String[] columnNames,
 		    int[] columnWidths
-		) {
-		    JTable table = new JTable();
+	) {
+	    JTable table = new JTable();
 
-		    DefaultTableModel tableModel = new DefaultTableModel(data, columnNames) {
-		        private static final long serialVersionUID = -4108980079580312070L;
+	    DefaultTableModel tableModel = new DefaultTableModel(data, columnNames) {
+	        private static final long serialVersionUID = -4108980079580312070L;
 
-		        @Override
-		        public boolean isCellEditable(int row, int column) {
-		            return false;
-		        }
-		    };
-		    table.setModel(tableModel);
+	        @Override
+	        public boolean isCellEditable(int row, int column) {
+	            return false;
+	        }
+	    };
+	    table.setModel(tableModel);
 
-		    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		    table.getTableHeader().setReorderingAllowed(false);
+	    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	    table.getTableHeader().setReorderingAllowed(false);
 
-		    int columnCount = table.getColumnModel().getColumnCount();
-		    int widthCount = columnWidths.length;
-		    int columnsToConfigure = Math.min(columnCount, widthCount);
+	    int columnCount = table.getColumnModel().getColumnCount();
+	    int widthCount = columnWidths.length;
+	    int columnsToConfigure = Math.min(columnCount, widthCount);
 
-		    for (int i = 0; i < columnsToConfigure; i++) {
-		        table.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
-		    }
+	    for (int i = 0; i < columnsToConfigure; i++) {
+	        table.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
+	    }
 
 
-		    return table;
-		}
+	    return table;
+	}
 	
 	private void addRowSelectionListener(JTable table, ListSelectionListener selectionListener) {
         table.getSelectionModel().addListSelectionListener(selectionListener);
