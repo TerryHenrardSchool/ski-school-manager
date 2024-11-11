@@ -9,6 +9,9 @@ import java.awt.Font;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
@@ -50,7 +53,7 @@ public class AddALesson extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JLabel lblTitle = new JLabel("Add a new instructor");
+		JLabel lblTitle = new JLabel("Add a new lesson");
 		lblTitle.setOpaque(true);
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 24));
@@ -64,19 +67,22 @@ public class AddALesson extends JFrame {
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
-		JLabel lblLessonType = new JLabel("Lesson type");
-		lblLessonType.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblLessonType.setBounds(10, 21, 90, 31);
-		panel.add(lblLessonType);
+		JLabel lblSport = new JLabel("Lesson type");
+		lblSport.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		lblSport.setBounds(10, 21, 90, 31);
+		panel.add(lblSport);
 		
-		JComboBox<LessonType> comboBox = new JComboBox<LessonType>();
+		JComboBox<String> comboBox = new JComboBox<String>();
 		
-		comboBox.setBounds(110, 21, 154, 31);
+		comboBox.setBounds(110, 21, 167, 31);
 		panel.add(comboBox);
+		
+		loadLessonTypeMap();
+		setModelToJComboBox(comboBox, lessonTypeMap.keySet().stream().sorted((key1, key2) -> key1.compareTo(key2)).toArray(String[]::new));
 	}
 	
-	private void setModelToJComboBox(JComboBox<LessonType> comboBox, LessonType[] lessonTypes) {
-		comboBox.setModel(new DefaultComboBoxModel<LessonType>(lessonTypes));
+	private void setModelToJComboBox(JComboBox<String> comboBox, String[] values) {
+		comboBox.setModel(new DefaultComboBoxModel<String>(values));
 	}
 	
 	private Collection<LessonType> getLessonTypesFromDatabase() {
@@ -87,7 +93,7 @@ public class AddALesson extends JFrame {
 		Collection<LessonType> lessonTypes = getLessonTypesFromDatabase();
 		
 		for (LessonType lessonType: lessonTypes) {
-			String key = lessonType.getName() + " - " + lessonType.getLevel();
+			String key = lessonType.getLessonTypeInfoFormattedForDisplay();
 			lessonTypeMap.put(key, lessonType);
 		}
 	}

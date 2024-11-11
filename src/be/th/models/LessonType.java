@@ -127,6 +127,11 @@ public class LessonType {
     	this.maxAge = maxAge;
     }
     
+    // Methods 
+    public String getLessonTypeInfoFormattedForDisplay() {
+    	return level + " " + ageCategoryName + " - " + name;
+    }
+    
     // Database methods
     public static Collection<LessonType> findAllInDatabase(LessonTypeDAO lessonTypeDao){
     	return lessonTypeDao.findAll();

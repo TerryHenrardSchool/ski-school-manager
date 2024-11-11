@@ -1,6 +1,5 @@
 package be.th.dao;
 
-import java.lang.foreign.Linker.Option;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
