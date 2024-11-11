@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.awt.event.ActionEvent;
 
@@ -60,11 +61,11 @@ public class UpdateAnInstructor extends JFrame {
 	private JTextField streetNumberField;
 	private Map<JCheckBox, Accreditation> checkBoxMap;
 
-	public UpdateAnInstructor(Instructor instructorToUpdate, Consumer<Boolean> onUpdateCallBack) {		
+	public UpdateAnInstructor(Instructor instructorToUpdate, BiConsumer<Boolean, Instructor> onUpdateCallBack) {		
 		DAOFactory daoFactory = new DAOFactory();
 		
-		instructorDAO = daoFactory.getInstructorDAO();
-		accreditationDAO = daoFactory.getAccreditationDAO();
+		this.instructorDAO = daoFactory.getInstructorDAO();
+		this.accreditationDAO = daoFactory.getAccreditationDAO();
 		
 		this.instructorToUpdate = instructorToUpdate;
 		
@@ -325,7 +326,7 @@ public class UpdateAnInstructor extends JFrame {
 		return Accreditation.findAllInDatabase((AccreditationDAO) accreditationDAO);
 	}
 	
-	private void handleClickOnUpdateButton(Consumer<Boolean> onUpdateCallBack) {
+	private void handleClickOnUpdateButton(BiConsumer<Boolean, Instructor> onUpdateCallBack) {
         try {		   
             Instructor instructorWithNewData = buildInstructorFromFields();
             
@@ -336,7 +337,7 @@ public class UpdateAnInstructor extends JFrame {
             }
             
             displaySuccessToUpdateMessage(instructorWithNewData);
-            onUpdateCallBack.accept(isUpdated);
+            onUpdateCallBack.accept(isUpdated, instructorWithNewData);
             dispose();
         } catch (Exception ex) {
         	displayErrorMessage(ex);
