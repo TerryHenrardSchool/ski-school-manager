@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import be.th.models.Accreditation;
 import be.th.models.LessonType;
 
 public class LessonTypeDAO extends DAO<LessonType>{
@@ -47,18 +48,22 @@ public class LessonTypeDAO extends DAO<LessonType>{
         List<LessonType> lessonTypes = new ArrayList<>();
         String sql = """
     		SELECT 
-  		  		lesson_type_id, 	
-  		  		name, price, 
-  		  		skill_level, 
-  		  		age_category_name, 
-  		  		min_age, 
-  		  		max_age ,
-  		  		min_bookings,
-  		  		max_bookings
-	  		FROM 
-		 		lesson_types 
-	 		ORDER BY 
-      			lesson_type_id
+			    lesson_type_id, 	
+			    name, price, 
+			    skill_level, 
+			    age_category_name, 
+			    min_age, 
+			    max_age ,
+			    min_bookings,
+			    max_bookings,
+			    accreditation_id,
+			    sport
+			FROM 
+			    lesson_types 
+			NATURAL JOIN 
+			    accreditations
+			ORDER BY 
+			    lesson_type_id
 		""";
 
         try (PreparedStatement stmt = super.connection.prepareStatement(sql);
@@ -76,7 +81,12 @@ public class LessonTypeDAO extends DAO<LessonType>{
                 int minBookings = rs.getInt("min_bookings");
                 int maxBookings = rs.getInt("max_bookings");
                 
-                LessonType lessonType = new LessonType(lessonTypeId, skillLevel, price, name, ageCategoryName, minAge, maxAge, minBookings, maxBookings);
+                int accreditationId = rs.getInt("accreditation_id");
+                String sport = rs.getString("sport");
+
+                Accreditation accreditation = new Accreditation(accreditationId, sport, ageCategoryName);
+                LessonType lessonType = new LessonType(lessonTypeId, skillLevel, price, name, ageCategoryName, minAge, maxAge, minBookings, maxBookings, accreditation);
+                
                 lessonTypes.add(lessonType);
             }
         } catch (SQLException e) {

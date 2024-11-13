@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.sound.midi.VoiceStatus;
+
 import be.th.dao.DatabaseConstants;
 import be.th.dao.LessonTypeDAO;
 import be.th.validators.IntegerValidator;
@@ -25,6 +27,9 @@ public class LessonType {
     private Optional<Integer> maxAge;
     private int minBookings;
     private int maxBookings;
+    
+    // References
+    private Accreditation accreditation;
 
     // Constructor
     public LessonType(
@@ -36,7 +41,8 @@ public class LessonType {
 		int minAge, 
 		Optional<Integer> maxAge, 
 		int minBookings, 
-		int maxBookings
+		int maxBookings,
+		Accreditation accreditation
 	) {
         setId(id);
         setLevel(level);
@@ -47,6 +53,7 @@ public class LessonType {
         setMaxAge(maxAge);
         setMinBookings(minBookings);
         setMaxBookings(maxBookings);
+        setAccreditation(accreditation);
     }
 
     // Getters
@@ -84,6 +91,10 @@ public class LessonType {
     
     public int getMaxBookings() {
     	return maxBookings;
+    }
+    
+    public Accreditation getAccreditation() {
+    	return accreditation;
     }
 
     // Setters
@@ -166,6 +177,14 @@ public class LessonType {
     	this.maxBookings = maxBookings;
     }
     
+    public void setAccreditation(Accreditation accreditation) {
+    	if(!ObjectValidator.hasValue(accreditation)) {    		
+    		throw new IllegalArgumentException("A lesson type must have an accreditation.");    		    		
+    	}
+    	
+    	this.accreditation = accreditation;
+    }
+    
     // Methods 
     public String getLessonTypeInfoFormattedForDisplay() {
     	return name + " " + ageCategoryName  + " - " + level;
@@ -196,12 +215,13 @@ public class LessonType {
             Double.compare(lessonType.price, price) == 0 &&
             Objects.equals(level, lessonType.level) &&
             Objects.equals(name, lessonType.name) &&
-            Objects.equals(ageCategoryName, lessonType.ageCategoryName);
+            Objects.equals(ageCategoryName, lessonType.ageCategoryName) &&
+        	accreditation.equals(lessonType.accreditation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, level, price, name, ageCategoryName, minAge, maxAge, minBookings, maxBookings);
+        return Objects.hash(id, level, price, name, ageCategoryName, minAge, maxAge, minBookings, maxBookings, accreditation.hashCode());
     }
 
     @Override
@@ -215,6 +235,7 @@ public class LessonType {
            ", minAge'" + minAge + '\'' + 
            ", maxAge'" + maxAge + '\'' +
            ", minBookings'" + minBookings + '\'' +
-           ", maxBookings'" + maxBookings + '\'';
+           ", maxBookings'" + maxBookings + '\'' + 
+           ", Accreditation'" + accreditation + '\'';
     }
 }
