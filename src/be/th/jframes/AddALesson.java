@@ -35,6 +35,10 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
+import java.awt.Cursor;
+import javax.swing.DebugGraphics;
+import javax.swing.JTextArea;
+import javax.swing.UIManager;
 
 public class AddALesson extends JFrame {
 
@@ -94,7 +98,8 @@ public class AddALesson extends JFrame {
 		
 		lessonTypeComboBox = new JComboBox<String>();
 		
-		lessonTypeComboBox.setBounds(110, 21, 167, 31);
+		lessonTypeComboBox.setBounds(110, 21, 190, 31);
+		lessonTypeComboBox.setRenderer(createLessonTypeRenderer(lessonTypeMap, instructorMap.values()));
 		panel.add(lessonTypeComboBox);
 		
 		setModelToJComboBox(lessonTypeComboBox, lessonTypeMap.keySet().stream().sorted((key1, key2) -> key1.compareTo(key2)).toArray(String[]::new));
@@ -103,13 +108,13 @@ public class AddALesson extends JFrame {
 		
 		JLabel lblPrice = new JLabel("Price");
 		lblPrice.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblPrice.setBounds(393, 21, 90, 31);
+		lblPrice.setBounds(10, 105, 90, 31);
 		panel.add(lblPrice);
 		
 		textField = new JTextField();
 		textField.setEnabled(false);
 		textField.setEditable(false);
-		textField.setBounds(493, 21, 167, 31);
+		textField.setBounds(110, 105, 190, 31);
 		panel.add(textField);
 		textField.setColumns(10);
 		
@@ -121,8 +126,17 @@ public class AddALesson extends JFrame {
 		accreditedInstructorsComboBox = new JComboBox<String>();
 		accreditedInstructorsComboBox.setEnabled(false);
 		accreditedInstructorsComboBox.setSelectedIndex(-1);
-		accreditedInstructorsComboBox.setBounds(110, 63, 167, 31);
+		accreditedInstructorsComboBox.setBounds(110, 63, 190, 31);
 		panel.add(accreditedInstructorsComboBox);
+		
+		JTextArea txtrAGrayLesson = new JTextArea();
+		txtrAGrayLesson.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		txtrAGrayLesson.setBackground(UIManager.getColor("Button.background"));
+		txtrAGrayLesson.setWrapStyleWord(true);
+		txtrAGrayLesson.setLineWrap(true);
+		txtrAGrayLesson.setText("A gray lesson type indicates no available instructor for this lesson type.");
+		txtrAGrayLesson.setBounds(310, 21, 190, 31);
+		panel.add(txtrAGrayLesson);
 	}
 	
 	private void setModelToJComboBox(JComboBox<String> comboBox, String[] values) {
@@ -176,28 +190,87 @@ public class AddALesson extends JFrame {
 	}
 	
 	private void handleLessonTypeSelection() {
-		{
-			if(lessonTypeComboBox.getSelectedIndex() == -1) {
-				return;
+		if(lessonTypeComboBox.getSelectedIndex() == -1) {
+			return;
+		}
+		
+		Object lessonTypeKey = lessonTypeComboBox.getSelectedItem();
+		Accreditation associatedAccreditation = lessonTypeMap.get(lessonTypeKey).getAccreditation();
+		
+		Collection<Instructor> accreditedInstructors = 
+			getAccreditedInstructors(instructorMap.values(), associatedAccreditation);
+		
+		if(accreditedInstructors.isEmpty()) {
+			if(!isComboBoxEmpty(accreditedInstructorsComboBox)) {
+				clearJComboBox(accreditedInstructorsComboBox);
+				accreditedInstructorsComboBox.setEnabled(false);
 			}
 			
-			Object lessonTypeKey = lessonTypeComboBox.getSelectedItem();
-			Accreditation associatedAccreditation = lessonTypeMap.get(lessonTypeKey).getAccreditation();
-			
-			Collection<Instructor> accreditedInstructors = getAccreditedInstructors(instructorMap.values(), associatedAccreditation);
-			
-			if(accreditedInstructors.size() <= 0) {
-				JOptionPane.showMessageDialog(null, "There is no instructor available for this lesson type", "Warning", JOptionPane.WARNING_MESSAGE);
-			}
-			String[] accreditedInstructorsFormatted = 	
-					accreditedInstructors
-					.stream()
-					.map(accreditedInstructor -> getInstructorFormattedNames(accreditedInstructor))
-					.toArray(String[]::new);
-			
-			setModelToJComboBox(accreditedInstructorsComboBox, accreditedInstructorsFormatted);
-			accreditedInstructorsComboBox.setEnabled(true);
-			
+			JOptionPane.showMessageDialog(null, "There is no instructor available for this lesson type", "Warning", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+		
+		String[] accreditedInstructorsFormatted = 	
+				accreditedInstructors
+				.stream()
+				.map(accreditedInstructor -> getInstructorFormattedNames(accreditedInstructor))
+				.toArray(String[]::new);
+		
+		setModelToJComboBox(accreditedInstructorsComboBox, accreditedInstructorsFormatted);
+		accreditedInstructorsComboBox.setEnabled(true);
+	}
+	
+	private void clearJComboBox (JComboBox<?> comboBox) {
+		if(comboBox != null) {
+			comboBox.removeAllItems();
 		}
 	}
+	
+	private boolean isComboBoxEmpty(JComboBox<?> comboBox) {
+        return comboBox != null && comboBox.getItemCount() <= 0;
+    }
+	
+	private DefaultListCellRenderer createLessonTypeRenderer(
+        Map<? extends Object, LessonType> lessonTypeMap,
+        Collection<Instructor> instructors
+    ) {
+        return new DefaultListCellRenderer() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Component getListCellRendererComponent(
+        		JList<?> list, 
+        		Object value, 
+        		int index, 
+        		boolean isSelected, 
+        		boolean cellHasFocus
+    		) {    
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                if (value == null) {
+                    return this;
+                }
+
+                if (!isOneInstructorAccredited(value, lessonTypeMap, instructors)) {
+                    setEnabled(false); 
+                }
+
+                return this;
+            }
+        };
+    }
+
+	private boolean isOneInstructorAccredited(
+        Object lessonTypeKey, 
+        Map<? extends Object, LessonType> lessonTypeMap, 
+        Collection<Instructor> instructors
+    ) {
+        LessonType lessonType = lessonTypeMap.get(lessonTypeKey);
+        if (lessonType == null) {
+        	return false;        	
+        }
+
+        Accreditation accreditation = lessonType.getAccreditation();
+        return instructors.stream().anyMatch(instructor -> instructor.isAccreditate(accreditation));
+    }
 }
