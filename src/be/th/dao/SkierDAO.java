@@ -60,7 +60,7 @@ public class SkierDAO extends DAO<Skier>{
 	        int affectedRows = pstmtPerson.executeUpdate();
 	        
 	        if (affectedRows == 0) {
-	            throw new SQLException("Creating person failed, no rows affected.");
+	            throw new SQLException("Creating skier failed, no rows affected.");
 	        }
 
 	        try (ResultSet generatedKeys = pstmtPerson.getGeneratedKeys()) {
@@ -72,7 +72,7 @@ public class SkierDAO extends DAO<Skier>{
 	                connection.commit();
 	                return pstmtSkier.executeUpdate() > 0;
 	            } else {
-	                throw new SQLException("Creating person failed, no ID obtained.");
+	                throw new SQLException("Creating skier failed, no ID obtained.");
 	            }
 	        }
 	    } catch (SQLException e) {
