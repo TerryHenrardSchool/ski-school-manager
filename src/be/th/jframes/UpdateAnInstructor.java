@@ -329,11 +329,10 @@ public class UpdateAnInstructor extends JFrame {
 	private void handleClickOnUpdateButton(BiConsumer<Boolean, Instructor> onUpdateCallBack) {
         try {		   
             Instructor instructorWithNewData = buildInstructorFromFields();
-            
             boolean isUpdated = instructorWithNewData.updateInDatabase((InstructorDAO) instructorDAO);
-            
             if (!isUpdated) {
             	displayFailedToUpdateMessage();
+            	return;
             }
             
             displaySuccessToUpdateMessage(instructorWithNewData);

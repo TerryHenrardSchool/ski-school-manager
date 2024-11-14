@@ -12,10 +12,10 @@ public class SkiSchoolConnection {
 	
 	private SkiSchoolConnection(){
 		try{
-			Class.forName(DatabaseConstants.DRIVER);
+			Class.forName(DatabaseConstant.DRIVER);
 			
 			System.setProperty("oracle.jdbc.Trace", "true");
-			instance = DriverManager.getConnection(DatabaseConstants.URL, DatabaseConstants.USERNAME, DatabaseConstants.PASSWORD);
+			instance = DriverManager.getConnection(DatabaseConstant.URL, DatabaseConstant.USERNAME, DatabaseConstant.PASSWORD);
 		} catch (ClassNotFoundException ex){
 			JOptionPane.showMessageDialog(null, "Driver class is nowhere to be found."+ ex.getMessage());
 			System.exit(0);			

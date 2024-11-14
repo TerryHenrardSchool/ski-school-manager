@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import be.th.dao.DatabaseConstants;
+import be.th.dao.DatabaseConstant;
 import be.th.formatters.StringFormatter;
 import be.th.validators.StringValidator;
 
@@ -70,8 +70,8 @@ public class Address {
             throw new IllegalArgumentException("City must have a value.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(city, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("City's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(city, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("City's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.city = city;
     }
@@ -92,8 +92,8 @@ public class Address {
             throw new IllegalArgumentException("Street name must have value");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(streetName, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Street name's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(streetName, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Street name's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.streetName = streetName;
     }

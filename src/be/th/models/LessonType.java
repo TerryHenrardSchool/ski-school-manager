@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import javax.sound.midi.VoiceStatus;
 
-import be.th.dao.DatabaseConstants;
+import be.th.dao.DatabaseConstant;
 import be.th.dao.LessonTypeDAO;
 import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
@@ -110,8 +110,8 @@ public class LessonType {
             throw new IllegalArgumentException("Level must be a non-empty string. Null or empty values are not allowed.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(level, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Level length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(level, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Level length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.level = level;
     }
@@ -128,8 +128,8 @@ public class LessonType {
             throw new IllegalArgumentException("Name must be a non-empty string. Null or empty values are not allowed.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(level, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Lesson type's name length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(level, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Lesson type's name length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.name = name;
     }
@@ -139,8 +139,8 @@ public class LessonType {
             throw new IllegalArgumentException("Age category name must be a non-empty string. Null or empty values are not allowed.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(ageCategoryName, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Age category name's name length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(ageCategoryName, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Age category name's name length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.ageCategoryName = ageCategoryName;
     }

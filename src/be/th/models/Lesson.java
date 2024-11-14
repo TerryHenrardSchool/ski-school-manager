@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import be.th.validators.IntegerValidator;
-import be.th.dao.DatabaseConstants;
+import be.th.dao.DatabaseConstant;
 import be.th.validators.DateValidator;
 import be.th.validators.StringValidator;
 
@@ -97,8 +97,8 @@ public abstract class Lesson implements Serializable {
             throw new IllegalArgumentException("Location must be a non-empty string. Null or empty values are not allowed.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(location, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Location's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(location, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Location's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.location = location;
     }

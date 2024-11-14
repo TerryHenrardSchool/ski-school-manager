@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import be.th.dao.DatabaseConstants;
+import be.th.dao.DatabaseConstant;
 import be.th.formatters.StringFormatter;
 import be.th.validators.DateValidator;
 import be.th.validators.IntegerValidator;
@@ -107,8 +107,8 @@ public abstract class Person implements Serializable {
             throw new IllegalArgumentException("Last name must have a value.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(lastName, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Last name's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(lastName, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Last name's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.lastName = lastName;
     }
@@ -118,8 +118,8 @@ public abstract class Person implements Serializable {
             throw new IllegalArgumentException("First name must have a value.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(firstName, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("First name's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(firstName, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("First name's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.firstName = firstName;
     }

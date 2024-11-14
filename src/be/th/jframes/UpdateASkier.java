@@ -240,11 +240,10 @@ public class UpdateASkier extends JFrame {
 	private void handleCLickOnUpdateButton(BiConsumer<Boolean, Skier> onUpdateCallBack) {
         try {		   
             Skier skierWithNewData = buildSkierFromFields();
-            
             boolean isUpdated = skierWithNewData.updateInDatabase((SkierDAO) skierDAO);
-            
             if (!isUpdated) {
             	displayFailedToUpdateMessage();
+            	return;
             }
             
             displaySuccessToUpdateMessage(skierWithNewData);

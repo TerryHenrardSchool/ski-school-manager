@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import be.th.dao.AccreditationDAO;
-import be.th.dao.DatabaseConstants;
+import be.th.dao.DatabaseConstant;
 import be.th.validators.IntegerValidator;
 import be.th.validators.StringValidator;
 
@@ -47,8 +47,8 @@ public class Accreditation {
             throw new IllegalArgumentException("Sport type must have value.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(sportType, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Sport type's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(sportType, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Sport type's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.sportType = sportType;
     }
@@ -58,8 +58,8 @@ public class Accreditation {
             throw new IllegalArgumentException("Age category must have value.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(ageCategory, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Age category's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(ageCategory, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Age category's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.ageCategory = ageCategory;
     }
