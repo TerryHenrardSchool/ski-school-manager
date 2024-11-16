@@ -7,6 +7,7 @@ import be.th.models.Booking;
 import be.th.models.Instructor;
 import be.th.models.Lesson;
 import be.th.models.LessonType;
+import be.th.models.Location;
 import be.th.models.Secretary;
 import be.th.models.Skier;
 
@@ -39,5 +40,9 @@ public class DAOFactory {
 	
 	public DAO<Accreditation> getAccreditationDAO(){
 		return new AccreditationDAO(CONNECTION);
+	}
+	
+	public DAO<Location> getLocationDAO(){
+		return new LocationDAO(CONNECTION);
 	}
 }

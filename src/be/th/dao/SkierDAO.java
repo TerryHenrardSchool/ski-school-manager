@@ -249,9 +249,10 @@ public class SkierDAO extends DAO<Skier>{
 
 	    List<Skier> skiers = new ArrayList<>();
 
-	    try (PreparedStatement stmt = connection.prepareStatement(sql);
-	         ResultSet rs = stmt.executeQuery()) {
-
+	    try (
+    		PreparedStatement stmt = connection.prepareStatement(sql);
+    		ResultSet rs = stmt.executeQuery();
+		) {
 	        while (rs.next()) {
 	            Skier skier = new Skier(
 	                rs.getInt("skier_id"),

@@ -20,6 +20,7 @@ public class Instructor extends Person {
 	
 	// References
 	private Set<Accreditation> accreditations;
+	// private Set<Lesson> lessons; // TODO: add into constructor, add getter and setter 
 
 	// Constructors
     public Instructor(

@@ -24,42 +24,12 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	@Override
 	public boolean create(Instructor instructor) {
-	    String sqlPerson = """
-    		INSERT INTO persons
-	        (
-	            last_name, 
-	            first_name, 
-	            date_of_birth, 
-	            phone_number, 
-	            email, 
-	            city, 
-	            postcode, 
-	            street_name, 
-	    		street_number
-	        ) 
-	        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-	    """;
-	    
-	    String sqlInstructor = """
-    		INSERT INTO instructors (person_id)
-    		VALUES(?)
-		""";
-
-	    String sqlAccreditation = """
-	        INSERT INTO instructor_accreditation_details 
-	        (
-			    instructor_id, 
-			    accreditation_id
-		    )
-	        VALUES (?, ?)
-	    """;
-
 	    try {
 	        connection.setAutoCommit(false);
 
-	        int personId = insertPerson(sqlPerson, instructor);
-	        int instructorId = insertInstructor(sqlInstructor, personId);
-	        insertAccreditations(sqlAccreditation, instructorId, instructor.getAccreditations());
+	        int personId = insertPerson(instructor);
+	        int instructorId = insertInstructor(personId);
+	        insertAccreditations(instructorId, instructor.getAccreditations());
 	        
 	        connection.commit();
 	        
@@ -76,21 +46,11 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	@Override
 	public boolean delete(int id) {
-		String sqlInstructorAccreditationDetails = """
-			DELETE FROM instructor_accreditation_details
-			WHERE instructor_id = ?
-		""";
-		
-		String sqlInstructor = """
-		    DELETE FROM instructors 
-		    WHERE instructor_id = ?
-	    """;
-	    
 		try {
 	        connection.setAutoCommit(false);
 
-			deleteInstructorAccreditationDetails(sqlInstructorAccreditationDetails, id);
-			deleteInstructor(sqlInstructor, id);
+			deleteInstructorAccreditationDetails(id);
+			deleteInstructor(id);
 			
 	        connection.commit();
 	        return true;
@@ -245,7 +205,23 @@ public class InstructorDAO extends DAO<Instructor> {
 		return null;
 	}
 
-	private int insertPerson(String sqlPerson, Instructor instructor) throws SQLException {
+	private int insertPerson(Instructor instructor) throws SQLException {
+		String sqlPerson = """
+    		INSERT INTO persons
+	        (
+	            last_name, 
+	            first_name, 
+	            date_of_birth, 
+	            phone_number, 
+	            email, 
+	            city, 
+	            postcode, 
+	            street_name, 
+	    		street_number
+	        ) 
+	        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	    """;
+		
 	    try (PreparedStatement pstmtPerson = connection.prepareStatement(sqlPerson, new String[] {"person_id"})) {
 	    	pstmtPerson.setString(1, DatabaseFormatter.format(instructor.getLastName()));
 	    	pstmtPerson.setString(2, DatabaseFormatter.format(instructor.getFirstName()));
@@ -274,7 +250,12 @@ public class InstructorDAO extends DAO<Instructor> {
 	    }
 	}
 	
-	private int insertInstructor(String sqlInstructor, int personId) throws SQLException {
+	private int insertInstructor(int personId) throws SQLException {
+		String sqlInstructor = """
+    		INSERT INTO instructors (person_id)
+    		VALUES(?)
+		""";
+		
 		try (PreparedStatement pstmtInstructor = connection.prepareStatement(sqlInstructor, new String[] {"instructor_id"})) {
 			pstmtInstructor.setInt(1, personId);
 			
@@ -295,7 +276,16 @@ public class InstructorDAO extends DAO<Instructor> {
 		}
 	}
 
-	private void insertAccreditations(String sqlAccreditation, int instructorId, Set<Accreditation> accreditations) throws SQLException {
+	private void insertAccreditations(int instructorId, Set<Accreditation> accreditations) throws SQLException {
+		String sqlAccreditation = """
+	        INSERT INTO instructor_accreditation_details 
+	        (
+			    instructor_id, 
+			    accreditation_id
+		    )
+	        VALUES (?, ?)
+	    """;
+		
 	    try (PreparedStatement pstmtAccreditation = connection.prepareStatement(sqlAccreditation)) {
 	        for (Accreditation accreditation : accreditations) {
 	            pstmtAccreditation.setInt(1, instructorId);
@@ -309,8 +299,13 @@ public class InstructorDAO extends DAO<Instructor> {
 	    }
 	}
 	
-	private void deleteInstructorAccreditationDetails(String sql, int instructorId) throws SQLException {
-	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	private void deleteInstructorAccreditationDetails(int instructorId) throws SQLException {
+		String sqlInstructorAccreditationDetails = """
+			DELETE FROM instructor_accreditation_details
+			WHERE instructor_id = ?
+		""";
+		
+	    try (PreparedStatement pstmt = connection.prepareStatement(sqlInstructorAccreditationDetails)) {
 	        pstmt.setInt(1, instructorId);
 	        
 	        int affectedRows = pstmt.executeUpdate();
@@ -323,8 +318,13 @@ public class InstructorDAO extends DAO<Instructor> {
 	    }
 	}
 
-	private void deleteInstructor(String sql, int instructorId) throws SQLException {
-	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	private void deleteInstructor(int instructorId) throws SQLException {
+		String sqlInstructor = """
+		    DELETE FROM instructors 
+		    WHERE instructor_id = ?
+	    """;
+		
+	    try (PreparedStatement pstmt = connection.prepareStatement(sqlInstructor)) {
 	        pstmt.setInt(1, instructorId);
 	        
 	        int affectedRows = pstmt.executeUpdate();
