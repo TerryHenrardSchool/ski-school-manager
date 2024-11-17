@@ -68,7 +68,7 @@ public class AddAnInstructor extends JFrame {
 		
 		// I'll add some library
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 630, 666);
+		setBounds(100, 100, 630, 711);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -77,7 +77,7 @@ public class AddAnInstructor extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Instructor information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 72, 600, 544);
+		panel.setBounds(10, 72, 600, 589);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -194,7 +194,7 @@ public class AddAnInstructor extends JFrame {
 		cancelBtn.setOpaque(true);
 		cancelBtn.setBorderPainted(false);
 		cancelBtn.setBackground(ColorStyles.RED);
-		cancelBtn.setBounds(121, 470, 154, 51);
+		cancelBtn.setBounds(121, 527, 154, 51);
 		panel.add(cancelBtn);
 		
 		JButton submitBtn = new JButton("Add");
@@ -205,7 +205,7 @@ public class AddAnInstructor extends JFrame {
 		submitBtn.setOpaque(true);
 		submitBtn.setBorderPainted(false);
 		submitBtn.setBackground(ColorStyles.GREEN);
-		submitBtn.setBounds(304, 470, 154, 51);
+		submitBtn.setBounds(304, 527, 154, 51);
 		panel.add(submitBtn);
 		
 		JLabel lblAccreditation = new JLabel("Accreditations");

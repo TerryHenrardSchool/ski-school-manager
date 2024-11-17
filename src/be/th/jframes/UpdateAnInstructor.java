@@ -70,7 +70,7 @@ public class UpdateAnInstructor extends JFrame {
 		this.instructorToUpdate = instructorToUpdate;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 630, 666);
+		setBounds(100, 100, 630, 739);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -79,7 +79,7 @@ public class UpdateAnInstructor extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Instructor information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 72, 600, 544);
+		panel.setBounds(10, 72, 600, 617);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -200,7 +200,7 @@ public class UpdateAnInstructor extends JFrame {
 		cancelBtn.setOpaque(true);
 		cancelBtn.setBorderPainted(false);
 		cancelBtn.setBackground(ColorStyles.RED);
-		cancelBtn.setBounds(121, 482, 154, 51);
+		cancelBtn.setBounds(121, 555, 154, 51);
 		panel.add(cancelBtn);
 		
 		JButton updateBtn = new JButton("Update");
@@ -211,7 +211,7 @@ public class UpdateAnInstructor extends JFrame {
 		updateBtn.setOpaque(true);
 		updateBtn.setBorderPainted(false);
 		updateBtn.setBackground(ColorStyles.GREEN);
-		updateBtn.setBounds(304, 482, 154, 51);
+		updateBtn.setBounds(304, 555, 154, 51);
 		panel.add(updateBtn);
 		
 		List<Accreditation> accreditations = getAccreditationsFromDatabase();

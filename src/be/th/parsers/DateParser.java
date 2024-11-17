@@ -1,6 +1,7 @@
 package be.th.parsers;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -19,6 +20,12 @@ public class DateParser {
 			? date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate() 
 			: null;
     }
+	
+	public static LocalDateTime toLocalDateTime(Date date) {
+		return DateValidator.hasValue(date) 
+			? date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() 
+			: null;
+	}
 	
     public static LocalDate toLocalDate(String date) throws Exception, IllegalArgumentException {  
     	if(!StringValidator.hasValue(date)) {
