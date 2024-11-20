@@ -55,7 +55,9 @@ public abstract class Person implements Serializable {
 		String streetNumber,
 		String phoneNumber, 
 		String email
-	) {
+	) 
+		throws IllegalArgumentException 
+    {
         setId(id);
         setLastName(lastName);
         setFirstName(firstName);

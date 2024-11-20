@@ -9,6 +9,7 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import com.toedter.calendar.JDateChooser;
 
+import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
 import be.th.dao.SkierDAO;
 import be.th.models.Skier;
@@ -27,6 +28,8 @@ public class AddASkier extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	
+	DAO<Skier> skierDAO;
+	
 	private JPanel contentPane;
 	private JTextField lastNameField;
 	private JTextField firstNameField;
@@ -39,6 +42,7 @@ public class AddASkier extends JFrame {
 	private JTextField streetNumberField;
 
 	public AddASkier() {
+		this.skierDAO = new DAOFactory().getSkierDAO();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 630, 554);
 		contentPane = new JPanel();
@@ -238,8 +242,7 @@ public class AddASkier extends JFrame {
 	}
 	
 	private boolean insertSkierIntoDatabase(Skier skier) {
-	    SkierDAO skierDAO = (SkierDAO) new DAOFactory().getSkierDAO();
-	    return skier.insertIntoDatabase(skierDAO);
+	    return skier.insertIntoDatabase((SkierDAO) skierDAO);
 	}
 	
 	private void resetFormFields() {

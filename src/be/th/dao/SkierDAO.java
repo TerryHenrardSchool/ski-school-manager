@@ -1,6 +1,7 @@
 package be.th.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,7 +50,7 @@ public class SkierDAO extends DAO<Skier>{
 	    	
 	        pstmtPerson.setString(1, DatabaseFormatter.format(skier.getLastName()));
 	        pstmtPerson.setString(2, DatabaseFormatter.format(skier.getFirstName()));
-	        pstmtPerson.setDate(3, java.sql.Date.valueOf(skier.getDateOfBirth()));
+	        pstmtPerson.setDate(3, Date.valueOf(skier.getDateOfBirth()));
 	        pstmtPerson.setString(4, DatabaseFormatter.format(skier.getPhoneNumber()));
 	        pstmtPerson.setString(5, DatabaseFormatter.format(skier.getEmail()));
 	        pstmtPerson.setString(6, DatabaseFormatter.format(skier.getAddress().getCity()));

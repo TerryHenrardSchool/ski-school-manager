@@ -9,12 +9,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Accreditation;
 import be.th.models.Instructor;
+import be.th.models.Lesson;
+import be.th.models.LessonType;
+import be.th.validators.IntegerValidator;
 
 public class InstructorDAO extends DAO<Instructor> {
 
@@ -146,7 +150,6 @@ public class InstructorDAO extends DAO<Instructor> {
 	    return null;
 	}
 
-	@Override
 	public List<Instructor> findAll() {
 	    String sql = """
 	        SELECT * 
@@ -156,36 +159,19 @@ public class InstructorDAO extends DAO<Instructor> {
 	        NATURAL JOIN accreditations 
 	        ORDER BY instructor_id DESC
 	    """;
-	    
+
 	    List<Instructor> instructors = new ArrayList<>();
 	    Map<Integer, Instructor> instructorMap = new HashMap<>();
-	    
+
 	    try (ResultSet rs = connection.prepareStatement(sql).executeQuery()) {
 	        while (rs.next()) {
 	            int instructorId = rs.getInt("instructor_id");
-
-	            Accreditation accreditation = new Accreditation(
-	                rs.getInt("accreditation_id"),
-	                rs.getString("sport"),
-	                rs.getString("age_category_name")
-	            );
+	            Accreditation accreditation = mapAccreditation(rs);
 
 	            Instructor instructor = instructorMap.get(instructorId);
 	            if (instructor == null) {
-	                instructor = new Instructor(
-	                    instructorId,
-	                    rs.getString("last_name"),
-	                    rs.getString("first_name"),
-	                    rs.getDate("date_of_birth").toLocalDate(),
-	                    rs.getString("city"),
-	                    rs.getString("postcode"),
-	                    rs.getString("street_name"),
-	                    rs.getString("street_number"),
-	                    rs.getString("phone_number"),
-	                    rs.getString("email"),
-	                    Set.of(accreditation)
-	                );
-	                
+	                instructor = mapInstructor(rs, accreditation);
+	                loadInstructorLessons(instructor);
 	                instructorMap.put(instructorId, instructor);
 	                instructors.add(instructor);
 	            } else {
@@ -195,7 +181,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }
-	    
+
 	    return instructors;
 	}
 
@@ -203,6 +189,93 @@ public class InstructorDAO extends DAO<Instructor> {
 	public List<Instructor> findAll(Map<String, Object> criteria) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	private Accreditation mapAccreditation(ResultSet rs) throws SQLException {
+	    return new Accreditation(
+	        rs.getInt("accreditation_id"),
+	        rs.getString("sport"),
+	        rs.getString("age_category_name")
+	    );
+	}
+
+	private Instructor mapInstructor(ResultSet rs, Accreditation accreditation) throws SQLException {
+	    return new Instructor(
+	        rs.getInt("instructor_id"),
+	        rs.getString("last_name"),
+	        rs.getString("first_name"),
+	        rs.getDate("date_of_birth").toLocalDate(),
+	        rs.getString("city"),
+	        rs.getString("postcode"),
+	        rs.getString("street_name"),
+	        rs.getString("street_number"),
+	        rs.getString("phone_number"),
+	        rs.getString("email"),
+	        Set.of(accreditation)
+	    );
+	}
+
+	private void loadInstructorLessons(Instructor instructor) throws SQLException {
+	    String sql = """
+	        SELECT 
+	            l.*, 
+	            lt.*, 
+	            a.*, 
+	            loc.location_id AS location_id_1, loc.name AS name_1
+	        FROM 
+	            lessons l
+	        INNER JOIN 
+	            lesson_types lt ON lt.lesson_type_id = l.lesson_type_id
+	        INNER JOIN 
+	            accreditations a ON a.accreditation_id = lt.accreditation_id
+	        INNER JOIN 
+	            locations loc ON loc.location_id = l.location_id
+	        WHERE 
+	            instructor_id = ?
+	    """;
+
+	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	        pstmt.setInt(1, instructor.getId());
+	        ResultSet rs2 = pstmt.executeQuery();
+
+	        while (rs2.next()) {
+	            Lesson lesson = mapLesson(rs2, instructor);
+	            instructor.addLesson(lesson);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	}
+
+	private Lesson mapLesson(ResultSet rs, Instructor instructor) throws SQLException {
+	    int maxAge = rs.getInt("max_age");
+	    Optional<Integer> maxAgeOptional = rs.wasNull() ? Optional.empty() : Optional.of(maxAge);
+
+	    LessonType lessonType = new LessonType(
+	        rs.getInt("lesson_type_id"),
+	        rs.getString("skill_level"),
+	        rs.getDouble("price"),
+	        rs.getString("name"),
+	        rs.getString("age_category_name"),
+	        rs.getInt("min_age"),
+	        maxAgeOptional,
+	        rs.getInt("min_bookings"),
+	        rs.getInt("max_bookings"),
+	        new Accreditation(
+	            rs.getInt("accreditation_id"),
+	            rs.getString("sport"),
+	            rs.getString("age_category_name")
+	        )
+	    );
+
+	    return new Lesson(
+	        rs.getInt("lesson_id"),
+	        rs.getDate("start_date").toLocalDate().atStartOfDay(),
+	        lessonType,
+	        instructor,
+	        rs.getInt("location_id_1"),
+	        rs.getString("name_1")
+	    );
 	}
 
 	private int insertPerson(Instructor instructor) throws SQLException {

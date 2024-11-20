@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import javax.swing.border.TitledBorder;
 import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
 import be.th.dao.InstructorDAO;
+import be.th.dao.LessonDAO;
 import be.th.dao.LessonTypeDAO;
 import be.th.dao.LocationDAO;
 import be.th.models.Accreditation;
@@ -52,6 +54,8 @@ import javax.swing.JCheckBox;
 import com.toedter.calendar.JDateChooser;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.awt.event.ActionEvent;
@@ -63,6 +67,7 @@ public class AddALesson extends JFrame {
 	DAO<LessonType> lessonTypeDAO;
 	DAO<Instructor> instructorDAO;
 	DAO<Location> locationDAO;
+	DAO<Lesson> lessonDAO;	
 	
 	private Map<String, LessonType> lessonTypeMap;
 	private Map<String, Instructor> instructorMap;
@@ -70,7 +75,7 @@ public class AddALesson extends JFrame {
 	
 	private JPanel contentPane;
 	private JComboBox<String> lessonTypeComboBox;
-	private JComboBox<String> accreditedInstructorsComboBox;
+	private JComboBox<String> eligibleInstructorsComboBox;
 	private JComboBox<String> locationComboBox;
 	private JDateChooser startDateField;
 
@@ -83,6 +88,7 @@ public class AddALesson extends JFrame {
 		this.lessonTypeDAO = daoFactory.getLessonTypeDAO();
 		this.instructorDAO = daoFactory.getInstructorDAO();
 		this.locationDAO = daoFactory.getLocationDAO();
+		this.lessonDAO = daoFactory.getLessonDAO();
         this.lessonTypeMap = new HashMap<>();
         this.instructorMap = new HashMap<>();
         this.locationMap = new HashMap<>();
@@ -115,12 +121,12 @@ public class AddALesson extends JFrame {
 		
 		JLabel lblSport = new JLabel("Lesson type");
 		lblSport.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblSport.setBounds(10, 21, 90, 31);
+		lblSport.setBounds(340, 21, 90, 31);
 		panel.add(lblSport);
 		
 		lessonTypeComboBox = new JComboBox<String>();
 		
-		lessonTypeComboBox.setBounds(110, 21, 190, 31);
+		lessonTypeComboBox.setBounds(440, 21, 190, 31);
 		lessonTypeComboBox.setRenderer(createLessonTypeRenderer(lessonTypeMap, instructorMap.values()));
 		panel.add(lessonTypeComboBox);
 		
@@ -130,22 +136,22 @@ public class AddALesson extends JFrame {
 		
 		JLabel lblInstructor = new JLabel("Instructor");
 		lblInstructor.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblInstructor.setBounds(340, 21, 90, 31);
+		lblInstructor.setBounds(340, 105, 90, 31);
 		panel.add(lblInstructor);
 		
-		accreditedInstructorsComboBox = new JComboBox<String>();
-		accreditedInstructorsComboBox.setEnabled(false);
-		accreditedInstructorsComboBox.setSelectedIndex(-1);
-		accreditedInstructorsComboBox.setBounds(440, 21, 190, 31);
-		panel.add(accreditedInstructorsComboBox);
+		eligibleInstructorsComboBox = new JComboBox<String>();
+		eligibleInstructorsComboBox.setEnabled(false);
+		eligibleInstructorsComboBox.setSelectedIndex(-1);
+		eligibleInstructorsComboBox.setBounds(440, 105, 190, 31);
+		panel.add(eligibleInstructorsComboBox);
 		
 		JTextArea txtrAGrayLesson = new JTextArea();
 		txtrAGrayLesson.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		txtrAGrayLesson.setBackground(UIManager.getColor("Button.background"));
 		txtrAGrayLesson.setWrapStyleWord(true);
 		txtrAGrayLesson.setLineWrap(true);
-		txtrAGrayLesson.setText("A gray lesson type indicates no available instructor for this lesson type.");
-		txtrAGrayLesson.setBounds(110, 63, 190, 31);
+		txtrAGrayLesson.setText("A gray lesson type indicates no eligible instructor for this lesson type at this date.");
+		txtrAGrayLesson.setBounds(340, 63, 290, 31);
 		panel.add(txtrAGrayLesson);
 		
 		locationComboBox = new JComboBox<String>();
@@ -160,13 +166,22 @@ public class AddALesson extends JFrame {
 		panel.add(lblLocation);
 		
 		startDateField = new JDateChooser();
-		startDateField.setBounds(440, 105, 190, 31);
-		startDateField.setEnabled(false);
-		panel.add(startDateField);
+	    startDateField.setBounds(110, 21, 190, 31);
+	    Calendar calendar = Calendar.getInstance();
+	    calendar.add(Calendar.DAY_OF_YEAR, 1); 
+	    startDateField.setDate(calendar.getTime()); 
+	    startDateField.addPropertyChangeListener("date", new PropertyChangeListener() {
+	        @Override
+	        public void propertyChange(PropertyChangeEvent evt) {
+	            clearJComboBox(List.of(eligibleInstructorsComboBox, locationComboBox));
+	        }
+	    });
+
+	    panel.add(startDateField);
 		
 		JLabel lblStartDate = new JLabel("Start date");
 		lblStartDate.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblStartDate.setBounds(340, 105, 90, 31);
+		lblStartDate.setBounds(10, 21, 90, 31);
 		panel.add(lblStartDate);
 		
 		JButton createBtn = new JButton("Create");
@@ -243,17 +258,16 @@ public class AddALesson extends JFrame {
 	}
 	
 	
-	private Collection<Instructor> getAccreditedInstructors(Collection<Instructor> instructors, Accreditation accreditation) {
-		Collection<Instructor> accreditedInstructors = new ArrayList<Instructor>();
-		
-		for (Instructor instructor: instructors) {
-			if(instructor.isAccreditate(accreditation)) {
-				accreditedInstructors.add(instructor);
-			}
-		}
-		
-		return accreditedInstructors;
+	private Collection<Instructor> getEligibleInstructors(
+        Collection<Instructor> instructors, 
+        Accreditation accreditation, 
+        LocalDate date
+    ) {
+	    return instructors.stream()
+            .filter(i -> i.isAccreditate(accreditation) && i.isAvailable(date))
+            .collect(Collectors.toList());
 	}
+
 	
 	private void setComponentsEnabled(Collection<JComponent> components, boolean enabled) {
         for (JComponent component : components) {
@@ -268,36 +282,38 @@ public class AddALesson extends JFrame {
 			return;
 		}
 		
+		LocalDate selectedDate = DateParser.toLocalDate(startDateField.getDate());
 		Object lessonTypeKey = lessonTypeComboBox.getSelectedItem();
 		Accreditation associatedAccreditation = lessonTypeMap.get(lessonTypeKey).getAccreditation();
 				
-		Collection<JComponent> components = List.of(accreditedInstructorsComboBox, locationComboBox, startDateField);
-		Collection<JComboBox<?>> comboBoxes = List.of(accreditedInstructorsComboBox, locationComboBox);
-		Collection<Instructor> accreditedInstructors = 
-				getAccreditedInstructors(instructorMap.values(), associatedAccreditation);
+		Collection<JComponent> components = List.of(eligibleInstructorsComboBox, locationComboBox);
+		Collection<JComboBox<?>> comboBoxes = List.of(eligibleInstructorsComboBox, locationComboBox);
+		Collection<Instructor> eligibleInstructors = 
+				getEligibleInstructors(instructorMap.values(), associatedAccreditation, selectedDate);
 		
-		if(accreditedInstructors.isEmpty()) {
-			if(!isComboBoxEmpty(accreditedInstructorsComboBox)) {
+		if(eligibleInstructors.isEmpty()) {
+			if(!isComboBoxEmpty(eligibleInstructorsComboBox)) {
 				clearJComboBox(comboBoxes);
 				setComponentsEnabled(components, false);
 			}
 			
 			JOptionPane.showMessageDialog(
 				null, 
-				"There is no instructor available for this lesson type", 
+				"There is no instructor eligible for this lesson type at this date.", 
 				"Warning", 
 				JOptionPane.WARNING_MESSAGE
 			);
+			
 			return;
 		}
 		
-		String[] accreditedInstructorsFormatted = 	
-			accreditedInstructors
+		String[] eligibleInstructorsFormatted = 	
+			eligibleInstructors
 				.stream()
-				.map(accreditedInstructor -> getInstructorFormattedNames(accreditedInstructor))
+				.map(eligibleInstructor -> getInstructorFormattedNames(eligibleInstructor))
 				.toArray(String[]::new);
 		
-		setModelToJComboBox(accreditedInstructorsComboBox, accreditedInstructorsFormatted);
+		setModelToJComboBox(eligibleInstructorsComboBox, eligibleInstructorsFormatted);
 		setModelToJComboBox(locationComboBox, locationMap.keySet().toArray(String[]::new));
 		setComponentsEnabled(components, true);
 	}
@@ -335,7 +351,7 @@ public class AddALesson extends JFrame {
                     return this;
                 }
 
-                if (!isOneInstructorAccredited(value, lessonTypeMap, instructors)) {
+                if (!isOneInstructorEligible(value, lessonTypeMap, instructors)) {
                     setEnabled(false); 
                 }
 
@@ -344,7 +360,7 @@ public class AddALesson extends JFrame {
         };
     }
 
-	private boolean isOneInstructorAccredited(
+	private boolean isOneInstructorEligible(
         Object lessonTypeKey, 
         Map<? extends Object, LessonType> lessonTypeMap, 
         Collection<Instructor> instructors
@@ -355,7 +371,11 @@ public class AddALesson extends JFrame {
         }
 
         Accreditation accreditation = lessonType.getAccreditation();
-        return instructors.stream().anyMatch(instructor -> instructor.isAccreditate(accreditation));
+        return instructors.stream()
+    		.anyMatch(
+				instructor -> instructor.isAccreditate(accreditation) && 
+							  instructor.isAvailable(DateParser.toLocalDate(startDateField.getDate()))
+		    );
     }
 	
 	private void handleClickOnCancelButton() {
@@ -367,11 +387,31 @@ public class AddALesson extends JFrame {
 	
 	private void handleClickOnCreateButton() {
 		try {
+			Lesson lesson = buildLessonFromFields();
+			boolean isAdded = insertLessonIntoDatabase(lesson);
 			
+			if(isAdded) {
+				displayAddLessonSuccess(JOptionPane.INFORMATION_MESSAGE);
+	        	resetFormFields();
+	        } else {
+	        	displayAddLessonFailure(JOptionPane.ERROR_MESSAGE);
+	        }
 		} catch (Exception ex) {
 			displayErrorMessage(ex);
 		}
 	}
+	
+	private void displayAddLessonSuccess(int messageType) {
+        JOptionPane.showMessageDialog(null, "Lesson added successfully!", "Success", messageType);
+	}
+	
+	private void displayAddLessonFailure(int messageType) {
+        JOptionPane.showMessageDialog(null, "Failed to add lesson. Please try again.", "Error", messageType);
+	}
+	
+	private boolean insertLessonIntoDatabase(Lesson lesson) {
+        return lesson.insertIntoDatabase((LessonDAO) lessonDAO);
+    }
 	
 	private void displayErrorMessage(Exception ex) {
 		JOptionPane.showMessageDialog(
@@ -384,10 +424,17 @@ public class AddALesson extends JFrame {
 	
 	private Lesson buildLessonFromFields() {
 		LessonType lessonType = lessonTypeMap.get(lessonTypeComboBox.getSelectedItem());
-		Instructor instructor = instructorMap.get(accreditedInstructorsComboBox.getSelectedItem());
+		Instructor instructor = instructorMap.get(eligibleInstructorsComboBox.getSelectedItem());
 		Location location = locationMap.get(locationComboBox.getSelectedItem());
 		LocalDateTime startDate = DateParser.toLocalDateTime(startDateField.getDate());
-		
+						
 		return new Lesson(startDate, lessonType, instructor, location.getId(), location.getName());
+	}
+	
+	private void resetFormFields() {
+		lessonTypeComboBox.setSelectedIndex(-1);
+		eligibleInstructorsComboBox.setSelectedIndex(-1);
+		locationComboBox.setSelectedIndex(-1);
+		startDateField.setDate(null);
 	}
 }

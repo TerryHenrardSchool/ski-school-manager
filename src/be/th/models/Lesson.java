@@ -8,6 +8,7 @@ import java.util.Set;
 import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
 import be.th.dao.DatabaseConstant;
+import be.th.dao.LessonDAO;
 import be.th.validators.DateValidator;
 import be.th.validators.StringValidator;
 
@@ -88,10 +89,15 @@ public class Lesson implements Serializable {
 	}
 
 	public void setInstructor(Instructor instructor) {
-		if (!ObjectValidator.hasValue(location)) {
+		if (!ObjectValidator.hasValue(instructor)) {
     		throw new IllegalArgumentException("Instructor must have value.");    		
     	}
 		this.instructor = instructor;
+	}
+	
+	// Database methods
+	public boolean insertIntoDatabase(LessonDAO lessonDAO) {
+		return lessonDAO.create(this);
 	}
 
     // Methods
@@ -128,6 +134,8 @@ public class Lesson implements Serializable {
     public String toString() {
         return "Lesson:" +
            "id=" + id +
-           ", date=" + date + '\'';
-    }
+           ", date=" + date + '\'' + 
+           ", " + location + '\'' +
+           ", " + lessonType + '\'';  
+       }
 }
