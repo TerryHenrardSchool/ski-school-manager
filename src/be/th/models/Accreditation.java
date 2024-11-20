@@ -1,8 +1,10 @@
 package be.th.models;
 
+import java.util.List;
 import java.util.Objects;
 
-import be.th.dao.DatabaseConstants;
+import be.th.dao.AccreditationDAO;
+import be.th.dao.DatabaseConstant;
 import be.th.validators.IntegerValidator;
 import be.th.validators.StringValidator;
 
@@ -12,14 +14,12 @@ public class Accreditation {
 	private int id;
     private String sportType;
     private String ageCategory;
-    private String lessonLevel;
 
     // Constructor
-    public Accreditation(int id, String sportType, String ageCategory, String lessonLevel) {
+    public Accreditation(int id, String sportType, String ageCategory) {
     	setId(id);
         setSportType(sportType);
         setAgeCategory(ageCategory);
-        setLessonLevel(lessonLevel);
     }
 
     // Getters
@@ -34,11 +34,6 @@ public class Accreditation {
     public String getAgeCategory() {
         return ageCategory;
     }
-
-    public String getLessonLevel() {
-        return lessonLevel;
-    }
-
     // Setters
     public void setId(int id) {
     	if (!IntegerValidator.isPositiveOrEqualToZero(id)) {
@@ -52,8 +47,8 @@ public class Accreditation {
             throw new IllegalArgumentException("Sport type must have value.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(sportType, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Sport type's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(sportType, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Sport type's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.sportType = sportType;
     }
@@ -63,21 +58,15 @@ public class Accreditation {
             throw new IllegalArgumentException("Age category must have value.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(ageCategory, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Age category's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(ageCategory, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Age category's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.ageCategory = ageCategory;
     }
-
-    public void setLessonLevel(String lessonLevel) {
-        if (!StringValidator.hasValue(lessonLevel)) {
-            throw new IllegalArgumentException("Lesson level must have value.");
-        }
-        
-        if(!StringValidator.isLengthSmallerOrEqual(lessonLevel, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Lesson level's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
-        }
-        this.lessonLevel = lessonLevel;
+    
+    // Database methods
+    public static List<Accreditation> findAllInDatabase(AccreditationDAO accreditationDAO){
+    	return accreditationDAO.findAll();
     }
     
     // Override methods
@@ -93,14 +82,13 @@ public class Accreditation {
 
         Accreditation accreditation = (Accreditation) object;
         return id == accreditation.id &&
-           Objects.equals(sportType, accreditation.sportType) &&
-           Objects.equals(ageCategory, accreditation.ageCategory) &&
-           Objects.equals(lessonLevel, accreditation.lessonLevel);
+    		Objects.equals(sportType, accreditation.sportType) &&
+    		Objects.equals(ageCategory, accreditation.ageCategory);           
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, sportType, ageCategory, lessonLevel);
+        return Objects.hash(id, sportType, ageCategory);
     }
 
     @Override
@@ -108,7 +96,6 @@ public class Accreditation {
         return "Accreditation:" +
            "id=" + id +
            ", sportType='" + sportType + '\'' +
-           ", ageCategory='" + ageCategory + '\'' +
-           ", lessonLevel='" + lessonLevel + '\'';
+           ", ageCategory='" + ageCategory + '\'';
     }
 }

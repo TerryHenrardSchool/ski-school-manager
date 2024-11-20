@@ -7,12 +7,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import be.th.models.Accreditation;
 import be.th.models.LessonType;
 
-public class LessonTypesDAO extends DAO<LessonType>{
+public class LessonTypeDAO extends DAO<LessonType>{
 
-	public LessonTypesDAO(Connection conn) {
+	public LessonTypeDAO(Connection conn) {
 		super(conn);
 		// TODO Auto-generated constructor stub
 	}
@@ -44,7 +46,25 @@ public class LessonTypesDAO extends DAO<LessonType>{
 	@Override
 	public List<LessonType> findAll() {
         List<LessonType> lessonTypes = new ArrayList<>();
-        String sql = "SELECT lesson_type_id, name, price, skill_level, age_category_name FROM lesson_types";
+        String sql = """
+    		SELECT 
+			    lesson_type_id, 	
+			    name, price, 
+			    skill_level, 
+			    age_category_name, 
+			    min_age, 
+			    max_age ,
+			    min_bookings,
+			    max_bookings,
+			    accreditation_id,
+			    sport
+			FROM 
+			    lesson_types 
+			NATURAL JOIN 
+			    accreditations
+			ORDER BY 
+			    lesson_type_id
+		""";
 
         try (PreparedStatement stmt = super.connection.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -55,8 +75,18 @@ public class LessonTypesDAO extends DAO<LessonType>{
                 double price = rs.getDouble("price");
                 String skillLevel = rs.getString("skill_level");
                 String ageCategoryName = rs.getString("age_category_name");
-             
-                LessonType lessonType = new LessonType(lessonTypeId, name, price, skillLevel, ageCategoryName);
+                int minAge = rs.getInt("min_age");
+                int maxAgeDatabase = rs.getInt("max_age");
+                Optional<Integer> maxAge = rs.wasNull() ? Optional.empty() : Optional.of(maxAgeDatabase);    
+                int minBookings = rs.getInt("min_bookings");
+                int maxBookings = rs.getInt("max_bookings");
+                
+                int accreditationId = rs.getInt("accreditation_id");
+                String sport = rs.getString("sport");
+
+                Accreditation accreditation = new Accreditation(accreditationId, sport, ageCategoryName);
+                LessonType lessonType = new LessonType(lessonTypeId, skillLevel, price, name, ageCategoryName, minAge, maxAge, minBookings, maxBookings, accreditation);
+                
                 lessonTypes.add(lessonType);
             }
         } catch (SQLException e) {

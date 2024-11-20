@@ -1,33 +1,63 @@
 package be.th.models;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+
 import be.th.validators.IntegerValidator;
-import be.th.dao.DatabaseConstants;
+import be.th.validators.ObjectValidator;
+import be.th.dao.DatabaseConstant;
+import be.th.dao.LessonDAO;
 import be.th.validators.DateValidator;
 import be.th.validators.StringValidator;
 
-public abstract class Lesson implements Serializable {
+public class Lesson implements Serializable {
 
     // Static attributes
     private static final long serialVersionUID = 5815631340419350701L;
 
     // Attributes
     private int id;
-    private int minBookings;
-    private int maxBookings;
     private LocalDateTime date;
-    private String location;
-    private int duration;
-
+    
+    // References
+    Location location;
+    LessonType lessonType;
+    Instructor instructor;
+    // Secretary secretary;
+    Set<Booking> bookings; //TODO: Implement booking methods
+    
     // Constructor
-    public Lesson(int id, int minBookings, int maxBookings, LocalDateTime date, String location, int duration) {
+    public Lesson(
+		int id, 
+		LocalDateTime startDate, 
+		LessonType lessonType, 
+		Instructor instructor, 
+		int locationId, 
+		String LocationName
+	) {
         setId(id);
-        setBookingRange(minBookings, maxBookings);
-        setDate(date);
-        setLocation(location);
-        setDuration(duration);
+        setDate(startDate);
+        setLessonType(lessonType);
+        setInstructor(instructor);
+        location = new Location(locationId, LocationName);
+        bookings = new LinkedHashSet<>();
+    }
+    
+    public Lesson(
+		LocalDateTime startDate, 
+		LessonType lessonType, 
+		Instructor instructor, 
+		int locationId, 
+		String LocationName
+	) {
+    	this(0, startDate, lessonType, instructor, locationId, LocationName);
     }
 
     // Getters
@@ -35,27 +65,27 @@ public abstract class Lesson implements Serializable {
         return id;
     }
 
-    public int getMinBookings() {
-        return minBookings;
-    }
-
-    public int getMaxBookings() {
-        return maxBookings;
-    }
-
     public LocalDateTime getDate() {
         return date;
     }
+    
+    public Location getLocation() {
+    	return location;
+    }
+    
+    public LessonType getLessonType() {
+		return lessonType;
+	}
 
-    public String getLocation() {
-        return location;
+	public Instructor getInstructor() {
+		return instructor;
+	}
+	
+	public Set<Booking> getBookings() {
+        return Collections.unmodifiableSet(bookings);
     }
 
-    public int getDuration() {
-        return duration;
-    }
-
-    // Setters
+	// Setters
     public void setId(int id) {
         if (!IntegerValidator.isPositiveOrEqualToZero(id)) {
             throw new IllegalArgumentException("ID must be a positive or equal to 0. Negative values are not allowed.");
@@ -63,61 +93,91 @@ public abstract class Lesson implements Serializable {
         this.id = id;
     }
 
-    public void setBookingRange(int minBookings, int maxBookings) {
-        if (!IntegerValidator.isPositiveOrEqualToZero(minBookings)) {
-            throw new IllegalArgumentException("Invalid booking range: minBookings must be positive or equal to 0.");
-        }
-        
-        if (!IntegerValidator.isPositiveOrEqualToZero(maxBookings)) {
-            throw new IllegalArgumentException("Invalid booking range: maxBookings must be positive or equal to 0.");
-        }
-        
-        if (!IntegerValidator.isSmallerOrEqual(minBookings, maxBookings)) {
-            throw new IllegalArgumentException("Invalid booking range: minBookings must be smaller or equal to maxBookings.");
-        }
-
-        this.minBookings = minBookings;
-        this.maxBookings = maxBookings;
-    }
-
-
     public void setDate(LocalDateTime date) {
     	if (!DateValidator.hasValue(date)) {
             throw new IllegalArgumentException("Date must have a value.");
         }
-    	
-        if (!DateValidator.isInFuture(date)) {
-            throw new IllegalArgumentException("Date must be set to a future date. Past dates or today's date are not allowed.");
-        }
         this.date = date;
     }
 
-    public void setLocation(String location) {
-        if (!StringValidator.hasValue(location)) {
-            throw new IllegalArgumentException("Location must be a non-empty string. Null or empty values are not allowed.");
-        }
-        
-        if(!StringValidator.isLengthSmallerOrEqual(location, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Location's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
-        }
-        this.location = location;
-    }
+	public void setLessonType(LessonType lessonType) {
+		if (!ObjectValidator.hasValue(lessonType)) {
+    		throw new IllegalArgumentException("Lesson type must have value.");    		
+    	}
+		this.lessonType = lessonType;
+	}
 
-    public void setDuration(int duration) {
-        if (!IntegerValidator.isPositiveOrEqualToZero(duration)) {
-            throw new IllegalArgumentException("Duration must be a positive integer. Zero or negative values are not allowed.");
-        }
-        this.duration = duration;
-    }
+	public void setInstructor(Instructor instructor) {
+		if (!ObjectValidator.hasValue(instructor)) {
+    		throw new IllegalArgumentException("Instructor must have value.");    		
+    	}
+		this.instructor = instructor;
+	}
+	
+	// Database methods
+	public boolean insertIntoDatabase(LessonDAO lessonDAO) {
+		return lessonDAO.create(this);
+	}
+	
+	public static List<Lesson> findAllInDatabase(LessonDAO lessonDAO) {
+		return lessonDAO.findAll();
+	}
+	
+	public static List<Lesson> findAllAfterDateInDatabase(LocalDate date, LessonDAO lessonDAO) {
+		return lessonDAO.findAll(date);
+	}
 
     // Methods
+	public boolean addBooking(Booking booking) {
+		if (!ObjectValidator.hasValue(booking)) {
+			throw new IllegalArgumentException("Booking must have value.");
+		}
+		
+		if (bookings.contains(booking)) {
+			throw new IllegalArgumentException("Booking already exists.");
+		}
+		
+		if (bookings.size() >= lessonType.getMaxBookings()) {
+			throw new IllegalArgumentException("Lesson is fully booked.");
+			
+		}
+		
+		if (!booking.getSkier().hasValidAgeForLessonType(lessonType)) {
+			throw new IllegalArgumentException("Skier does not meet the age requirements for the lesson type.");
+		}
+		return bookings.add(booking);
+	}
+	
+	public boolean removeBooking(Booking booking) {
+		if (!ObjectValidator.hasValue(booking)) {
+			throw new IllegalArgumentException("Booking must have value.");
+		}
+
+		if (!bookings.contains(booking)) {
+			throw new IllegalArgumentException("Booking does not exist.");
+		}
+		return bookings.remove(booking);
+	}
+	
     public double calculatePrice() {
-        return 0.0; // TODO: Implement price calculation logic
+        return lessonType.getPrice() * bookings.size();
     }
+    
+	public String getCalculatePriceFormattedForDisplay() {
+		return String.format("%.2f €", calculatePrice());
+	}
 
     public boolean hasBooking() {
-        return false; // TODO: Implement booking check logic
+        return !bookings.isEmpty();
     }
+    
+	public int getBookingCount() {
+		return bookings.size();
+	}
+	
+	public int getRemainingBookingsCount() {
+		return lessonType.getMaxBookings() - bookings.size();
+	}
 
     // Override methods
     @Override
@@ -132,27 +192,22 @@ public abstract class Lesson implements Serializable {
 
         Lesson lesson = (Lesson) object;
         return id == lesson.id &&
-            minBookings == lesson.minBookings &&
-            maxBookings == lesson.maxBookings &&
-            duration == lesson.duration &&
-            Objects.equals(date, lesson.date) &&
-            Objects.equals(location, lesson.location);
+            Objects.equals(date, lesson.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, minBookings, maxBookings, duration, date, location);
+        return Objects.hash(id, date);
     }
 
     @Override
     public String toString() {
         return "Lesson:" +
            "id=" + id +
-           ", minBookings=" + minBookings +
-           ", maxBookings=" + maxBookings +
-           ", duration=" + duration +
-           ", date=" + date +
-           ", location='" + location + '\'';
-    }
-
+           ", date=" + date + '\'' + 
+           ", " + location + '\'' +
+           ", " + lessonType + '\'' + 
+           ", " + bookings.toString() + '\'' +
+           ", " + instructor.getFullNameFormattedForDisplay();  
+       }
 }

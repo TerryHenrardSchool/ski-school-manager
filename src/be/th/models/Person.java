@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import be.th.dao.DatabaseConstants;
+import be.th.dao.DatabaseConstant;
 import be.th.formatters.StringFormatter;
 import be.th.validators.DateValidator;
 import be.th.validators.IntegerValidator;
@@ -18,26 +18,26 @@ import be.th.validators.StringValidator;
 
 public abstract class Person implements Serializable {
 	
-	// Static attributes
+	// Static constant attributes
 	private static final long serialVersionUID = -6721217695491429434L;
 	
-	// Static Constant attributes
-	private final static String SPLIT_LAST_NAME_AND_FIRST_NAME_REGEX = "^([A-Z\\s]+)\\s+([A-Z][a-zA-Z\\s]+)$";
-	
-	// Constant attributes
-    private final String DATE_PATTERN = "YYYY-MM-DD";
-    private final LocalDate MIN_VALID_BIRTHDATE = LocalDate.of(1900, 1, 1);
-    private final LocalDate MAX_VALID_BIRTHDATE = LocalDate.now();
-	private final String EMAIL_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
-	private final String PHONE_NUMBER_REGEX = 
-		"^(((\\+|00)32[ ]?(?:\\(0\\)[ ]?)?)|0){1}(4(60|[789]\\d)\\/?(\\s?\\d{2}\\.?){2}(\\s?\\d{2})|(\\d\\/?\\s?\\d{3}|\\d{2}\\/?\\s?\\d{2})(\\.?\\s?\\d{2}){2})$";
+    private final static String DATE_PATTERN = "YYYY-MM-DD";
+    
+    private final static LocalDate MIN_VALID_BIRTHDATE = LocalDate.of(1900, 1, 1);
+    private final static LocalDate MAX_VALID_BIRTHDATE = LocalDate.now();
+    
+    private final static String SPLIT_LAST_NAME_AND_FIRST_NAME_REGEX = "^([A-Z\\s]+)\\s+([A-Z][a-zA-Z\\s]+)$";
+	private final static String EMAIL_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+	private final static String PHONE_NUMBER_REGEX = 
+		"^(((\\+|00)32[ ]?(?:\\(0\\)[ ]?)?)|0){1}(4(60|[789]\\d)\\/?(\\s?\\d{2}\\.?){2}" +  
+		"(\\s?\\d{2})|(\\d\\/?\\s?\\d{3}|\\d{2}\\/?\\s?\\d{2})(\\.?\\s?\\d{2}){2})$";
 	
 	// Attributes
     private int id;
     private String lastName;
     private String firstName;
     private LocalDate dateOfBirth;
-    String phoneNumber;
+    private String phoneNumber;
     private String email;
     
     // References
@@ -55,7 +55,9 @@ public abstract class Person implements Serializable {
 		String streetNumber,
 		String phoneNumber, 
 		String email
-	) {
+	) 
+		throws IllegalArgumentException 
+    {
         setId(id);
         setLastName(lastName);
         setFirstName(firstName);
@@ -107,8 +109,8 @@ public abstract class Person implements Serializable {
             throw new IllegalArgumentException("Last name must have a value.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(lastName, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Last name's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(lastName, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Last name's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.lastName = lastName;
     }
@@ -118,8 +120,8 @@ public abstract class Person implements Serializable {
             throw new IllegalArgumentException("First name must have a value.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(firstName, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("First name's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(firstName, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("First name's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.firstName = firstName;
     }
@@ -154,7 +156,6 @@ public abstract class Person implements Serializable {
         }
         
         if (!StringValidator.isValidUsingRegex(phoneNumber, PHONE_NUMBER_REGEX)) {
-        	System.out.println(phoneNumber);
         	throw new IllegalArgumentException("The phone number format is invalid. Please enter a phone number in Belgian format.");
         }
         this.phoneNumber = phoneNumber;
@@ -203,6 +204,10 @@ public abstract class Person implements Serializable {
 		return lastName.toUpperCase();
     }
     
+	public String getFullNameFormattedForDisplay() {
+		return getLastnameFormattedForDisplay() + " " + getFirstNameFormattedForDisplay();
+	}
+    
     // Override methods
     @Override
     public boolean equals(Object object) {
@@ -246,6 +251,6 @@ public abstract class Person implements Serializable {
 	        ", dateOfBirth=" + dateOfBirth +
 	        ", phoneNumber='" + phoneNumber + '\'' +
 	        ", email='" + email + '\'' + 
-	        ", " + address.toString();
+	        ", address=" + address;
     }
 }

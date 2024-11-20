@@ -12,6 +12,7 @@ import javax.swing.border.TitledBorder;
 import be.th.styles.FontStyles;
 
 import java.awt.GridLayout;
+import javax.swing.border.EtchedBorder;
 
 public class MainMenu extends JFrame {
     
@@ -19,7 +20,7 @@ public class MainMenu extends JFrame {
     
     public MainMenu() {
         setTitle("Ski School Manager");
-        setSize(1017, 525);
+        setSize(1017, 694);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -36,22 +37,15 @@ public class MainMenu extends JFrame {
         btnAddSkier.setFont(FontStyles.BUTTON);
         
         JButton btnNewButton = new JButton("Search a skier");
-        btnNewButton.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) {
-        		SearchASkier searchASkierFrame = new SearchASkier();
-        		searchASkierFrame.setVisible(true);
-        		
-        		dispose();
-        	}
+        btnNewButton.addActionListener(e -> {
+        	openFrame(new SearchASkier());
+        	dispose();
         });
         btnNewButton.setFont(FontStyles.BUTTON);
         panel.add(btnNewButton);
-        btnAddSkier.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                AddASkier addSkierFrame = new AddASkier();
-                addSkierFrame.setVisible(true);
-                dispose();
-            }
+        btnAddSkier.addActionListener(e -> {
+        	openFrame(new AddASkier());
+        	dispose();
         });
         
         JLabel lblNewLabel_1 = new JLabel("Main menu");
@@ -73,23 +67,35 @@ public class MainMenu extends JFrame {
 	    btnAddInstructor.setFont(FontStyles.BUTTON);
 	    
 	    JButton btnNewButton_1 = new JButton("Search an instructor");
-	    btnNewButton_1.addActionListener(new ActionListener() {
-	    	public void actionPerformed(ActionEvent e) {
-	    		SearchAnInstructor searchAnInstructorFrame = new SearchAnInstructor();
-	    		searchAnInstructorFrame.setVisible(true);
-                dispose();
-	    	}
+	    btnNewButton_1.addActionListener(e -> {
+	    	openFrame(new SearchAnInstructor());
+	    	dispose();
 	    });
 	    
 	    btnNewButton_1.setFont(FontStyles.BUTTON);
 	    panel_1.add(btnNewButton_1);
-        btnAddInstructor.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                AddAnInstructor addInstructorFrame = new AddAnInstructor();
-                addInstructorFrame.setVisible(true);
-                dispose();  
-            }
-        });
+	    
+	    JPanel panel_1_1 = new JPanel();
+	    panel_1_1.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Lesson Actions", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+	    panel_1_1.setBounds(20, 365, 973, 136);
+	    getContentPane().add(panel_1_1);
+	    panel_1_1.setLayout(new GridLayout(0, 2, 0, 0));
+	    
+	    JButton btnAddLesson = new JButton("Add a lesson");
+	    btnAddLesson.addActionListener(e -> {
+	    	openFrame(new AddALesson());
+	    	dispose();
+	    });
+	    btnAddLesson.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	    panel_1_1.add(btnAddLesson);
+	    
+	    JButton btnSearchLesson = new JButton("Search a lesson");
+	    btnSearchLesson.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	    panel_1_1.add(btnSearchLesson);
+	    btnAddInstructor.addActionListener(e ->{
+	    	openFrame(new AddAnInstructor());
+	    	dispose();
+	    });
     }
 
     public static void main(String[] args) {
@@ -99,5 +105,9 @@ public class MainMenu extends JFrame {
                 frame.setVisible(true);
             }
         });
+    }
+    
+    private void openFrame(JFrame frame) {
+        frame.setVisible(true);
     }
 }

@@ -1,10 +1,12 @@
 package be.th.models;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import be.th.validators.IntegerValidator;
 import be.th.validators.DateValidator;
-import be.th.dao.DatabaseConstants;
+import be.th.dao.DatabaseConstant;
+import be.th.dao.PeriodDAO;
 import be.th.validators.BooleanValidator;
 import be.th.validators.StringValidator;
 
@@ -82,11 +84,25 @@ public class Period {
             throw new IllegalArgumentException("Name must be a non-empty string. Null or empty values are not allowed.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(name, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Name length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(name, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Name length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.name = name;
     }
+    
+    // Methods
+	public boolean isCurrentPeriod(LocalDate date) {
+		return date.isAfter(startDate) && date.isBefore(endDate);
+	}
+    
+    // Database methods
+	public static Period findInDatabase(LocalDate date, PeriodDAO periodDAO) {
+		return periodDAO.find(date);
+	}
+	
+	public static List<Period> findAllInDatabase(PeriodDAO periodDAO) {
+		return periodDAO.findAll();
+	}
     
     // Override methods
     @Override

@@ -9,8 +9,11 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import com.toedter.calendar.JDateChooser;
 
+import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
+import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
+import be.th.models.Instructor;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
 import be.th.styles.ColorStyles;
@@ -21,6 +24,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.awt.event.ActionEvent;
 
@@ -38,8 +42,18 @@ public class UpdateASkier extends JFrame {
 	private JTextField postcodeField;
 	private JTextField streetNameField;
 	private JTextField streetNumberField;
+	
+	DAO<Skier> skierDAO;
+	
+	Skier skierToUpdate;
 
-	UpdateASkier(Skier skierToUpdate, Consumer<Boolean> onUpdateCallBack) {		
+	UpdateASkier(Skier skierToUpdate, BiConsumer<Boolean, Skier> onUpdateCallBack) {
+		DAOFactory daoFactory = new DAOFactory();
+
+		skierDAO = daoFactory.getSkierDAO();
+		
+		this.skierToUpdate = skierToUpdate;
+		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 630, 554);
 		contentPane = new JPanel();
@@ -161,11 +175,7 @@ public class UpdateASkier extends JFrame {
 		panel.add(lblStreetNumber);
 		
 		JButton cancelBtn = new JButton("Cancel");
-		cancelBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				dispose();
-			}
-		});
+		cancelBtn.addActionListener(this::handleCLickOnCancelButton);
 		cancelBtn.setFont(FontStyles.BUTTON);
 		cancelBtn.setContentAreaFilled(true);
 		cancelBtn.setOpaque(true);
@@ -175,35 +185,7 @@ public class UpdateASkier extends JFrame {
 		panel.add(cancelBtn);
 		
 		JButton updateBtn = new JButton("Update");
-		updateBtn.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        try {		   
-		        	int skierId = skierToUpdate.getId();
-		            String skierLastName = DatabaseFormatter.format(lastNameField.getText());
-		            String skierFirstName = DatabaseFormatter.format(firstNameField.getText());
-		            LocalDate skierDateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
-		            String phoneNumber = DatabaseFormatter.format(phoneNumberField.getText());
-		            String email = DatabaseFormatter.format(emailField.getText());
-		            String city = DatabaseFormatter.format(cityField.getText());
-		            String postcode = DatabaseFormatter.format(postcodeField.getText());
-		            String streetName = DatabaseFormatter.format(streetNameField.getText());
-		            String streetNumber = DatabaseFormatter.format(streetNumberField.getText());
-		            
-		            Skier skier = new Skier(skierId, skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
-		            
-		            boolean isUpdated = new DAOFactory().getSkierDAO().update(skier);
-		            
-		            if (isUpdated) {
-		                onUpdateCallBack.accept(isUpdated);
-		                dispose();
-		            } else {
-		                JOptionPane.showMessageDialog(null, "Failed to update skier's information. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
-		            }
-		        } catch (Exception ex) {
-		            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-		        }
-		    }
-		});
+		updateBtn.addActionListener(ev -> handleCLickOnUpdateButton(onUpdateCallBack));
 
 		updateBtn.setFont(FontStyles.BUTTON);
 		updateBtn.setContentAreaFilled(true);
@@ -234,5 +216,68 @@ public class UpdateASkier extends JFrame {
 	    postcodeField.setText(skier.getAddress().getPostcode());
 	    streetNameField.setText(skier.getAddress().getStreetName());
 	    streetNumberField.setText(skier.getAddress().getStreetNumber());
+	}
+	
+	private void handleCLickOnCancelButton(ActionEvent e) {
+		dispose();
+	}
+	
+	private Skier buildSkierFromFields() {
+		int skierId = skierToUpdate.getId();
+        String skierLastName = DatabaseFormatter.format(lastNameField.getText());
+        String skierFirstName = DatabaseFormatter.format(firstNameField.getText());
+        LocalDate skierDateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
+        String phoneNumber = DatabaseFormatter.format(phoneNumberField.getText());
+        String email = DatabaseFormatter.format(emailField.getText());
+        String city = DatabaseFormatter.format(cityField.getText());
+        String postcode = DatabaseFormatter.format(postcodeField.getText());
+        String streetName = DatabaseFormatter.format(streetNameField.getText());
+        String streetNumber = DatabaseFormatter.format(streetNumberField.getText());
+        
+        return new Skier(skierId, skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+	}
+	
+	private void handleCLickOnUpdateButton(BiConsumer<Boolean, Skier> onUpdateCallBack) {
+        try {		   
+            Skier skierWithNewData = buildSkierFromFields();
+            boolean isUpdated = skierWithNewData.updateInDatabase((SkierDAO) skierDAO);
+            if (!isUpdated) {
+            	displayFailedToUpdateMessage();
+            	return;
+            }
+            
+            displaySuccessToUpdateMessage(skierWithNewData);
+            onUpdateCallBack.accept(isUpdated, skierWithNewData);
+            dispose();
+        } catch (Exception ex) {
+        	displayErrorMessage(ex);
+        }
+    }
+	
+	private void displaySuccessToUpdateMessage(Skier skier) {
+		JOptionPane.showMessageDialog(
+    		null, 
+    		skier.getLastnameFormattedForDisplay() + " " + skier.getFirstNameFormattedForDisplay() + " successfully updated.", 
+    		"Success", 
+    		JOptionPane.PLAIN_MESSAGE
+		);
+	}
+	
+	private void displayErrorMessage(Exception ex) {
+		JOptionPane.showMessageDialog(
+    		null, 
+    		ex.getMessage(), 
+    		"Error", 
+    		JOptionPane.ERROR_MESSAGE
+		);
+	}
+	
+	private void displayFailedToUpdateMessage() {
+		JOptionPane.showMessageDialog(
+    		null, 
+    		"Failed to update skier's information. Please try again.", 
+    		"Error", 
+    		JOptionPane.ERROR_MESSAGE
+		);
 	}
 }
