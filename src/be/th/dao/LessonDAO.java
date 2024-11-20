@@ -18,6 +18,7 @@ import be.th.models.Instructor;
 import be.th.models.Lesson;
 import be.th.models.LessonType;
 import be.th.models.Location;
+import be.th.models.Skier;
 
 public class LessonDAO extends DAO<Lesson>{
 
@@ -172,13 +173,17 @@ public class LessonDAO extends DAO<Lesson>{
 	private void loadLessonBookings(Lesson lesson) throws SQLException {
 		String sql = """
 	        SELECT
-	            b.*, p.*
-	        FROM
-	            bookings b
-            INNER JOIN 
-	    		periods p ON p.period_id = b.period_id
-	        WHERE
-	            b.lesson_id = ?
+			    b.*, p.*, per.*, s.skier_id as skier_id_1
+			FROM
+			    bookings b
+			INNER JOIN 
+			    periods p ON p.period_id = b.period_id
+			INNER JOIN 
+			    skiers s ON s.skier_id = b.skier_id
+			INNER JOIN 
+			    persons per ON per.person_id = s.person_id
+			WHERE
+			    b.lesson_id = ?
 	    """;
 
 	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -194,12 +199,25 @@ public class LessonDAO extends DAO<Lesson>{
         			rs.getDate("start_date").toLocalDate(),
         			rs.getDate("end_date").toLocalDate(),
         			rs.getBoolean("is_vacation"),
-        			rs.getString("name")
+        			rs.getString("name"),
+        			new Skier(
+    					rs.getInt("skier_id_1"),
+    					rs.getString("last_name"),
+    					rs.getString("first_name"),
+    					rs.getDate("date_of_birth").toLocalDate(),
+    					rs.getString("city"),
+    					rs.getString("postcode"),
+    					rs.getString("street_name"),
+    					rs.getString("street_number"),
+    					rs.getString("phone_number"),
+    					rs.getString("email")
+					)
 	            );
 	            lesson.addBooking(booking);
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
+	        System.out.println(e.getMessage());
 	    }
 	}
 }

@@ -261,7 +261,6 @@ public class SkierDAO extends DAO<Skier>{
 	        while (rs.next()) {
 	            int skierId = rs.getInt("skier_id");
 	            
-	            Booking booking = mapBooking(rs);
 	            
 	            Skier skier = skierMap.get(skierId);
 	            if (skier == null) {
@@ -277,13 +276,16 @@ public class SkierDAO extends DAO<Skier>{
 	                    rs.getString("phone_number"),
 	                    rs.getString("email")
 	                );
+	                
+	                Booking booking = mapBooking(rs, skier);
 	                skierMap.put(skierId, skier);
 	                skiers.add(skier);
+	                
+	                if (booking != null) {
+	                	skier.addBooking(booking);
+	                }
 	            }
 
-	            if (booking != null) {
-	                skier.addBooking(booking);
-	            }
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
@@ -292,7 +294,7 @@ public class SkierDAO extends DAO<Skier>{
 	    return skiers;
 	}
 	
-	private Booking mapBooking(ResultSet rs) throws SQLException {
+	private Booking mapBooking(ResultSet rs, Skier skier) throws SQLException {
 	    if (rs.getInt("booking_id") == 0) {	    	
 	    	return null;
 	    }
@@ -305,7 +307,8 @@ public class SkierDAO extends DAO<Skier>{
     		rs.getDate("start_date").toLocalDate(),
     		rs.getDate("end_date").toLocalDate(),
     		rs.getBoolean("is_vacation"),
-    		rs.getString("name")
+    		rs.getString("name"),
+    		skier
         );
 	}
 }

@@ -54,7 +54,7 @@ public class AddABooking extends JFrame {
 		this.lessonDAO = daoFactory.getLessonDAO();
 		this.selectedSkier = selectedSkier;
 		
-		System.out.println("Selected skier: " + selectedSkier);
+		System.out.println("Selected skier: " + selectedSkier.getBookings().toString());
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1232, 589);
@@ -115,9 +115,9 @@ public class AddABooking extends JFrame {
 
 		scrollPane.setViewportView(upcomingLessonsTable);
 		
-		JLabel lblSelectALesson = new JLabel("Select an upcoming lesson");
+		JLabel lblSelectALesson = new JLabel("Select an upcoming lesson (only those that haven't already been booked are displayed).");
 		lblSelectALesson.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblSelectALesson.setBounds(10, 21, 199, 31);
+		lblSelectALesson.setBounds(10, 21, 924, 31);
 		panel.add(lblSelectALesson);
 		
 		JButton cancelBtn = new JButton("Cancel");
@@ -145,15 +145,20 @@ public class AddABooking extends JFrame {
 	}
 	
 	private void loadUpcommingLessonsMap() {
-		List<Lesson> upcomingLessons = Lesson.findAllInDatabase((LessonDAO) lessonDAO);
-		
-		if (!upcomingLessonsMap.isEmpty()) {
-			upcomingLessonsMap.clear();
-		}
-		
-		for (Lesson upcomingLesson : upcomingLessons) {
-            upcomingLessonsMap.put(upcomingLesson.getId(), upcomingLesson);
-		}
+	    List<Lesson> upcomingLessons = Lesson.findAllInDatabase((LessonDAO) lessonDAO);
+
+	    if (!upcomingLessonsMap.isEmpty()) {
+	        upcomingLessonsMap.clear();
+	    }
+
+	    for (Lesson upcomingLesson : upcomingLessons) {
+	        boolean isBookedBySelectedSkier = upcomingLesson.getBookings().stream()
+	            .anyMatch(booking -> booking.getSkier().equals(selectedSkier));
+	        
+	        if (!isBookedBySelectedSkier) {
+	            upcomingLessonsMap.put(upcomingLesson.getId(), upcomingLesson);
+	        }
+	    }
 	}
 	
 	private void displayUpcomingLessons(Collection<Lesson> upcomingLessons) {

@@ -21,6 +21,7 @@ public class Booking implements Serializable {
     
     // References
     private Period period;
+    private Skier skier;
 
     // Constructor
     public Booking(
@@ -31,12 +32,14 @@ public class Booking implements Serializable {
 		LocalDate startDate, 
 		LocalDate endDate, 
 		boolean isVacation, 
-		String name
+		String name,
+		Skier skier
 	) {
         setId(id);
         setBookingDate(bookingDate);
         setInsured(isInsured);
-        period = new Period(periodId, startDate, endDate, isVacation, name);
+        setSkier(skier);
+        this.period = new Period(periodId, startDate, endDate, isVacation, name);
     }
 
     // Getters
@@ -55,6 +58,10 @@ public class Booking implements Serializable {
 	public Period getPeriod() {
 		return period;
 	}
+	
+	public Skier getSkier() {
+		return skier;
+	}
 
     // Setters
     public void setId(int id) {
@@ -62,6 +69,13 @@ public class Booking implements Serializable {
             throw new IllegalArgumentException("ID must be positive or equals to 0.");
         }
         this.id = id;
+    }
+    
+    public void setSkier(Skier skier) {
+		if (!ObjectValidator.hasValue(skier)) {
+			throw new IllegalArgumentException("Skier must have a value.");
+		}
+		this.skier = skier;
     }
 
     public void setBookingDate(LocalDateTime bookingDate) {
@@ -102,12 +116,13 @@ public class Booking implements Serializable {
         return id == booking.id &&
             isInsured == booking.isInsured &&
             Objects.equals(bookingDate, booking.bookingDate) &&
-            period.equals(booking.period);
+            period.equals(booking.period) &&
+            skier.equals(booking.skier);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(id, isInsured, bookingDate, period.hashCode());
+        return Objects.hash(id, isInsured, bookingDate, period.hashCode(), skier.hashCode());
     }
     
     @Override
@@ -116,6 +131,7 @@ public class Booking implements Serializable {
             "id=" + id +
             ", insured=" + isInsured +
             ", booking date=" + bookingDate + 
-            ", period=" + period;
+            ", period=" + period + 
+            ", skier=" + skier.getFullNameFormattedForDisplay();
     }
 }
