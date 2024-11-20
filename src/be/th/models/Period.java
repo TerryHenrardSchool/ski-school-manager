@@ -1,10 +1,12 @@
 package be.th.models;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import be.th.validators.IntegerValidator;
 import be.th.validators.DateValidator;
 import be.th.dao.DatabaseConstant;
+import be.th.dao.PeriodDAO;
 import be.th.validators.BooleanValidator;
 import be.th.validators.StringValidator;
 
@@ -87,6 +89,20 @@ public class Period {
         }
         this.name = name;
     }
+    
+    // Methods
+	public boolean isCurrentPeriod(LocalDate date) {
+		return date.isAfter(startDate) && date.isBefore(endDate);
+	}
+    
+    // Database methods
+	public static Period findInDatabase(LocalDate date, PeriodDAO periodDAO) {
+		return periodDAO.find(date);
+	}
+	
+	public static List<Period> findAllInDatabase(PeriodDAO periodDAO) {
+		return periodDAO.findAll();
+	}
     
     // Override methods
     @Override

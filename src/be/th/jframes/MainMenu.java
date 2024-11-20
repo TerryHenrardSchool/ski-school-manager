@@ -20,7 +20,7 @@ public class MainMenu extends JFrame {
     
     public MainMenu() {
         setTitle("Ski School Manager");
-        setSize(1017, 548);
+        setSize(1017, 694);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 

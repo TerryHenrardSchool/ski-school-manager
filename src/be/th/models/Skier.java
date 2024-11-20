@@ -2,14 +2,23 @@ package be.th.models;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import be.th.dao.SkierDAO;
+import be.th.validators.ObjectValidator;
 
 public class Skier extends Person {
 
 	// Static attributes
 	private static final long serialVersionUID = -342070697036823773L;
+	
+	// References
+	private Set<Booking> bookings;
 
 	// Constructor
     public Skier(
@@ -25,6 +34,7 @@ public class Skier extends Person {
         String email
     ) {
         super(id, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+        bookings = new HashSet<>();
     }
     
     public Skier(
@@ -39,6 +49,11 @@ public class Skier extends Person {
 		String email
 	) {
     	this(0, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+    }
+    
+    // Getters
+    public Set<Booking> getBookings() {
+    	return Collections.unmodifiableSet(bookings);
     }
 
     // Database methods
@@ -59,8 +74,42 @@ public class Skier extends Person {
     }
 
     // Methods
+    public boolean hasValidAgeForLessonType(LessonType lessonType) {
+        int age = LocalDate.now().getYear() - getDateOfBirth().getYear();
+        return lessonType.isAgeValid(age);
+    }
+    
+    public boolean hasBookingForLesson(Lesson lesson) {
+        return lesson.getBookings().stream().anyMatch(booking -> booking.getSkier().equals(this));
+    }
+
+	public boolean addBooking(Booking booking) {
+		if (!ObjectValidator.hasValue(booking)) {
+			throw new IllegalArgumentException("Booking must have value.");
+        }
+		
+		if (bookings.contains(booking)) {
+			return false;
+		}
+		
+		return bookings.add(booking);
+
+	}
+	
+	public boolean removeBooking(Booking booking) {
+		if (!ObjectValidator.hasValue(booking)) {
+			throw new IllegalArgumentException("Booking must have value.");
+		}
+		
+		if (!bookings.contains(booking)) {
+			return false;
+		}
+		
+		return bookings.remove(booking);
+	}
+	
     public boolean hasScheduledLesson() {
-        return false; //TODO
+        return !bookings.isEmpty();
     }
 
     //Override methods
@@ -75,11 +124,11 @@ public class Skier extends Person {
     
     @Override
     public int hashCode() {
-    	return super.hashCode();
+    	return Objects.hash(super.hashCode(), bookings);
     }
     
     @Override
     public String toString() {
-    	return super.toString();
+    	return super.toString() + bookings;
     }
 }

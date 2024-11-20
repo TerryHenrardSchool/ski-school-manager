@@ -186,9 +186,21 @@ public class LessonType {
     }
     
     // Methods 
+    public boolean isAgeValid(int age) {
+        if (this.maxAge.isPresent()) {
+            return age >= this.minAge && age <= this.maxAge.get();
+        } else {
+            return age >= this.minAge;
+        }
+    }
+    
     public String getLessonTypeInfoFormattedForDisplay() {
     	return name + " " + ageCategoryName  + " - " + level;
     }
+    
+	public String getPriceFormattedForDisplay() {
+		return String.format("%.2f €", price);
+	}
     
     // Database methods
     public static Collection<LessonType> findAllInDatabase(LessonTypeDAO lessonTypeDao){

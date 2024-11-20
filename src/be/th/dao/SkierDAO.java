@@ -6,10 +6,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import be.th.formatters.DatabaseFormatter;
+import be.th.models.Booking;
+import be.th.models.Period;
 import be.th.models.Skier;
 
 public class SkierDAO extends DAO<Skier>{
@@ -240,40 +243,72 @@ public class SkierDAO extends DAO<Skier>{
 
 	@Override
 	public List<Skier> findAll() {
-		String sql = """
-			SELECT *
-			FROM skiers 
-			NATURAL JOIN persons
-			ORDER BY skier_id DESC
-		""";
-
+	    String sql = """
+	        SELECT *
+	        FROM persons
+	        NATURAL JOIN skiers
+	        LEFT JOIN bookings b ON b.skier_id = skiers.skier_id
+	        LEFT JOIN periods p ON b.period_id = p.period_id
+	        ORDER BY skiers.skier_id DESC
+	    """;
 
 	    List<Skier> skiers = new ArrayList<>();
+	    Map<Integer, Skier> skierMap = new HashMap<>();
 
-	    try (
-    		PreparedStatement stmt = connection.prepareStatement(sql);
-    		ResultSet rs = stmt.executeQuery();
-		) {
+	    try (PreparedStatement stmt = connection.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+
 	        while (rs.next()) {
-	            Skier skier = new Skier(
-	                rs.getInt("skier_id"),
-	                rs.getString("last_name"),
-	                rs.getString("first_name"),
-	                rs.getDate("date_of_birth").toLocalDate(),
-	                rs.getString("city"),
-	                rs.getString("postcode"),
-	                rs.getString("street_name"),
-	                rs.getString("street_number"),
-	                rs.getString("phone_number"),
-	                rs.getString("email")
-	            );
+	            int skierId = rs.getInt("skier_id");
+	            
+	            
+	            Skier skier = skierMap.get(skierId);
+	            if (skier == null) {
+	                skier = new Skier(
+	                    skierId,
+	                    rs.getString("last_name"),
+	                    rs.getString("first_name"),
+	                    rs.getDate("date_of_birth").toLocalDate(),
+	                    rs.getString("city"),
+	                    rs.getString("postcode"),
+	                    rs.getString("street_name"),
+	                    rs.getString("street_number"),
+	                    rs.getString("phone_number"),
+	                    rs.getString("email")
+	                );
+	                
+	                Booking booking = mapBooking(rs, skier);
+	                skierMap.put(skierId, skier);
+	                skiers.add(skier);
+	                
+	                if (booking != null) {
+	                	skier.addBooking(booking);
+	                }
+	            }
 
-	            skiers.add(skier);
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }
 
 	    return skiers;
+	}
+	
+	private Booking mapBooking(ResultSet rs, Skier skier) throws SQLException {
+	    if (rs.getInt("booking_id") == 0) {	    	
+	    	return null;
+	    }
+	    
+	    return new Booking(
+    		rs.getInt("booking_id"),
+    		rs.getDate("booking_date").toLocalDate().atStartOfDay(),
+    		rs.getBoolean("is_insured"),
+    		rs.getInt("period_id"),
+    		rs.getDate("start_date").toLocalDate(),
+    		rs.getDate("end_date").toLocalDate(),
+    		rs.getBoolean("is_vacation"),
+    		rs.getString("name"),
+    		skier
+        );
 	}
 }

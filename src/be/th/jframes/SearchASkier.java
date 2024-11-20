@@ -108,23 +108,30 @@ public class SearchASkier extends JFrame {
 
 		scrollPane.setViewportView(table);
 		
-		JButton btnDeleteSkier = new JButton("Delete skier");
-		btnDeleteSkier.setBounds(10, 271, 110, 31);
+		JButton btnDeleteSkier = new JButton("Delete");
+		btnDeleteSkier.setBounds(130, 271, 110, 31);
 		panel.add(btnDeleteSkier);
 		btnDeleteSkier.addActionListener(this::handleClickOnDeleteButton);
 		btnDeleteSkier.setFont(FontStyles.BUTTON);
 		btnDeleteSkier.setBackground(ColorStyles.RED);
 		
-		JButton btnUpdateInformation = new JButton("Update skier");
-		btnUpdateInformation.setBounds(130, 271, 110, 31);
+		JButton btnUpdateInformation = new JButton("Update");
+		btnUpdateInformation.setBounds(250, 271, 110, 31);
 		panel.add(btnUpdateInformation);
 		btnUpdateInformation.addActionListener(this::handleClickOnUpdateButton);
 		btnUpdateInformation.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnUpdateInformation.setBackground(ColorStyles.ORANGE);
 		
 		JLabel lblNewLabel = new JLabel("(or double click on the row...)");
-		lblNewLabel.setBounds(250, 281, 196, 14);
+		lblNewLabel.setBounds(370, 281, 196, 14);
 		panel.add(lblNewLabel);
+		
+		JButton btnAddBooking = new JButton("Book");
+		btnAddBooking.addActionListener(this::handleClickOnAddBookingButton);
+		btnAddBooking.setBounds(10, 271, 110, 31);
+		panel.add(btnAddBooking);
+		btnAddBooking.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnAddBooking.setBackground(Color.GREEN);
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new TitledBorder(null, "Search criteria", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -557,9 +564,16 @@ public class SearchASkier extends JFrame {
 	}
     
 	private void handleClickOnBackButton(ActionEvent e) {
-		MainMenu mainMenuFrame = new MainMenu();
-		mainMenuFrame.setVisible(true);
-		
+		new MainMenu().setVisible(true);
 		dispose();
+	}
+	
+	private void handleClickOnAddBookingButton(ActionEvent e) {
+		if (!ObjectValidator.hasValue(selectedSkier)) {
+			JOptionPane.showMessageDialog(null, "Please select a skier", "Watch out", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+		
+		new AddABooking(selectedSkier).setVisible(true);
 	}
 }

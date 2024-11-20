@@ -31,4 +31,8 @@ public class DateValidator {
 	public static boolean isInFuture(LocalDateTime date) {
         return date.isAfter(LocalDateTime.now());
     }
+	
+	public static boolean isInPast(LocalDateTime date) {
+		return date.isBefore(LocalDateTime.now());
+	}
 }

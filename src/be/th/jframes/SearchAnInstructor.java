@@ -274,11 +274,8 @@ public class SearchAnInstructor extends JFrame {
 		
 		upcomingLessonsTable = new JTable();
 		upcomingLessonsTable.setModel(new DefaultTableModel(
-			new Object[][] {
-			},
-			new String[] {
-				"Start date", "Location", "Lesson type", "Participants", "Revenue"
-			}
+			new Object[][] {},
+			new String[] { "Start date", "Location", "Lesson type", "Participants", "Revenue" }
 		){
 			private static final long serialVersionUID = 1L;
 			boolean[] columnEditables = new boolean[] {
@@ -372,7 +369,7 @@ public class SearchAnInstructor extends JFrame {
 	}	
 	
 	private void loadInstructorMap() {	
-		List<Instructor> instructors = instructorDao.findAll();
+		List<Instructor> instructors = Instructor.findAllInDatabase((InstructorDAO) instructorDao);
 		
 		if(!instructorMap.isEmpty()) {
 			instructorMap.clear();
@@ -465,7 +462,7 @@ public class SearchAnInstructor extends JFrame {
 			lesson.getLocation().getName(),
 			lesson.getLessonType().getName(), 
 			lesson.getBookingCount(),
-		  	String.format("%.2f €", lesson.calculatePrice())
+			lesson.getCalculatePriceFormattedForDisplay()
 		};
 	}
 	
@@ -558,7 +555,6 @@ public class SearchAnInstructor extends JFrame {
 	    try {
 	        int id = (int) instructorsTable.getValueAt(selectedRow, 0);
 	        selectedInstructor = instructorMap.get(id);
-	        System.out.println(selectedInstructor);
 	        displayAccreditaionsInTable(selectedInstructor.getAccreditations());    
 	        displayLessonsInTable(selectedInstructor.getLessons());
         } catch (Exception ex) {

@@ -158,7 +158,7 @@ public class Instructor extends Person {
     }
 
     public boolean hasScheduledLesson() {
-        return false;
+        return !lessons.isEmpty();
     }
 
     public ArrayList<Lesson> getSchedule(int instructorId) {
