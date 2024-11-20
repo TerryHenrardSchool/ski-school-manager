@@ -569,6 +569,11 @@ public class SearchASkier extends JFrame {
 	}
 	
 	private void handleClickOnAddBookingButton(ActionEvent e) {
+		if (!ObjectValidator.hasValue(selectedSkier)) {
+			JOptionPane.showMessageDialog(null, "Please select a skier", "Watch out", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+		
 		new AddABooking(selectedSkier).setVisible(true);
 	}
 }

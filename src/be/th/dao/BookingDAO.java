@@ -1,6 +1,8 @@
 package be.th.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -13,8 +15,33 @@ public class BookingDAO extends DAO<Booking>{
 	}
 
 	@Override
-	public boolean create(Booking obj) {
-		return false; // TODO
+	public boolean create(Booking booking) {
+		String query = """
+			INSERT INTO bookings (
+				booking_date, 
+				is_insured, 
+				period_id,
+				secretary_id,
+				lesson_id, 
+				skier_id
+			) 
+			VALUES (?, ?, ?, ?, ?, ?)
+		"""; 
+
+		try (PreparedStatement statement = this.connection.prepareStatement(query)) {
+			statement.setObject(1, booking.getBookingDate());
+			statement.setBoolean(2, booking.isInsured());
+			statement.setInt(3, booking.getPeriod().getId());
+			statement.setInt(4, 21);
+			statement.setInt(5, booking.getLesson().getId());
+			statement.setInt(6, booking.getSkier().getId());
+
+			int rowsInserted = statement.executeUpdate();
+			return rowsInserted > 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package be.th.models;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
@@ -96,10 +97,6 @@ public class Lesson implements Serializable {
     	if (!DateValidator.hasValue(date)) {
             throw new IllegalArgumentException("Date must have a value.");
         }
-    	
-        if (!DateValidator.isInFuture(date)) {
-            throw new IllegalArgumentException("Date must be set to a future date. Past dates or today's date are not allowed.");
-        }
         this.date = date;
     }
 
@@ -125,6 +122,10 @@ public class Lesson implements Serializable {
 	public static List<Lesson> findAllInDatabase(LessonDAO lessonDAO) {
 		return lessonDAO.findAll();
 	}
+	
+	public static List<Lesson> findAllAfterDateInDatabase(LocalDate date, LessonDAO lessonDAO) {
+		return lessonDAO.findAll(date);
+	}
 
     // Methods
 	public boolean addBooking(Booking booking) {
@@ -134,6 +135,15 @@ public class Lesson implements Serializable {
 		
 		if (bookings.contains(booking)) {
 			throw new IllegalArgumentException("Booking already exists.");
+		}
+		
+		if (bookings.size() >= lessonType.getMaxBookings()) {
+			throw new IllegalArgumentException("Lesson is fully booked.");
+			
+		}
+		
+		if (!booking.getSkier().hasValidAgeForLessonType(lessonType)) {
+			throw new IllegalArgumentException("Skier does not meet the age requirements for the lesson type.");
 		}
 		return bookings.add(booking);
 	}

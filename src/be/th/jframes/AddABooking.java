@@ -6,11 +6,15 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
@@ -20,20 +24,28 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
+import be.th.dao.BookingDAO;
 import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
 import be.th.dao.LessonDAO;
+import be.th.dao.PeriodDAO;
 import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
+import be.th.models.Booking;
 import be.th.models.Instructor;
 import be.th.models.Lesson;
+import be.th.models.Period;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
+import be.th.validators.ObjectValidator;
+
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.time.LocalDate;
 import java.awt.event.ActionEvent;
 
 public class AddABooking extends JFrame {
@@ -41,21 +53,25 @@ public class AddABooking extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTable upcomingLessonsTable;
+	private JCheckBox chckbxAddInsurance;
 	
 	private Skier selectedSkier;
 	private Lesson selectedLesson;
-	private LinkedHashMap<Integer, Lesson> upcomingLessonsMap = new LinkedHashMap<>();
+	private LinkedHashMap<Integer, Lesson> unbookedUpcomingLessonsMap = new LinkedHashMap<>();
 	
 	private DAO<Lesson> lessonDAO;
+	private DAO<Period> periodDAO;
+	private DAO<Booking> bookingDAO;
 
 	public AddABooking(Skier selectedSkier) {
 		DAOFactory daoFactory = new DAOFactory();
 		
 		this.lessonDAO = daoFactory.getLessonDAO();
+		this.periodDAO = daoFactory.getPeriodDAO();
+		this.bookingDAO = daoFactory.getBookingDAO();
+		
 		this.selectedSkier = selectedSkier;
-		
-		System.out.println("Selected skier: " + selectedSkier.getBookings().toString());
-		
+				
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1232, 589);
 		contentPane = new JPanel();
@@ -78,9 +94,9 @@ public class AddABooking extends JFrame {
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
-		JCheckBox chckbxNewCheckBox = new JCheckBox("Take the insurance out (+ 20€)");
-		chckbxNewCheckBox.setBounds(106, 297, 229, 31);
-		panel.add(chckbxNewCheckBox);
+		chckbxAddInsurance = new JCheckBox("Take the insurance out (+ 20€)");
+		chckbxAddInsurance.setBounds(106, 297, 229, 31);
+		panel.add(chckbxAddInsurance);
 		
 		JLabel lblInsurance = new JLabel("Insurance");
 		lblInsurance.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -108,7 +124,15 @@ public class AddABooking extends JFrame {
 		upcomingLessonsTable.setModel(new DefaultTableModel(
 			new Object[][] {},
 			new String[] { "lesson id", "Lesson type", "instructor", "date", "Bookings left", "Location", "Price", }
-		));
+		)
+		{
+			private static final long serialVersionUID = 1L;
+
+			@Override
+		    public boolean isCellEditable(int row, int column) {
+		        return false;
+		    }
+		});
 		upcomingLessonsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		upcomingLessonsTable.getTableHeader().setReorderingAllowed(false);
 		addDoubleClickListener(upcomingLessonsTable, doubleClickListener);
@@ -140,26 +164,25 @@ public class AddABooking extends JFrame {
 		addBtn.setBounds(613, 403, 154, 51);
 		panel.add(addBtn);
 		
-		loadUpcommingLessonsMap();
-		displayUpcomingLessons(upcomingLessonsMap.values());
+		loadUnbookedUpcommingLessonsMap();
+		displayUpcomingLessons(unbookedUpcomingLessonsMap.values().stream()
+		    .sorted(Comparator.comparing(Lesson::getDate))
+		    .collect(Collectors.toList())
+	    );
 	}
 	
-	private void loadUpcommingLessonsMap() {
-	    List<Lesson> upcomingLessons = Lesson.findAllInDatabase((LessonDAO) lessonDAO);
+	private void loadUnbookedUpcommingLessonsMap() {
+	    List<Lesson> upcomingLessons = Lesson.findAllAfterDateInDatabase(LocalDate.now(), (LessonDAO) lessonDAO);
 
-	    if (!upcomingLessonsMap.isEmpty()) {
-	        upcomingLessonsMap.clear();
-	    }
+	    unbookedUpcomingLessonsMap.clear();
 
 	    for (Lesson upcomingLesson : upcomingLessons) {
-	        boolean isBookedBySelectedSkier = upcomingLesson.getBookings().stream()
-	            .anyMatch(booking -> booking.getSkier().equals(selectedSkier));
-	        
-	        if (!isBookedBySelectedSkier) {
-	            upcomingLessonsMap.put(upcomingLesson.getId(), upcomingLesson);
+	        if (!selectedSkier.hasBookingForLesson(upcomingLesson)) {
+	            unbookedUpcomingLessonsMap.put(upcomingLesson.getId(), upcomingLesson);
 	        }
 	    }
 	}
+
 	
 	private void displayUpcomingLessons(Collection<Lesson> upcomingLessons) {
         DefaultTableModel model = (DefaultTableModel) upcomingLessonsTable.getModel();
@@ -192,15 +215,43 @@ public class AddABooking extends JFrame {
 			return;
 		}
 		
-		selectedLesson = upcomingLessonsMap.get((Integer) table.getValueAt(row, 0));
-		System.out.println("Clicked on row: " + selectedLesson);
+		selectedLesson = unbookedUpcomingLessonsMap.get((Integer) table.getValueAt(row, 0));
+	}
+	
+	private Period getCurrentPeriod() {
+		return Period.findInDatabase(LocalDate.now(), (PeriodDAO) periodDAO);
 	}
 	
 	private void handleClickOnCancelBtn() {
 		dispose();
 	}
 	
+	private Booking buildBookingFromFields() {
+		Booking booking = new Booking(
+			LocalDate.now().atStartOfDay(), 
+			chckbxAddInsurance.isSelected(),
+			getCurrentPeriod(),
+			selectedSkier
+		);
+		booking.setLesson(selectedLesson);
+		
+		return booking;
+	}
+	
 	private void handleClickOnAddBtn() {
-		// TODO
+		if (!ObjectValidator.hasValue(selectedLesson)) {
+			JOptionPane.showMessageDialog(null, "Please select a lesson to add a booking.", "Watch out", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+			
+		Booking booking = buildBookingFromFields(); 
+		boolean isAdded = booking.insertIntoDatabase((BookingDAO) bookingDAO);
+		if(!isAdded) {
+			JOptionPane.showMessageDialog(null, "An error occurred while adding the booking. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		JOptionPane.showMessageDialog(null, "The booking has been successfully added.", "Success", JOptionPane.INFORMATION_MESSAGE);
+		dispose();
 	}
 }

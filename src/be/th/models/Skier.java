@@ -74,6 +74,15 @@ public class Skier extends Person {
     }
 
     // Methods
+    public boolean hasValidAgeForLessonType(LessonType lessonType) {
+        int age = LocalDate.now().getYear() - getDateOfBirth().getYear();
+        return lessonType.isAgeValid(age);
+    }
+    
+    public boolean hasBookingForLesson(Lesson lesson) {
+        return lesson.getBookings().stream().anyMatch(booking -> booking.getSkier().equals(this));
+    }
+
 	public boolean addBooking(Booking booking) {
 		if (!ObjectValidator.hasValue(booking)) {
 			throw new IllegalArgumentException("Booking must have value.");

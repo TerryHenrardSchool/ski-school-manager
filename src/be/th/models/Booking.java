@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
+import be.th.dao.BookingDAO;
 import be.th.validators.BooleanValidator;
 import be.th.validators.DateValidator;
 
@@ -22,6 +23,7 @@ public class Booking implements Serializable {
     // References
     private Period period;
     private Skier skier;
+    private Lesson lesson;
 
     // Constructor
     public Booking(
@@ -40,6 +42,28 @@ public class Booking implements Serializable {
         setInsured(isInsured);
         setSkier(skier);
         this.period = new Period(periodId, startDate, endDate, isVacation, name);
+    }
+    
+    public Booking(
+    		LocalDateTime bookingDate, 
+    		boolean isInsured, 
+    		int periodId, 
+    		LocalDate startDate, 
+    		LocalDate endDate, 
+    		boolean isVacation, 
+    		String name,
+    		Skier skier
+	) {
+    	this(0, bookingDate, isInsured, periodId, startDate, endDate, isVacation, name, skier);
+    }
+    
+    public Booking(
+		LocalDateTime bookingDate, 
+		boolean isInsured, 
+		Period period,
+		Skier skier
+		) {
+    	this(0, bookingDate, isInsured, period.getId(), period.getStartDate(), period.getEndDate(), period.isVacation(), period.getName(), skier);
     }
 
     // Getters
@@ -62,6 +86,10 @@ public class Booking implements Serializable {
 	public Skier getSkier() {
 		return skier;
 	}
+	
+	public Lesson getLesson() {
+		return lesson;
+	}
 
     // Setters
     public void setId(int id) {
@@ -77,14 +105,17 @@ public class Booking implements Serializable {
 		}
 		this.skier = skier;
     }
+    
+    public void setLesson(Lesson lesson) {
+    	if (!ObjectValidator.hasValue(lesson)) {
+    		throw new IllegalArgumentException("Lesson must have a value.");
+    	}
+    	this.lesson = lesson;
+    }
 
     public void setBookingDate(LocalDateTime bookingDate) {
     	if (!DateValidator.hasValue(bookingDate)) {
             throw new IllegalArgumentException("Booking date must have a value.");
-        }
-    	
-        if (!DateValidator.isInFuture(bookingDate)) {
-            throw new IllegalArgumentException("Booking date must be set to a future date. Past dates or today's date are not allowed.");
         }
         this.bookingDate = bookingDate;
     }
@@ -100,6 +131,11 @@ public class Booking implements Serializable {
     public double calculatePrice() {
         return 0.0; // TODO: Implement price calculation logic
     }
+    
+    // Database methods
+	public boolean insertIntoDatabase(BookingDAO bookingDAO) {
+		return bookingDAO.create(this);
+	}
     
     // Override methods
     @Override

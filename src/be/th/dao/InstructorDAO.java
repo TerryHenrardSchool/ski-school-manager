@@ -19,6 +19,7 @@ import be.th.models.Booking;
 import be.th.models.Instructor;
 import be.th.models.Lesson;
 import be.th.models.LessonType;
+import be.th.models.Skier;
 import be.th.validators.IntegerValidator;
 
 public class InstructorDAO extends DAO<Instructor> {
@@ -251,32 +252,48 @@ public class InstructorDAO extends DAO<Instructor> {
 	}
 
 	private void loadLessonBookings(Lesson lesson) throws SQLException {
-	    String sql = """
-	        SELECT
-	            b.*, p.*
-	        FROM
-	            bookings b
-            INNER JOIN 
-	    		periods p ON p.period_id = b.period_id
-	        WHERE
-	            b.lesson_id = ?
-	    """;
+		String sql = """
+		        SELECT
+				    b.*, p.*, per.*, s.skier_id as skier_id_1
+				FROM
+				    bookings b
+				INNER JOIN 
+				    periods p ON p.period_id = b.period_id
+				INNER JOIN 
+				    skiers s ON s.skier_id = b.skier_id
+				INNER JOIN 
+				    persons per ON per.person_id = s.person_id
+				WHERE
+				    b.lesson_id = ?
+		    """;
 	
 	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 	        pstmt.setInt(1, lesson.getId());
 	        ResultSet rs3 = pstmt.executeQuery();
 	
 	        while (rs3.next()) {
-	            Booking booking = new Booking(
-	                rs3.getInt("booking_id"),
-	                rs3.getDate("booking_date").toLocalDate().atStartOfDay(),
-	                rs3.getBoolean("is_insured"),
-	                rs3.getInt("period_id"),
-	                rs3.getDate("start_date").toLocalDate(),
-	                rs3.getDate("end_date").toLocalDate(),
-	                rs3.getBoolean("is_vacation"),
-	                rs3.getString("name")
-	            );
+	        	Booking booking = new Booking(
+	        			rs3.getInt("booking_id"),
+	        			rs3.getDate("booking_date").toLocalDate().atStartOfDay(),
+	        			rs3.getBoolean("is_insured"),
+	        			rs3.getInt("period_id"),
+	        			rs3.getDate("start_date").toLocalDate(),
+	        			rs3.getDate("end_date").toLocalDate(),
+	        			rs3.getBoolean("is_vacation"),
+	        			rs3.getString("name"),
+	        			new Skier(
+        					rs3.getInt("skier_id_1"),
+        					rs3.getString("last_name"),
+        					rs3.getString("first_name"),
+        					rs3.getDate("date_of_birth").toLocalDate(),
+        					rs3.getString("city"),
+        					rs3.getString("postcode"),
+        					rs3.getString("street_name"),
+        					rs3.getString("street_number"),
+        					rs3.getString("phone_number"),
+        					rs3.getString("email")
+    					)
+		            );
 	
 	            lesson.addBooking(booking);
 	        }
