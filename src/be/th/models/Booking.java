@@ -1,9 +1,11 @@
 package be.th.models;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import be.th.validators.IntegerValidator;
+import be.th.validators.ObjectValidator;
 import be.th.validators.BooleanValidator;
 import be.th.validators.DateValidator;
 
@@ -16,12 +18,25 @@ public class Booking implements Serializable {
     private int id;
     private LocalDateTime bookingDate;
     private Boolean isInsured;
+    
+    // References
+    private Period period;
 
     // Constructor
-    public Booking(int id, LocalDateTime bookingDate, boolean isInsured) {
+    public Booking(
+		int id, 
+		LocalDateTime bookingDate, 
+		boolean isInsured, 
+		int periodId, 
+		LocalDate startDate, 
+		LocalDate endDate, 
+		boolean isVacation, 
+		String name
+	) {
         setId(id);
         setBookingDate(bookingDate);
         setInsured(isInsured);
+        period = new Period(periodId, startDate, endDate, isVacation, name);
     }
 
     // Getters
@@ -36,6 +51,10 @@ public class Booking implements Serializable {
     public boolean isInsured() {
         return isInsured;
     }
+    
+	public Period getPeriod() {
+		return period;
+	}
 
     // Setters
     public void setId(int id) {
@@ -82,12 +101,13 @@ public class Booking implements Serializable {
         Booking booking = (Booking) object;
         return id == booking.id &&
             isInsured == booking.isInsured &&
-            Objects.equals(bookingDate, booking.bookingDate);
+            Objects.equals(bookingDate, booking.bookingDate) &&
+            period.equals(booking.period);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(id, isInsured, bookingDate);
+        return Objects.hash(id, isInsured, bookingDate, period.hashCode());
     }
     
     @Override
@@ -95,6 +115,7 @@ public class Booking implements Serializable {
         return "Booking: " +
             "id=" + id +
             ", insured=" + isInsured +
-            ", booking date=" + bookingDate;
+            ", booking date=" + bookingDate + 
+            ", period=" + period;
     }
 }

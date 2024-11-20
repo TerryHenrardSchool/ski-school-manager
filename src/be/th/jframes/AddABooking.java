@@ -17,17 +17,23 @@ import javax.swing.border.TitledBorder;
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
 import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
 import be.th.dao.LessonDAO;
+import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Instructor;
 import be.th.models.Lesson;
+import be.th.models.Skier;
 import be.th.parsers.DateParser;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.ActionEvent;
 
 public class AddABooking extends JFrame {
@@ -36,15 +42,19 @@ public class AddABooking extends JFrame {
 	private JPanel contentPane;
 	private JTable upcomingLessonsTable;
 	
+	private Skier selectedSkier;
+	private Lesson selectedLesson;
 	private LinkedHashMap<Integer, Lesson> upcomingLessonsMap = new LinkedHashMap<>();
 	
-	DAO<Lesson> lessonDAO;
+	private DAO<Lesson> lessonDAO;
 
-	public AddABooking() {
+	public AddABooking(Skier selectedSkier) {
 		DAOFactory daoFactory = new DAOFactory();
 		
 		this.lessonDAO = daoFactory.getLessonDAO();
+		this.selectedSkier = selectedSkier;
 		
+		System.out.println("Selected skier: " + selectedSkier);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1232, 589);
@@ -54,7 +64,7 @@ public class AddABooking extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JLabel lblTitle = new JLabel("Add a new booking");
+		JLabel lblTitle = new JLabel("Add a new booking to " + selectedSkier.getFullNameFormattedForDisplay());
 		lblTitle.setOpaque(true);
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 24));
@@ -87,11 +97,22 @@ public class AddABooking extends JFrame {
 		scrollPane.setBounds(10, 21, 1156, 197);
 		panel_1.add(scrollPane);
 		
+		MouseListener doubleClickListener = new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		        handleSingleClickOnUpcomingLessonRows(e, upcomingLessonsTable);
+		    }
+		};
+		
 		upcomingLessonsTable = new JTable();
 		upcomingLessonsTable.setModel(new DefaultTableModel(
 			new Object[][] {},
 			new String[] { "lesson id", "Lesson type", "instructor", "date", "Bookings left", "Location", "Price", }
 		));
+		upcomingLessonsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		upcomingLessonsTable.getTableHeader().setReorderingAllowed(false);
+		addDoubleClickListener(upcomingLessonsTable, doubleClickListener);
+
 		scrollPane.setViewportView(upcomingLessonsTable);
 		
 		JLabel lblSelectALesson = new JLabel("Select an upcoming lesson");
@@ -156,8 +177,21 @@ public class AddABooking extends JFrame {
 		};
 	}
 	
+	private void addDoubleClickListener(JTable table, MouseListener doubleClickListener) {
+        table.addMouseListener(doubleClickListener);
+    }
+	
+	private void handleSingleClickOnUpcomingLessonRows(MouseEvent e, JTable table) {
+		int row = table.rowAtPoint(e.getPoint());
+		if (row <= -1) { 
+			return;
+		}
+		
+		selectedLesson = upcomingLessonsMap.get((Integer) table.getValueAt(row, 0));
+		System.out.println("Clicked on row: " + selectedLesson);
+	}
+	
 	private void handleClickOnCancelBtn() {
-		new MainMenu().setVisible(true);
 		dispose();
 	}
 	

@@ -170,11 +170,13 @@ public class LessonDAO extends DAO<Lesson>{
 	}
 	
 	private void loadLessonBookings(Lesson lesson) throws SQLException {
-	    String sql = """
+		String sql = """
 	        SELECT
-	            b.*
+	            b.*, p.*
 	        FROM
 	            bookings b
+            INNER JOIN 
+	    		periods p ON p.period_id = b.period_id
 	        WHERE
 	            b.lesson_id = ?
 	    """;
@@ -184,10 +186,15 @@ public class LessonDAO extends DAO<Lesson>{
 	        ResultSet rs = pstmt.executeQuery();
 
 	        while (rs.next()) {
-	            Booking booking = new Booking(
-	                rs.getInt("booking_id"),
-	                rs.getTimestamp("booking_date").toLocalDateTime(),
-	                rs.getBoolean("is_insured")
+	        	Booking booking = new Booking(
+        			rs.getInt("booking_id"),
+        			rs.getDate("booking_date").toLocalDate().atStartOfDay(),
+        			rs.getBoolean("is_insured"),
+        			rs.getInt("period_id"),
+        			rs.getDate("start_date").toLocalDate(),
+        			rs.getDate("end_date").toLocalDate(),
+        			rs.getBoolean("is_vacation"),
+        			rs.getString("name")
 	            );
 	            lesson.addBooking(booking);
 	        }

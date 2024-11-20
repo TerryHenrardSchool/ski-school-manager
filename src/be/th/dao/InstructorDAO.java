@@ -253,9 +253,11 @@ public class InstructorDAO extends DAO<Instructor> {
 	private void loadLessonBookings(Lesson lesson) throws SQLException {
 	    String sql = """
 	        SELECT
-	            b.*
+	            b.*, p.*
 	        FROM
 	            bookings b
+            INNER JOIN 
+	    		periods p ON p.period_id = b.period_id
 	        WHERE
 	            b.lesson_id = ?
 	    """;
@@ -268,7 +270,12 @@ public class InstructorDAO extends DAO<Instructor> {
 	            Booking booking = new Booking(
 	                rs3.getInt("booking_id"),
 	                rs3.getDate("booking_date").toLocalDate().atStartOfDay(),
-	                rs3.getBoolean("is_insured")
+	                rs3.getBoolean("is_insured"),
+	                rs3.getInt("period_id"),
+	                rs3.getDate("start_date").toLocalDate(),
+	                rs3.getDate("end_date").toLocalDate(),
+	                rs3.getBoolean("is_vacation"),
+	                rs3.getString("name")
 	            );
 	
 	            lesson.addBooking(booking);

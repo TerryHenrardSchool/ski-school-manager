@@ -197,6 +197,7 @@ public class Lesson implements Serializable {
            ", date=" + date + '\'' + 
            ", " + location + '\'' +
            ", " + lessonType + '\'' + 
-           ", " + bookings.toString();  
+           ", " + bookings.toString() + '\'' +
+           ", " + instructor.getFullNameFormattedForDisplay();  
        }
 }

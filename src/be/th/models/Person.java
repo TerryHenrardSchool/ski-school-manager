@@ -251,6 +251,6 @@ public abstract class Person implements Serializable {
 	        ", dateOfBirth=" + dateOfBirth +
 	        ", phoneNumber='" + phoneNumber + '\'' +
 	        ", email='" + email + '\'' + 
-	        ", " + address.toString();
+	        ", address=" + address;
     }
 }
