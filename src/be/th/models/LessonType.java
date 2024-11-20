@@ -190,6 +190,10 @@ public class LessonType {
     	return name + " " + ageCategoryName  + " - " + level;
     }
     
+	public String getPriceFormattedForDisplay() {
+		return String.format("%.2f €", price);
+	}
+    
     // Database methods
     public static Collection<LessonType> findAllInDatabase(LessonTypeDAO lessonTypeDao){
     	return lessonTypeDao.findAll();
