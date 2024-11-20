@@ -1,8 +1,6 @@
 package be.th.jframes;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Function;
@@ -28,6 +26,7 @@ import be.th.dao.InstructorDAO;
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Accreditation;
 import be.th.models.Instructor;
+import be.th.models.Lesson;
 import be.th.parsers.DateParser;
 import be.th.styles.ColorStyles;
 import be.th.styles.FontStyles;
@@ -71,6 +70,7 @@ public class SearchAnInstructor extends JFrame {
 	private JTextField phoneNumberTextField;
 	
 	private Instructor selectedInstructor;
+	private JTable upcomingLessonsTable;
 
 	public SearchAnInstructor() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -261,6 +261,39 @@ public class SearchAnInstructor extends JFrame {
 		accreditationsTable.getColumnModel().getColumn(0).setResizable(false);
 		accreditationsTable.getColumnModel().getColumn(1).setResizable(false);
 		accreditationsJScrollPane.setViewportView(accreditationsTable);
+		
+		JPanel panel = new JPanel();
+		panel.setBorder(new TitledBorder(null, "Upcoming lessons", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel.setBounds(20, 388, 439, 229);
+		contentPane.add(panel);
+		panel.setLayout(null);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(10, 21, 419, 197);
+		panel.add(scrollPane);
+		
+		upcomingLessonsTable = new JTable();
+		upcomingLessonsTable.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"Start date", "Location", "Lesson type", "Participants", "Revenue"
+			}
+		){
+			private static final long serialVersionUID = 1L;
+			boolean[] columnEditables = new boolean[] {
+				false, false, false, false, false
+			};
+			public boolean isCellEditable(int row, int column) {
+				return columnEditables[column];
+			}
+		});
+		upcomingLessonsTable.getColumnModel().getColumn(0).setResizable(false);
+		upcomingLessonsTable.getColumnModel().getColumn(1).setResizable(false);
+		upcomingLessonsTable.getColumnModel().getColumn(2).setResizable(false);
+		upcomingLessonsTable.getColumnModel().getColumn(3).setResizable(false);
+		upcomingLessonsTable.getColumnModel().getColumn(4).setResizable(false);
+		scrollPane.setViewportView(upcomingLessonsTable);
 				
 		loadInstructorMap();
 		displayInstructorsInTable(instructorMap.values());
@@ -306,6 +339,19 @@ public class SearchAnInstructor extends JFrame {
 			".Please, try again later."
 		);
 	}
+	
+	private void displayLessonsInTable(Collection<Lesson> lessons) {
+        DefaultTableModel model = (DefaultTableModel) upcomingLessonsTable.getModel();
+		lessons = lessons.stream()
+			.sorted((lesson1, lesson2) -> lesson1.getDate().compareTo(lesson2.getDate()))
+			.collect(Collectors.toList());
+		
+        model.setRowCount(0);
+        
+        for (final Lesson lesson : lessons) {
+            model.addRow(getPreparedLessonInfoForTableModel(lesson));
+        }
+    }
 	
 	private void displayAccreditaionsInTable(Collection<Accreditation> accreditations) {		
 		DefaultTableModel model = (DefaultTableModel) accreditationsTable.getModel();
@@ -383,16 +429,16 @@ public class SearchAnInstructor extends JFrame {
     }
 	 
 	 private void applyFilters() {
-		    final Integer id = getNumberField(idSearchTxtField, "id");
-		    final String lastName = getTextField(lastNameSearchTxtField);
-		    final String firstName = getTextField(firstNameSearchTxtField);
-		    final LocalDate birthdate = DateParser.toLocalDate(birthDateTextField.getDate());
-		    final String email = getTextField(emailSearchTxtField);
-		    final String address = getTextField(addressSearchTxtField);
-		    final String phoneNumber = getTextField(phoneNumberTextField);
+	    final Integer id = getNumberField(idSearchTxtField, "id");
+	    final String lastName = getTextField(lastNameSearchTxtField);
+	    final String firstName = getTextField(firstNameSearchTxtField);
+	    final LocalDate birthdate = DateParser.toLocalDate(birthDateTextField.getDate());
+	    final String email = getTextField(emailSearchTxtField);
+	    final String address = getTextField(addressSearchTxtField);
+	    final String phoneNumber = getTextField(phoneNumberTextField);
 
-		    displayInstructorsInTable(searchInstructors(id, lastName, firstName, birthdate, email, address, phoneNumber));
-		}
+	    displayInstructorsInTable(searchInstructors(id, lastName, firstName, birthdate, email, address, phoneNumber));
+	}
 
 	
 	private Object[] getPreparedInstructorInfoForTableModel(Instructor instructor) {
@@ -410,6 +456,16 @@ public class SearchAnInstructor extends JFrame {
 		return new Object[] {
 			accreditation.getSportType(),
 			accreditation.getAgeCategory()
+		};
+	}
+	
+	private Object[] getPreparedLessonInfoForTableModel(Lesson lesson) {
+		return new Object[] { 
+			DatabaseFormatter.toBelgianFormat(lesson.getDate().toLocalDate()), 
+			lesson.getLocation().getName(),
+			lesson.getLessonType().getName(), 
+			lesson.getBookingCount(),
+		  	String.format("%.2f €", lesson.calculatePrice())
 		};
 	}
 	
@@ -502,7 +558,9 @@ public class SearchAnInstructor extends JFrame {
 	    try {
 	        int id = (int) instructorsTable.getValueAt(selectedRow, 0);
 	        selectedInstructor = instructorMap.get(id);
+	        System.out.println(selectedInstructor);
 	        displayAccreditaionsInTable(selectedInstructor.getAccreditations());    
+	        displayLessonsInTable(selectedInstructor.getLessons());
         } catch (Exception ex) {
 	        ex.printStackTrace();
 	        JOptionPane.showMessageDialog(

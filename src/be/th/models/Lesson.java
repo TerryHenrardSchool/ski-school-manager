@@ -2,6 +2,9 @@ package be.th.models;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -26,7 +29,7 @@ public class Lesson implements Serializable {
     LessonType lessonType;
     Instructor instructor;
     // Secretary secretary;
-    // Set<Booking> bookings;
+    Set<Booking> bookings; //TODO: Implement booking methods
     
     // Constructor
     public Lesson(int id, LocalDateTime startDate, LessonType lessonType, Instructor instructor, int locationId, String LocationName) {
@@ -35,6 +38,7 @@ public class Lesson implements Serializable {
         setLessonType(lessonType);
         setInstructor(instructor);
         location = new Location(locationId, LocationName);
+        bookings = new LinkedHashSet<>();
     }
     
     public Lesson(LocalDateTime startDate, LessonType lessonType, Instructor instructor, int locationId, String LocationName) {
@@ -61,6 +65,10 @@ public class Lesson implements Serializable {
 	public Instructor getInstructor() {
 		return instructor;
 	}
+	
+	public Set<Booking> getBookings() {
+        return Collections.unmodifiableSet(bookings);
+    }
 
 	// Setters
     public void setId(int id) {
@@ -101,13 +109,39 @@ public class Lesson implements Serializable {
 	}
 
     // Methods
+	public boolean addBooking(Booking booking) {
+		if (!ObjectValidator.hasValue(booking)) {
+			throw new IllegalArgumentException("Booking must have value.");
+		}
+		
+		if (bookings.contains(booking)) {
+			throw new IllegalArgumentException("Booking already exists.");
+		}
+		return bookings.add(booking);
+	}
+	
+	public boolean removeBooking(Booking booking) {
+		if (!ObjectValidator.hasValue(booking)) {
+			throw new IllegalArgumentException("Booking must have value.");
+		}
+
+		if (!bookings.contains(booking)) {
+			throw new IllegalArgumentException("Booking does not exist.");
+		}
+		return bookings.remove(booking);
+	}
+	
     public double calculatePrice() {
-        return 0.0; // TODO: Implement price calculation logic
+        return lessonType.getPrice() * bookings.size();
     }
 
     public boolean hasBooking() {
-        return false; // TODO: Implement booking check logic
+        return !bookings.isEmpty();
     }
+    
+	public int getBookingCount() {
+		return bookings.size();
+	}
 
     // Override methods
     @Override
@@ -136,6 +170,7 @@ public class Lesson implements Serializable {
            "id=" + id +
            ", date=" + date + '\'' + 
            ", " + location + '\'' +
-           ", " + lessonType + '\'';  
+           ", " + lessonType + '\'' + 
+           ", " + bookings.toString();  
        }
 }

@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Accreditation;
+import be.th.models.Booking;
 import be.th.models.Instructor;
 import be.th.models.Lesson;
 import be.th.models.LessonType;
@@ -215,32 +216,62 @@ public class InstructorDAO extends DAO<Instructor> {
 	    );
 	}
 
+
 	private void loadInstructorLessons(Instructor instructor) throws SQLException {
 	    String sql = """
-	        SELECT 
-	            l.*, 
-	            lt.*, 
-	            a.*, 
+	        SELECT
+	            l.*,
+	            lt.*,
+	            a.*,
 	            loc.location_id AS location_id_1, loc.name AS name_1
-	        FROM 
+	        FROM
 	            lessons l
-	        INNER JOIN 
+	        INNER JOIN
 	            lesson_types lt ON lt.lesson_type_id = l.lesson_type_id
-	        INNER JOIN 
+	        INNER JOIN
 	            accreditations a ON a.accreditation_id = lt.accreditation_id
-	        INNER JOIN 
+	        INNER JOIN
 	            locations loc ON loc.location_id = l.location_id
-	        WHERE 
+	        WHERE
 	            instructor_id = ?
 	    """;
-
+	
 	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 	        pstmt.setInt(1, instructor.getId());
 	        ResultSet rs2 = pstmt.executeQuery();
-
+	
 	        while (rs2.next()) {
 	            Lesson lesson = mapLesson(rs2, instructor);
+	            loadLessonBookings(lesson);
 	            instructor.addLesson(lesson);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	}
+
+	private void loadLessonBookings(Lesson lesson) throws SQLException {
+	    String sql = """
+	        SELECT
+	            b.*
+	        FROM
+	            bookings b
+	        WHERE
+	            b.lesson_id = ?
+	    """;
+	
+	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	        pstmt.setInt(1, lesson.getId());
+	        ResultSet rs3 = pstmt.executeQuery();
+	
+	        while (rs3.next()) {
+	            Booking booking = new Booking(
+	                rs3.getInt("booking_id"),
+	                rs3.getDate("booking_date").toLocalDate().atStartOfDay(),
+	                rs3.getBoolean("is_insured")
+	            );
+	
+	            lesson.addBooking(booking);
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
