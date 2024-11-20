@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import be.th.dao.AccreditationDAO;
-import be.th.dao.DatabaseConstants;
+import be.th.dao.DatabaseConstant;
 import be.th.validators.IntegerValidator;
 import be.th.validators.StringValidator;
 
@@ -14,16 +14,12 @@ public class Accreditation {
 	private int id;
     private String sportType;
     private String ageCategory;
-    private int minAge;
-    private int maxAge;
 
     // Constructor
-    public Accreditation(int id, String sportType, String ageCategory, int minAge, int maxAge) {
+    public Accreditation(int id, String sportType, String ageCategory) {
     	setId(id);
         setSportType(sportType);
         setAgeCategory(ageCategory);
-        setMinAge(minAge);
-        setMaxAge(maxAge);
     }
 
     // Getters
@@ -38,14 +34,6 @@ public class Accreditation {
     public String getAgeCategory() {
         return ageCategory;
     }
-    
-    public int getMinAge() {
-    	return minAge;
-    }
-
-    public int getMaxAge() {
-    	return maxAge;
-    }
     // Setters
     public void setId(int id) {
     	if (!IntegerValidator.isPositiveOrEqualToZero(id)) {
@@ -59,8 +47,8 @@ public class Accreditation {
             throw new IllegalArgumentException("Sport type must have value.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(sportType, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Sport type's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(sportType, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Sport type's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.sportType = sportType;
     }
@@ -70,26 +58,10 @@ public class Accreditation {
             throw new IllegalArgumentException("Age category must have value.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(ageCategory, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Age category's length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(ageCategory, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Age category's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.ageCategory = ageCategory;
-    }
-    
-    public void setMinAge(int minAge) {
-    	if(!IntegerValidator.isPositiveOrEqualToZero(minAge)) {
-    		throw new IllegalArgumentException("Min age must be positive or equal to zero.");    		
-    	}
-    	
-    	this.minAge = minAge;
-    }
-    
-    public void setMaxAge(int maxAge) {
-    	if(!IntegerValidator.isPositiveOrEqualToZero(maxAge)) {
-    		throw new IllegalArgumentException("Max age must be positive or equal to zero.");    		
-    	}
-    	
-    	this.maxAge = maxAge;
     }
     
     // Database methods
@@ -110,15 +82,13 @@ public class Accreditation {
 
         Accreditation accreditation = (Accreditation) object;
         return id == accreditation.id &&
-    		minAge == accreditation.minAge &&
-    		maxAge == accreditation.maxAge &&
     		Objects.equals(sportType, accreditation.sportType) &&
     		Objects.equals(ageCategory, accreditation.ageCategory);           
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, sportType, ageCategory, minAge, maxAge);
+        return Objects.hash(id, sportType, ageCategory);
     }
 
     @Override
@@ -126,8 +96,6 @@ public class Accreditation {
         return "Accreditation:" +
            "id=" + id +
            ", sportType='" + sportType + '\'' +
-           ", ageCategory='" + ageCategory + '\'' +
-           ", minAge='" + minAge + '\'' +
-           ", maxAge='" + maxAge + '\'';
+           ", ageCategory='" + ageCategory + '\'';
     }
 }

@@ -9,12 +9,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Accreditation;
 import be.th.models.Instructor;
+import be.th.models.Lesson;
+import be.th.models.LessonType;
+import be.th.validators.IntegerValidator;
 
 public class InstructorDAO extends DAO<Instructor> {
 
@@ -24,32 +28,13 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	@Override
 	public boolean create(Instructor instructor) {
-	    String sqlInstructor = """
-	        INSERT INTO instructors (
-	            last_name, 
-	            first_name, 
-	            date_of_birth, 
-	            phone_number, 
-	            email, 
-	            city, 
-	            postcode, 
-	            street_name, 
-	            street_number
-	        ) 
-	        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-	    """;
-
-	    String sqlAccreditation = """
-	        INSERT INTO instructor_accreditation_details (instructor_id, accreditation_id)
-	        VALUES (?, ?)
-	    """;
-
 	    try {
 	        connection.setAutoCommit(false);
 
-	        int instructorId = insertInstructor(sqlInstructor, instructor);
-	        insertAccreditations(sqlAccreditation, instructorId, instructor.getAccreditations());
-
+	        int personId = insertPerson(instructor);
+	        int instructorId = insertInstructor(personId);
+	        insertAccreditations(instructorId, instructor.getAccreditations());
+	        
 	        connection.commit();
 	        
 	        return true;
@@ -65,21 +50,11 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	@Override
 	public boolean delete(int id) {
-		String sqlInstructorAccreditationDetails = """
-			DELETE FROM instructor_accreditation_details
-			WHERE instructor_id = ?
-		""";
-		
-		String sqlInstructor = """
-		    DELETE FROM instructors 
-		    WHERE instructor_id = ?
-	    """;
-	    
 		try {
 	        connection.setAutoCommit(false);
 
-			deleteInstructorAccreditationDetails(sqlInstructorAccreditationDetails, id);
-			deleteInstructor(sqlInstructor, id);
+			deleteInstructorAccreditationDetails(id);
+			deleteInstructor(id);
 			
 	        connection.commit();
 	        return true;
@@ -105,8 +80,8 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	        Set<Integer> currentAccreditations = getCurrentAccreditations(instructor.getId());
 	        Set<Integer> newAccreditations = instructor.getAccreditations().stream()
-	                .map(Accreditation::getId)
-	                .collect(Collectors.toSet());
+                .map(Accreditation::getId)
+                .collect(Collectors.toSet());
 
 	        deleteObsoleteAccreditations(instructor.getId(), currentAccreditations, newAccreditations);
 	        insertNewAccreditations(instructor.getId(), currentAccreditations, newAccreditations);
@@ -115,7 +90,6 @@ public class InstructorDAO extends DAO<Instructor> {
 	        return true;
 	    } catch (SQLException e) {
             DatabaseTransaction.rollbackTransaction(connection);
-	        e.printStackTrace();
 	        return false;
 	    } finally {
             DatabaseTransaction.restoreAutoCommit(connection);
@@ -127,7 +101,8 @@ public class InstructorDAO extends DAO<Instructor> {
 	public Instructor find(int id) {
 	    String sql = """
 	        SELECT * 
-	        FROM instructors 
+	        FROM persons
+	        NATURAL JOIN instructors 
 	        NATURAL JOIN instructor_accreditation_details 
 	        NATURAL JOIN accreditations 
 	        WHERE instructor_id = ?
@@ -144,9 +119,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	            Accreditation accreditation = new Accreditation(
 	                rs.getInt("accreditation_id"),
 	                rs.getString("sport"),
-	                rs.getString("age_category_name"),
-	                rs.getInt("min_age"),
-	                rs.getInt("max_age")
+	                rs.getString("age_category_name")
 	            );
 	            
 	            if (instructor == null) {
@@ -177,46 +150,28 @@ public class InstructorDAO extends DAO<Instructor> {
 	    return null;
 	}
 
-	@Override
 	public List<Instructor> findAll() {
 	    String sql = """
 	        SELECT * 
-	        FROM instructors 
+	        FROM persons
+	        NATURAL JOIN instructors 
 	        NATURAL JOIN instructor_accreditation_details 
 	        NATURAL JOIN accreditations 
 	        ORDER BY instructor_id DESC
 	    """;
-	    
+
 	    List<Instructor> instructors = new ArrayList<>();
 	    Map<Integer, Instructor> instructorMap = new HashMap<>();
-	    
+
 	    try (ResultSet rs = connection.prepareStatement(sql).executeQuery()) {
 	        while (rs.next()) {
 	            int instructorId = rs.getInt("instructor_id");
-
-	            Accreditation accreditation = new Accreditation(
-	                rs.getInt("accreditation_id"),
-	                rs.getString("sport"),
-	                rs.getString("age_category_name"),
-	                rs.getInt("min_age"),
-	                rs.getInt("max_age")
-	            );
+	            Accreditation accreditation = mapAccreditation(rs);
 
 	            Instructor instructor = instructorMap.get(instructorId);
 	            if (instructor == null) {
-	                instructor = new Instructor(
-	                    instructorId,
-	                    rs.getString("last_name"),
-	                    rs.getString("first_name"),
-	                    rs.getDate("date_of_birth").toLocalDate(),
-	                    rs.getString("city"),
-	                    rs.getString("postcode"),
-	                    rs.getString("street_name"),
-	                    rs.getString("street_number"),
-	                    rs.getString("phone_number"),
-	                    rs.getString("email"),
-	                    Set.of(accreditation)
-	                );
+	                instructor = mapInstructor(rs, accreditation);
+	                loadInstructorLessons(instructor);
 	                instructorMap.put(instructorId, instructor);
 	                instructors.add(instructor);
 	            } else {
@@ -226,7 +181,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }
-	    
+
 	    return instructors;
 	}
 
@@ -235,45 +190,195 @@ public class InstructorDAO extends DAO<Instructor> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	private Accreditation mapAccreditation(ResultSet rs) throws SQLException {
+	    return new Accreditation(
+	        rs.getInt("accreditation_id"),
+	        rs.getString("sport"),
+	        rs.getString("age_category_name")
+	    );
+	}
 
-	private int insertInstructor(String sqlInstructor, Instructor instructor) throws SQLException {
-	    try (PreparedStatement pstmtInstructor = connection.prepareStatement(sqlInstructor)) {
-	    	pstmtInstructor.setString(1, DatabaseFormatter.format(instructor.getLastName()));
-	    	pstmtInstructor.setString(2, DatabaseFormatter.format(instructor.getFirstName()));
-	    	pstmtInstructor.setDate(3, java.sql.Date.valueOf(instructor.getDateOfBirth()));
-	    	pstmtInstructor.setString(4, DatabaseFormatter.format(instructor.getPhoneNumber()));
-	    	pstmtInstructor.setString(5, DatabaseFormatter.format(instructor.getEmail()));
-	    	pstmtInstructor.setString(6, DatabaseFormatter.format(instructor.getAddress().getCity()));
-	    	pstmtInstructor.setString(7, DatabaseFormatter.format(instructor.getAddress().getPostcode()));
-	    	pstmtInstructor.setString(8, DatabaseFormatter.format(instructor.getAddress().getStreetName()));
-	    	pstmtInstructor.setString(9, DatabaseFormatter.format(instructor.getAddress().getStreetNumber()));
+	private Instructor mapInstructor(ResultSet rs, Accreditation accreditation) throws SQLException {
+	    return new Instructor(
+	        rs.getInt("instructor_id"),
+	        rs.getString("last_name"),
+	        rs.getString("first_name"),
+	        rs.getDate("date_of_birth").toLocalDate(),
+	        rs.getString("city"),
+	        rs.getString("postcode"),
+	        rs.getString("street_name"),
+	        rs.getString("street_number"),
+	        rs.getString("phone_number"),
+	        rs.getString("email"),
+	        Set.of(accreditation)
+	    );
+	}
 
-	        int affectedRows = pstmtInstructor.executeUpdate();
-	        if (affectedRows == 0) {
-	            throw new SQLException("Creating instructor failed, no rows affected.");
+	private void loadInstructorLessons(Instructor instructor) throws SQLException {
+	    String sql = """
+	        SELECT 
+	            l.*, 
+	            lt.*, 
+	            a.*, 
+	            loc.location_id AS location_id_1, loc.name AS name_1
+	        FROM 
+	            lessons l
+	        INNER JOIN 
+	            lesson_types lt ON lt.lesson_type_id = l.lesson_type_id
+	        INNER JOIN 
+	            accreditations a ON a.accreditation_id = lt.accreditation_id
+	        INNER JOIN 
+	            locations loc ON loc.location_id = l.location_id
+	        WHERE 
+	            instructor_id = ?
+	    """;
+
+	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	        pstmt.setInt(1, instructor.getId());
+	        ResultSet rs2 = pstmt.executeQuery();
+
+	        while (rs2.next()) {
+	            Lesson lesson = mapLesson(rs2, instructor);
+	            instructor.addLesson(lesson);
 	        }
-
-	        return DatabaseSequence.getCurrentSequenceValue(connection, "instructors_seq");
-	    } catch (SQLException ex) {
-	    	throw new SQLException("Error while inserting instructor. Error: " + ex.getMessage());
+	    } catch (SQLException e) {
+	        e.printStackTrace();
 	    }
 	}
 
-	private void insertAccreditations(String sqlAccreditation, int instructorId, Set<Accreditation> accreditations) throws SQLException {
+	private Lesson mapLesson(ResultSet rs, Instructor instructor) throws SQLException {
+	    int maxAge = rs.getInt("max_age");
+	    Optional<Integer> maxAgeOptional = rs.wasNull() ? Optional.empty() : Optional.of(maxAge);
+
+	    LessonType lessonType = new LessonType(
+	        rs.getInt("lesson_type_id"),
+	        rs.getString("skill_level"),
+	        rs.getDouble("price"),
+	        rs.getString("name"),
+	        rs.getString("age_category_name"),
+	        rs.getInt("min_age"),
+	        maxAgeOptional,
+	        rs.getInt("min_bookings"),
+	        rs.getInt("max_bookings"),
+	        new Accreditation(
+	            rs.getInt("accreditation_id"),
+	            rs.getString("sport"),
+	            rs.getString("age_category_name")
+	        )
+	    );
+
+	    return new Lesson(
+	        rs.getInt("lesson_id"),
+	        rs.getDate("start_date").toLocalDate().atStartOfDay(),
+	        lessonType,
+	        instructor,
+	        rs.getInt("location_id_1"),
+	        rs.getString("name_1")
+	    );
+	}
+
+	private int insertPerson(Instructor instructor) throws SQLException {
+		String sqlPerson = """
+    		INSERT INTO persons
+	        (
+	            last_name, 
+	            first_name, 
+	            date_of_birth, 
+	            phone_number, 
+	            email, 
+	            city, 
+	            postcode, 
+	            street_name, 
+	    		street_number
+	        ) 
+	        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	    """;
+		
+	    try (PreparedStatement pstmtPerson = connection.prepareStatement(sqlPerson, new String[] {"person_id"})) {
+	    	pstmtPerson.setString(1, DatabaseFormatter.format(instructor.getLastName()));
+	    	pstmtPerson.setString(2, DatabaseFormatter.format(instructor.getFirstName()));
+	    	pstmtPerson.setDate(3, java.sql.Date.valueOf(instructor.getDateOfBirth()));
+	    	pstmtPerson.setString(4, DatabaseFormatter.format(instructor.getPhoneNumber()));
+	    	pstmtPerson.setString(5, DatabaseFormatter.format(instructor.getEmail()));
+	    	pstmtPerson.setString(6, DatabaseFormatter.format(instructor.getAddress().getCity()));
+	    	pstmtPerson.setString(7, DatabaseFormatter.format(instructor.getAddress().getPostcode()));
+	    	pstmtPerson.setString(8, DatabaseFormatter.format(instructor.getAddress().getStreetName()));
+	    	pstmtPerson.setString(9, DatabaseFormatter.format(instructor.getAddress().getStreetNumber()));
+
+	        int affectedRows = pstmtPerson.executeUpdate();
+	        if (affectedRows == 0) {
+	            throw new SQLException("Creating instructor failed, no rows affected.");
+	        }
+	        
+	        try (ResultSet generatedKeys = pstmtPerson.getGeneratedKeys()){
+	        	if(generatedKeys.next()) {
+	        		return generatedKeys.getInt(1);
+	        	}
+	        	
+	        	return -1;
+	        }
+	    } catch (SQLException ex) {
+	    	throw new SQLException("Error while inserting person. Error: " + ex.getMessage());
+	    }
+	}
+	
+	private int insertInstructor(int personId) throws SQLException {
+		String sqlInstructor = """
+    		INSERT INTO instructors (person_id)
+    		VALUES(?)
+		""";
+		
+		try (PreparedStatement pstmtInstructor = connection.prepareStatement(sqlInstructor, new String[] {"instructor_id"})) {
+			pstmtInstructor.setInt(1, personId);
+			
+			int affectedRows = pstmtInstructor.executeUpdate();
+			if (affectedRows == 0) {
+	            throw new SQLException("Creating instructor failed, no rows affected.");
+	        }
+			
+			try (ResultSet generatedKeys = pstmtInstructor.getGeneratedKeys()){
+	        	if(generatedKeys.next()) {
+	        		return generatedKeys.getInt(1);
+	        	}
+	        	
+	        	return -1;
+	        }
+		} catch (SQLException ex) {
+	    	throw new SQLException("Error while inserting instructor. Error: " + ex.getMessage());
+		}
+	}
+
+	private void insertAccreditations(int instructorId, Set<Accreditation> accreditations) throws SQLException {
+		String sqlAccreditation = """
+	        INSERT INTO instructor_accreditation_details 
+	        (
+			    instructor_id, 
+			    accreditation_id
+		    )
+	        VALUES (?, ?)
+	    """;
+		
 	    try (PreparedStatement pstmtAccreditation = connection.prepareStatement(sqlAccreditation)) {
 	        for (Accreditation accreditation : accreditations) {
 	            pstmtAccreditation.setInt(1, instructorId);
 	            pstmtAccreditation.setInt(2, accreditation.getId());
 	            pstmtAccreditation.addBatch();
 	        }
+	        
 	        pstmtAccreditation.executeBatch();
 	    } catch (SQLException ex) {
-	    	throw new SQLException("Error while inserting instructor's accreditations.");
+	    	throw new SQLException("Error while inserting instructor's accreditations. Error: " + ex.getMessage());
 	    }
 	}
 	
-	private void deleteInstructorAccreditationDetails(String sql, int instructorId) throws SQLException {
-	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	private void deleteInstructorAccreditationDetails(int instructorId) throws SQLException {
+		String sqlInstructorAccreditationDetails = """
+			DELETE FROM instructor_accreditation_details
+			WHERE instructor_id = ?
+		""";
+		
+	    try (PreparedStatement pstmt = connection.prepareStatement(sqlInstructorAccreditationDetails)) {
 	        pstmt.setInt(1, instructorId);
 	        
 	        int affectedRows = pstmt.executeUpdate();
@@ -286,8 +391,13 @@ public class InstructorDAO extends DAO<Instructor> {
 	    }
 	}
 
-	private void deleteInstructor(String sql, int instructorId) throws SQLException {
-	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	private void deleteInstructor(int instructorId) throws SQLException {
+		String sqlInstructor = """
+		    DELETE FROM instructors 
+		    WHERE instructor_id = ?
+	    """;
+		
+	    try (PreparedStatement pstmt = connection.prepareStatement(sqlInstructor)) {
 	        pstmt.setInt(1, instructorId);
 	        
 	        int affectedRows = pstmt.executeUpdate();
@@ -302,7 +412,7 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	private boolean updateInstructorInfo(Instructor instructor) {
 	    String sql = """
-	        UPDATE instructors
+	        UPDATE persons
 	        SET last_name = ?, 
 	            first_name = ?, 
 	            date_of_birth = ?, 
@@ -312,7 +422,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	            postcode = ?, 
 	            street_name = ?, 
 	            street_number = ?
-	        WHERE instructor_id = ?
+	        WHERE person_id = (SELECT person_id FROM instructors WHERE instructor_id = ?)
 	    """;
 
 	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -334,12 +444,18 @@ public class InstructorDAO extends DAO<Instructor> {
 	}
 
 	private Set<Integer> getCurrentAccreditations(int instructorId) throws SQLException {
-	    String selectSql = "SELECT accreditation_id FROM instructor_accreditation_details WHERE instructor_id = ?";
+	    String selectSql = """		
+    		SELECT accreditation_id 
+    		FROM instructor_accreditation_details 
+    		WHERE instructor_id = ?
+		""";
+	    
 	    Set<Integer> accreditations = new HashSet<>();
 
 	    try (PreparedStatement selectStmt = connection.prepareStatement(selectSql)) {
 	        selectStmt.setInt(1, instructorId);
 	        ResultSet rs = selectStmt.executeQuery();
+	        
 	        while (rs.next()) {
 	            accreditations.add(rs.getInt("accreditation_id"));
 	        }
@@ -350,7 +466,10 @@ public class InstructorDAO extends DAO<Instructor> {
 	}
 
 	private void deleteObsoleteAccreditations(int instructorId, Set<Integer> currentAccreditations, Set<Integer> newAccreditations) throws SQLException {
-	    String deleteSql = "DELETE FROM instructor_accreditation_details WHERE instructor_id = ? AND accreditation_id = ?";
+	    String deleteSql = """
+    		DELETE FROM instructor_accreditation_details 
+    		WHERE instructor_id = ? AND accreditation_id = ?
+		""";
 
 	    try (PreparedStatement deleteStmt = connection.prepareStatement(deleteSql)) {
 	        for (Integer currentAccreditation : currentAccreditations) {
@@ -365,8 +484,21 @@ public class InstructorDAO extends DAO<Instructor> {
 	    }
 	}
 
-	private void insertNewAccreditations(int instructorId, Set<Integer> currentAccreditations, Set<Integer> newAccreditations) throws SQLException {
-	    String insertSql = "INSERT INTO instructor_accreditation_details (instructor_id, accreditation_id) VALUES (?, ?)";
+	private void insertNewAccreditations(
+		int instructorId, 
+		Set<Integer> currentAccreditations, 
+		Set<Integer> newAccreditations
+	) 
+		throws SQLException 
+	{
+	    String insertSql = """
+    		INSERT INTO instructor_accreditation_details 
+    		(
+	    		instructor_id, 
+	    		accreditation_id
+    		) 
+    		VALUES (?, ?)
+		""";
 
 	    try (PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
 	        for (Integer newAccreditation : newAccreditations) {

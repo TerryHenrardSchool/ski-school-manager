@@ -7,6 +7,7 @@ import be.th.models.Booking;
 import be.th.models.Instructor;
 import be.th.models.Lesson;
 import be.th.models.LessonType;
+import be.th.models.Location;
 import be.th.models.Secretary;
 import be.th.models.Skier;
 
@@ -33,11 +34,15 @@ public class DAOFactory {
 		return new SecretaryDAO(CONNECTION);
 	}
 	
-	public DAO<LessonType> getLessonTypesDAO(){
-		return new LessonTypesDAO(CONNECTION);
+	public DAO<LessonType> getLessonTypeDAO(){
+		return new LessonTypeDAO(CONNECTION);
 	}
 	
 	public DAO<Accreditation> getAccreditationDAO(){
 		return new AccreditationDAO(CONNECTION);
+	}
+	
+	public DAO<Location> getLocationDAO(){
+		return new LocationDAO(CONNECTION);
 	}
 }

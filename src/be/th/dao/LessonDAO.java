@@ -1,6 +1,9 @@
 package be.th.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -13,9 +16,30 @@ public class LessonDAO extends DAO<Lesson>{
 	}
 
 	@Override
-	public boolean create(Lesson obj) {
-		return false; // TODO
+	public boolean create(Lesson lesson) {
+	    String query = """
+	    	INSERT INTO lessons (
+    		   	start_date, 
+    		   	location_id, 
+    		   	secretary_id, 
+    		   	instructor_id, 
+    		   	lesson_type_id
+		   	) 
+    		VALUES (?, ?, ?, ?, ?)
+		""";
+	    try (PreparedStatement ps = connection.prepareStatement(query)) {
+	        ps.setDate(1, Date.valueOf(lesson.getDate().toLocalDate()));
+	        ps.setInt(2, lesson.getLocation().getId());
+	        ps.setInt(3, 21);
+	        ps.setInt(4, lesson.getInstructor().getId());
+	        ps.setInt(5, lesson.getLessonType().getId());
+	        return ps.executeUpdate() > 0;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
 	}
+
 
 	@Override
 	public boolean delete(int id) {

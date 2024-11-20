@@ -57,9 +57,7 @@ public class AccreditationDAO extends DAO<Accreditation>{
 	            Accreditation accreditation = new Accreditation(
 	                rs.getInt("accreditation_id"),
 	                rs.getString("sport"),
-	                rs.getString("age_category_name"),
-	                rs.getInt("min_age"),
-	                rs.getInt("max_age")
+	                rs.getString("age_category_name")
 	            );
 	            accreditations.add(accreditation);
 	        }

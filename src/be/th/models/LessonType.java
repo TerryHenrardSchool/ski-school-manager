@@ -1,9 +1,15 @@
 package be.th.models;
 
+import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
-import be.th.dao.DatabaseConstants;
+import javax.sound.midi.VoiceStatus;
+
+import be.th.dao.DatabaseConstant;
+import be.th.dao.LessonTypeDAO;
 import be.th.validators.IntegerValidator;
+import be.th.validators.ObjectValidator;
 import be.th.validators.StringValidator;
 
 public class LessonType {
@@ -17,14 +23,37 @@ public class LessonType {
     private double price;
     private String name;
     private String ageCategoryName;
+    private int minAge;
+    private Optional<Integer> maxAge;
+    private int minBookings;
+    private int maxBookings;
+    
+    // References
+    private Accreditation accreditation;
 
     // Constructor
-    public LessonType(int id, String level, double price, String name, String ageCategoryName) {
+    public LessonType(
+		int id, 
+		String level, 
+		double price, 
+		String name, 
+		String ageCategoryName, 
+		int minAge, 
+		Optional<Integer> maxAge, 
+		int minBookings, 
+		int maxBookings,
+		Accreditation accreditation
+	) {
         setId(id);
         setLevel(level);
         setPrice(price);
         setName(name);
         setAgeCategoryName(ageCategoryName);
+        setMinAge(minAge);
+        setMaxAge(maxAge);
+        setMinBookings(minBookings);
+        setMaxBookings(maxBookings);
+        setAccreditation(accreditation);
     }
 
     // Getters
@@ -47,6 +76,26 @@ public class LessonType {
     public String getAgeCategoryName() {
         return ageCategoryName;
     }
+    
+    public int getMinAge() {
+    	return minAge;
+    }
+    
+    public Optional<Integer> getMaxAge(){
+    	return maxAge;
+    }
+    
+    public int getMinBookings() {
+    	return minBookings;
+    }
+    
+    public int getMaxBookings() {
+    	return maxBookings;
+    }
+    
+    public Accreditation getAccreditation() {
+    	return accreditation;
+    }
 
     // Setters
     public void setId(int id) {
@@ -61,8 +110,8 @@ public class LessonType {
             throw new IllegalArgumentException("Level must be a non-empty string. Null or empty values are not allowed.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(level, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Level length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(level, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Level length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.level = level;
     }
@@ -79,8 +128,8 @@ public class LessonType {
             throw new IllegalArgumentException("Name must be a non-empty string. Null or empty values are not allowed.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(level, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Lesson type's name length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(level, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Lesson type's name length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.name = name;
     }
@@ -90,10 +139,60 @@ public class LessonType {
             throw new IllegalArgumentException("Age category name must be a non-empty string. Null or empty values are not allowed.");
         }
         
-        if(!StringValidator.isLengthSmallerOrEqual(ageCategoryName, DatabaseConstants.MAX_CHARACTERS)) {
-            throw new IllegalArgumentException("Age category name's name length must be smaller than " + DatabaseConstants.MAX_CHARACTERS);
+        if(!StringValidator.isLengthSmallerOrEqual(ageCategoryName, DatabaseConstant.MAX_CHARACTERS)) {
+            throw new IllegalArgumentException("Age category name's name length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
         this.ageCategoryName = ageCategoryName;
+    }
+    
+    public void setMinAge(int minAge) {
+    	if(!IntegerValidator.isGreaterOrEqual(minAge, 1)) {
+    		throw new IllegalArgumentException("Min age must be a positive number.");    		
+    	}
+    	
+    	this.minAge = minAge;
+    }
+    
+    public void setMaxAge(Optional<Integer> maxAge) {
+    	if(maxAge.isPresent() && !IntegerValidator.isGreaterOrEqual(maxAge, 1)) {
+    		throw new IllegalArgumentException("Max age must be a positive number.");    		
+    	}
+    	
+    	this.maxAge = maxAge;
+    }
+    
+    public void setMinBookings(int minBookings) {
+    	if(!IntegerValidator.isPositiveOrEqualToZero(minBookings)) {
+    		throw new IllegalArgumentException("Min bookings must be positive or equal to zero.");    		    		
+    	}
+    	
+    	this.minBookings = minBookings;
+    }
+    
+    public void setMaxBookings(int maxBookings) {
+    	if(!IntegerValidator.isPositiveOrEqualToZero(maxBookings)) {
+    		throw new IllegalArgumentException("Max bookings must be positive or equal to zero.");    		    		
+    	}
+    	
+    	this.maxBookings = maxBookings;
+    }
+    
+    public void setAccreditation(Accreditation accreditation) {
+    	if(!ObjectValidator.hasValue(accreditation)) {    		
+    		throw new IllegalArgumentException("A lesson type must have an accreditation.");    		    		
+    	}
+    	
+    	this.accreditation = accreditation;
+    }
+    
+    // Methods 
+    public String getLessonTypeInfoFormattedForDisplay() {
+    	return name + " " + ageCategoryName  + " - " + level;
+    }
+    
+    // Database methods
+    public static Collection<LessonType> findAllInDatabase(LessonTypeDAO lessonTypeDao){
+    	return lessonTypeDao.findAll();
     }
 
     // Override methods
@@ -109,15 +208,20 @@ public class LessonType {
 
         LessonType lessonType = (LessonType) object;
         return id == lessonType.id &&
-           Double.compare(lessonType.price, price) == 0 &&
-           Objects.equals(level, lessonType.level) &&
-           Objects.equals(name, lessonType.name) &&
-           Objects.equals(ageCategoryName, lessonType.ageCategoryName);
+    		minAge == lessonType.minAge &&
+    		minBookings == lessonType.minBookings && 
+    		maxBookings == lessonType.maxBookings &&
+    		Objects.equals(maxAge, lessonType.maxAge) &&
+            Double.compare(lessonType.price, price) == 0 &&
+            Objects.equals(level, lessonType.level) &&
+            Objects.equals(name, lessonType.name) &&
+            Objects.equals(ageCategoryName, lessonType.ageCategoryName) &&
+        	accreditation.equals(lessonType.accreditation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, level, price, name, ageCategoryName);
+        return Objects.hash(id, level, price, name, ageCategoryName, minAge, maxAge, minBookings, maxBookings, accreditation.hashCode());
     }
 
     @Override
@@ -127,6 +231,11 @@ public class LessonType {
            ", level='" + level + '\'' +
            ", price=" + price +
            ", name='" + name + '\'' +
-           ", ageCategoryName='" + ageCategoryName + '\'';
+           ", ageCategoryName='" + ageCategoryName + '\'' + 
+           ", minAge'" + minAge + '\'' + 
+           ", maxAge'" + maxAge + '\'' +
+           ", minBookings'" + minBookings + '\'' +
+           ", maxBookings'" + maxBookings + '\'' + 
+           ", Accreditation'" + accreditation + '\'';
     }
 }
