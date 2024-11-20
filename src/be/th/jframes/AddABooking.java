@@ -48,6 +48,8 @@ import java.security.KeyStore.PrivateKeyEntry;
 import java.time.LocalDate;
 import java.awt.event.ActionEvent;
 
+// Review release 1.3.0 
+// Code pretty clean, could have split methods at some point but it's not a priority.
 public class AddABooking extends JFrame {
 
 	private static final long serialVersionUID = 1L;
