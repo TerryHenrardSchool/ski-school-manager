@@ -273,27 +273,28 @@ public class InstructorDAO extends DAO<Instructor> {
 	
 	        while (rs3.next()) {
 	        	Booking booking = new Booking(
-	        			rs3.getInt("booking_id"),
-	        			rs3.getDate("booking_date").toLocalDate().atStartOfDay(),
-	        			rs3.getBoolean("is_insured"),
-	        			rs3.getInt("period_id"),
-	        			rs3.getDate("start_date").toLocalDate(),
-	        			rs3.getDate("end_date").toLocalDate(),
-	        			rs3.getBoolean("is_vacation"),
-	        			rs3.getString("name"),
-	        			new Skier(
-        					rs3.getInt("skier_id_1"),
-        					rs3.getString("last_name"),
-        					rs3.getString("first_name"),
-        					rs3.getDate("date_of_birth").toLocalDate(),
-        					rs3.getString("city"),
-        					rs3.getString("postcode"),
-        					rs3.getString("street_name"),
-        					rs3.getString("street_number"),
-        					rs3.getString("phone_number"),
-        					rs3.getString("email")
-    					)
-		            );
+        			rs3.getInt("booking_id"),
+        			rs3.getDate("booking_date").toLocalDate().atStartOfDay(),
+        			rs3.getBoolean("is_insured"),
+        			rs3.getInt("period_id"),
+        			rs3.getDate("start_date").toLocalDate(),
+        			rs3.getDate("end_date").toLocalDate(),
+        			rs3.getBoolean("is_vacation"),
+        			rs3.getString("name"),
+        			lesson,
+        			new Skier(
+    					rs3.getInt("skier_id_1"),
+    					rs3.getString("last_name"),
+    					rs3.getString("first_name"),
+    					rs3.getDate("date_of_birth").toLocalDate(),
+    					rs3.getString("city"),
+    					rs3.getString("postcode"),
+    					rs3.getString("street_name"),
+    					rs3.getString("street_number"),
+    					rs3.getString("phone_number"),
+    					rs3.getString("email")
+					)
+	            );
 	
 	            lesson.addBooking(booking);
 	        }

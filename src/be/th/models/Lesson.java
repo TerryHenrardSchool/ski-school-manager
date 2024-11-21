@@ -133,9 +133,6 @@ public class Lesson implements Serializable {
 			throw new IllegalArgumentException("Booking must have value.");
 		}
 		
-		if (bookings.contains(booking)) {
-			throw new IllegalArgumentException("Booking already exists.");
-		}
 		
 		if (bookings.size() >= lessonType.getMaxBookings()) {
 			throw new IllegalArgumentException("Lesson is fully booked.");
@@ -144,6 +141,10 @@ public class Lesson implements Serializable {
 		
 		if (!booking.getSkier().hasValidAgeForLessonType(lessonType)) {
 			throw new IllegalArgumentException("Skier does not meet the age requirements for the lesson type.");
+		}
+		
+		if (bookings.contains(booking)) {
+			return false;
 		}
 		return bookings.add(booking);
 	}

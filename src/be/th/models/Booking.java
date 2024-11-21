@@ -35,35 +35,40 @@ public class Booking implements Serializable {
 		LocalDate endDate, 
 		boolean isVacation, 
 		String name,
+		Lesson lesson,
 		Skier skier
 	) {
         setId(id);
         setBookingDate(bookingDate);
         setInsured(isInsured);
         setSkier(skier);
+        setLesson(lesson);
         this.period = new Period(periodId, startDate, endDate, isVacation, name);
+        lesson.addBooking(this);
     }
     
     public Booking(
-    		LocalDateTime bookingDate, 
-    		boolean isInsured, 
-    		int periodId, 
-    		LocalDate startDate, 
-    		LocalDate endDate, 
-    		boolean isVacation, 
-    		String name,
-    		Skier skier
+		LocalDateTime bookingDate, 
+		boolean isInsured, 
+		int periodId, 
+		LocalDate startDate, 
+		LocalDate endDate, 
+		boolean isVacation, 
+		String name,
+		Lesson lesson,
+		Skier skier
 	) {
-    	this(0, bookingDate, isInsured, periodId, startDate, endDate, isVacation, name, skier);
+    	this(0, bookingDate, isInsured, periodId, startDate, endDate, isVacation, name, lesson, skier);
     }
     
     public Booking(
 		LocalDateTime bookingDate, 
 		boolean isInsured, 
 		Period period,
+		Lesson lesson,
 		Skier skier
 		) {
-    	this(0, bookingDate, isInsured, period.getId(), period.getStartDate(), period.getEndDate(), period.isVacation(), period.getName(), skier);
+    	this(0, bookingDate, isInsured, period.getId(), period.getStartDate(), period.getEndDate(), period.isVacation(), period.getName(), lesson, skier);
     }
 
     // Getters

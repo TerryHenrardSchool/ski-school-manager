@@ -26,6 +26,7 @@ import be.th.dao.DAOFactory;
 import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
 import be.th.models.Address;
+import be.th.models.Booking;
 import be.th.models.Person;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
@@ -463,6 +464,7 @@ public class SearchASkier extends JFrame {
 	        int id = (int) table.getValueAt(selectedRow, 0);
 	        
 	        selectedSkier = skierMap.get(id);
+	        // TODO: Display selected skier's information (bookings (edit, delete), lesson date, insurance, days before start (todo), price of the booking, etc)
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
 	        JOptionPane.showMessageDialog(null, "Error while fetching skier data.", "Erreur", JOptionPane.ERROR_MESSAGE);
