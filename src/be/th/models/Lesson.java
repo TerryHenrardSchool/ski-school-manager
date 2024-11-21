@@ -31,7 +31,7 @@ public class Lesson implements Serializable {
     LessonType lessonType;
     Instructor instructor;
     // Secretary secretary;
-    Set<Booking> bookings; //TODO: Implement booking methods
+    Set<Booking> bookings;
     
     // Constructor
     public Lesson(
