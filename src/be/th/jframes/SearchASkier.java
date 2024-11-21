@@ -352,16 +352,16 @@ public class SearchASkier extends JFrame {
     }
 	 
 	 private void applyFilters() {
-		    final Integer id = getNumberField(idSearchTxtField, "id");
-		    final String lastName = getTextField(lastNameSearchTxtField);
-		    final String firstName = getTextField(firstNameSearchTxtField);
-		    final LocalDate birthdate = DateParser.toLocalDate(birthDateTextField.getDate());
-		    final String email = getTextField(emailSearchTxtField);
-		    final String address = getTextField(addressSearchTxtField);
-		    final String phoneNumber = getTextField(phoneNumberTextField);
+	    final Integer id = getNumberField(idSearchTxtField, "id");
+	    final String lastName = getTextField(lastNameSearchTxtField);
+	    final String firstName = getTextField(firstNameSearchTxtField);
+	    final LocalDate birthdate = DateParser.toLocalDate(birthDateTextField.getDate());
+	    final String email = getTextField(emailSearchTxtField);
+	    final String address = getTextField(addressSearchTxtField);
+	    final String phoneNumber = getTextField(phoneNumberTextField);
 
-		    displaySkiersInTable(searchSkiers(id, lastName, firstName, birthdate, email, address, phoneNumber));
-		}
+	    displaySkiersInTable(searchSkiers(id, lastName, firstName, birthdate, email, address, phoneNumber));
+	}
 
 	
 	private Object[] getPreparedSkierInfoForTableModel(Skier skier) {
