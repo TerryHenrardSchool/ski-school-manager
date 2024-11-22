@@ -46,8 +46,23 @@ public class BookingDAO extends DAO<Booking>{
 
 	@Override
 	public boolean delete(int id) {
-		return false; // TODO
+	    String sqlDeleteBooking = """
+	        DELETE FROM bookings
+	        WHERE booking_id = ?
+	    """;
+
+	    try (PreparedStatement pstmt = connection.prepareStatement(sqlDeleteBooking)) {
+	        pstmt.setInt(1, id);
+
+	        int affectedRows = pstmt.executeUpdate();
+
+	        return affectedRows > 0;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
 	}
+
 
 	@Override
 	public boolean update(Booking obj) {

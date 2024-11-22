@@ -359,7 +359,7 @@ public class SearchASkier extends JFrame {
 			null, 
 			message,
 			"Success",
-			JOptionPane.PLAIN_MESSAGE
+			JOptionPane.INFORMATION_MESSAGE
 		);
 	}
 	
