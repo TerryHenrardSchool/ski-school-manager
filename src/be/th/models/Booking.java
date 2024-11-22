@@ -145,6 +145,10 @@ public class Booking implements Serializable {
         return Math.max(0, ChronoUnit.DAYS.between(now, lessonDate));
     }
     
+	public LocalDate getLessonDate() {
+		return lesson.getDate().toLocalDate();
+	}
+    
     // Database methods
 	public boolean insertIntoDatabase(BookingDAO bookingDAO) {
 		return bookingDAO.create(this);
