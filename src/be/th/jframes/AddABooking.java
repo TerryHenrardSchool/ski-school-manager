@@ -259,7 +259,7 @@ public class AddABooking extends JFrame {
 		btnResetSearch.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnResetSearch.addActionListener(this::handleCLickOnResetSearch);
 		btnResetSearch.setBackground(new Color(0, 147, 255));
-		btnResetSearch.setBounds(108, 233, 110, 31);
+		btnResetSearch.setBounds(205, 233, 110, 31);
 		panel_2.add(btnResetSearch);
 		
 		displayUpcomingLessons(unbookedUpcomingLessonsMap.values().stream()
