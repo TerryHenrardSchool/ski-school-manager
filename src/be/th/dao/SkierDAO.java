@@ -267,7 +267,8 @@ public class SkierDAO extends DAO<Skier>{
 			    per.city AS instructor_city,
 			    per.postcode AS instructor_postcode,
 			    per.street_number AS instructor_street_number,
-			    per.street_name AS instructor_street_name
+			    per.street_name AS instructor_street_name,
+                s.skier_id AS skier_skier_id
 			FROM persons pe
 			INNER JOIN skiers s ON s.person_id = pe.person_id
 			LEFT JOIN bookings b ON b.skier_id = s.skier_id
@@ -288,7 +289,7 @@ public class SkierDAO extends DAO<Skier>{
 	         ResultSet rs = stmt.executeQuery()) {
 
 	        while (rs.next()) {
-	            int skierId = rs.getInt("skier_id");
+	            int skierId = rs.getInt("skier_skier_id");
 
 	            Skier skier = skierMap.get(skierId);
 	            if (skier == null) {

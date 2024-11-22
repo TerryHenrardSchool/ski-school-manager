@@ -64,7 +64,7 @@ public class SearchASkier extends JFrame {
 	private JPanel contentPane;
 	private JTable table;
 	private JTextField idSearchTxtField;
-	private LinkedHashMap<Integer, Skier> skierMap = new LinkedHashMap<>();
+	private LinkedHashMap<Integer, Skier> skierMap;
 	private JTextField lastNameSearchTxtField;
 	private JTextField firstNameSearchTxtField;
 	private JDateChooser birthDateTextField;
@@ -76,6 +76,8 @@ public class SearchASkier extends JFrame {
 	private JTable bookingsTable;
 
 	public SearchASkier() {
+		skierMap = new LinkedHashMap<>();
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1539, 1003);
 
@@ -379,9 +381,7 @@ public class SearchASkier extends JFrame {
 	private void loadSkierMap() {	
 		List<Skier> skiers = Skier.findAllInDatabase((SkierDAO) skierDAO);
 		
-		if(!skierMap.isEmpty()) {
-			skierMap.clear();			
-		}
+		skierMap.clear();			
 		
 		for (final Skier skier : skiers) {
             skierMap.put(skier.getId(), skier);
