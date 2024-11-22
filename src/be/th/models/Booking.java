@@ -150,6 +150,10 @@ public class Booking implements Serializable {
 		return bookingDAO.create(this);
 	}
     
+	public boolean deleteFromDatabase(BookingDAO bookingDAO) {
+		return bookingDAO.delete(id);
+	}
+	
     // Override methods
     @Override
     public boolean equals(Object object) {

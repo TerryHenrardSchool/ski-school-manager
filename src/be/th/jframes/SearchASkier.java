@@ -21,6 +21,7 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
 
+import be.th.dao.BookingDAO;
 import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
 import be.th.dao.SkierDAO;
@@ -59,23 +60,31 @@ public class SearchASkier extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	
-	private DAO<Skier> skierDAO = new DAOFactory().getSkierDAO();
+	private DAO<Skier> skierDAO;
+	private DAO<Booking> bookingDAO;
 	
 	private JPanel contentPane;
-	private JTable table;
+	private JTable skierTable;
+	private JTable bookingTable;
 	private JTextField idSearchTxtField;
-	private LinkedHashMap<Integer, Skier> skierMap;
 	private JTextField lastNameSearchTxtField;
 	private JTextField firstNameSearchTxtField;
-	private JDateChooser birthDateTextField;
 	private JTextField emailSearchTxtField;
 	private JTextField addressSearchTxtField;
 	private JTextField phoneNumberTextField;
+	private JDateChooser birthDateTextField;
 	
+	private LinkedHashMap<Integer, Skier> skierMap;
+	
+	private Booking selectedBooking;
 	private Skier selectedSkier;
-	private JTable bookingsTable;
 
 	public SearchASkier() {
+		DAOFactory daoFactory = new DAOFactory();
+		
+		this.skierDAO = daoFactory.getSkierDAO();
+		this.bookingDAO = daoFactory.getBookingDAO();
+		
 		skierMap = new LinkedHashMap<>();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -100,22 +109,22 @@ public class SearchASkier extends JFrame {
 		String[] columnNames = { "Id", "Full name", "Birthdate", "Address", "Phone number", "Email" };
 		int[] columnWidths = { 10, 75, 50, 200, 80, 180 };
 
-		table = createJTable(data, columnNames, columnWidths);
+		skierTable = createJTable(data, columnNames, columnWidths);
 		MouseListener doubleClickListener = new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
 		        handleDoubleClickOnRows(e);
 		    }
 		};
-		addRowSelectionListener(table, this::handleClickOnRows);
-		addDoubleClickListener(table, doubleClickListener);
+		addRowSelectionListener(skierTable, this::handleClickOnSkierRows);
+		addDoubleClickListener(skierTable, doubleClickListener);
 
-		scrollPane.setViewportView(table);
+		scrollPane.setViewportView(skierTable);
 		
 		JButton btnDeleteSkier = new JButton("Delete");
 		btnDeleteSkier.setBounds(130, 271, 110, 31);
 		panel.add(btnDeleteSkier);
-		btnDeleteSkier.addActionListener(this::handleClickOnDeleteButton);
+		btnDeleteSkier.addActionListener(this::handleClickOnDeleteSkierButton);
 		btnDeleteSkier.setFont(FontStyles.BUTTON);
 		btnDeleteSkier.setBackground(ColorStyles.RED);
 		
@@ -245,7 +254,7 @@ public class SearchASkier extends JFrame {
 		
 		JPanel panel_2 = new JPanel();
 		panel_2.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Bookings for upcoming lessons", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel_2.setBounds(282, 388, 1231, 235);
+		panel_2.setBounds(282, 388, 1231, 269);
 		contentPane.add(panel_2);
 		panel_2.setLayout(null);
 		
@@ -253,8 +262,8 @@ public class SearchASkier extends JFrame {
 		scrollPane_1.setBounds(10, 25, 1211, 199);
 		panel_2.add(scrollPane_1);
 		
-		bookingsTable = new JTable();
-		bookingsTable.setModel(new DefaultTableModel(
+		bookingTable = new JTable();
+		bookingTable.setModel(new DefaultTableModel(
 			new Object[][] {
 			},
 			new String[] {
@@ -266,11 +275,20 @@ public class SearchASkier extends JFrame {
 				return false;
 			}
 		});
-		int columnCount = bookingsTable.getColumnModel().getColumnCount();
+		int columnCount = bookingTable.getColumnModel().getColumnCount();
 		for (int i = 0; i < columnCount; i++) {
-		    bookingsTable.getColumnModel().getColumn(i).setResizable(false);
+		    bookingTable.getColumnModel().getColumn(i).setResizable(false);
 		}
-		scrollPane_1.setViewportView(bookingsTable);
+		bookingTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		addRowSelectionListener(bookingTable, this::handleClickOnBookingRows);
+		scrollPane_1.setViewportView(bookingTable);
+		
+		JButton btnDeleteSkierBooking = new JButton("Delete");
+		btnDeleteSkierBooking.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnDeleteSkierBooking.setBackground(new Color(255, 57, 57));
+		btnDeleteSkierBooking.setBounds(10, 228, 110, 31);
+		btnDeleteSkierBooking.addActionListener(this::handleClickOnDeleteBookingButton);
+		panel_2.add(btnDeleteSkierBooking);
 				
 		loadSkierMap();
 		displaySkiersInTable(skierMap.values());
@@ -303,7 +321,7 @@ public class SearchASkier extends JFrame {
 
 	
 	private void displayBookingsInTable(Collection<Booking> bookings) {
-        DefaultTableModel model = (DefaultTableModel) bookingsTable.getModel();
+        DefaultTableModel model = (DefaultTableModel) bookingTable.getModel();
         model.setRowCount(0);
         
         bookings = sortBookingsByDate(bookings);
@@ -336,22 +354,19 @@ public class SearchASkier extends JFrame {
 		);
 	}
 	
-	private void confirmDeletion() {
+	private void confirmDeletion(String message) {
 		JOptionPane.showMessageDialog(
 			null, 
-			selectedSkier.getLastnameFormattedForDisplay() + " " + 
-			selectedSkier.getFirstNameFormattedForDisplay() + " has been successfully deleted.",
+			message,
 			"Success",
-			JOptionPane.PLAIN_MESSAGE
+			JOptionPane.INFORMATION_MESSAGE
 		);
 	}
 	
-	private int askConfirmationBeforeDeletion() {
+	private int askConfirmationBeforeDeletion(String message) {
 		return JOptionPane.showConfirmDialog(
 			null, 
-			"This is a critical operation. Are you sure that you want to delete " + 
-			selectedSkier.getLastnameFormattedForDisplay() + " " + 
-			selectedSkier.getFirstNameFormattedForDisplay(),
+			message,
 			"Are you sure?",
 			JOptionPane.YES_NO_OPTION,
 			JOptionPane.WARNING_MESSAGE
@@ -369,7 +384,7 @@ public class SearchASkier extends JFrame {
 	}
 	
 	private void displaySkiersInTable(Collection<Skier> skiers) {
-		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		DefaultTableModel model = (DefaultTableModel) skierTable.getModel();
 		model.setRowCount(0);
 		
 		for (final Skier skier : skiers) {
@@ -524,25 +539,25 @@ public class SearchASkier extends JFrame {
 			return;
 		}
 		
-		int row = table.rowAtPoint(e.getPoint());
+		int row = skierTable.rowAtPoint(e.getPoint());
 		if (row != -1) { 
 			openUpdateSkierWindow();
 		}
 	}
 	
-	private void handleClickOnRows(ListSelectionEvent ev) {
+	private void handleClickOnSkierRows(ListSelectionEvent ev) {
 	    if (ev.getValueIsAdjusting()) {
 	        return;
 	    }
 	    
-	    int selectedRow = table.getSelectedRow();
+	    int selectedRow = skierTable.getSelectedRow();
 	    
 	    if (selectedRow < 0) { 
 	        return;
 	    }
 	    
 	    try {
-	        int id = (int) table.getValueAt(selectedRow, 0);
+	        int id = (int) skierTable.getValueAt(selectedRow, 0);
 	        
 	        selectedSkier = skierMap.get(id);
 	        displayBookingsInTable(selectedSkier.getBookings());
@@ -565,7 +580,7 @@ public class SearchASkier extends JFrame {
 	
 	private void openUpdateSkierWindow() {
 		if(!ObjectValidator.hasValue(selectedSkier)) {
-			warnThereIsNoSkierSlected();
+			showError(getName());
 			return;
 		}
 		
@@ -577,6 +592,10 @@ public class SearchASkier extends JFrame {
 		return skierMap.remove(id) != null 
 			? true 
 			: false;
+	}
+	
+	private boolean removeBookingFromSkier(Booking booking) {
+		return selectedSkier.removeBooking(booking);
 	}
 	
 	private JTable createJTable(
@@ -619,13 +638,17 @@ public class SearchASkier extends JFrame {
         table.addMouseListener(doubleClickListener);
     }
     
-	private void handleClickOnDeleteButton(ActionEvent ev) {
+	private void handleClickOnDeleteSkierButton(ActionEvent ev) {
 		if(!ObjectValidator.hasValue(selectedSkier)) {
 			warnThereIsNoSkierSlected();
 			return;
 		}
 		
-		final int userResponse = askConfirmationBeforeDeletion();
+		final int userResponse = askConfirmationBeforeDeletion(
+			"This is a critical operation. Are you sure that you want to delete " + 
+			selectedSkier.getLastnameFormattedForDisplay() + " " + 
+			selectedSkier.getFirstNameFormattedForDisplay()
+		);
 		if (userResponse != 0) {
 			return;
 		}
@@ -636,7 +659,7 @@ public class SearchASkier extends JFrame {
 			return;
 		}
 		
-		confirmDeletion();
+		confirmDeletion(selectedSkier.getFullNameFormattedForDisplay() + " has been successfully deleted.");
 		removeSkierFromSkiermap(selectedSkier.getId());
 		displaySkiersInTable(skierMap.values());
 		displayBookingsInTable(List.of());
@@ -666,5 +689,70 @@ public class SearchASkier extends JFrame {
 			skierMap.get(booking.getSkier().getId()).addBooking(booking);
 			displayBookingsInTable(selectedSkier.getBookings());
 		}
+	}
+	
+	private void handleClickOnDeleteBookingButton(ActionEvent ev) {
+		if(!ObjectValidator.hasValue(selectedBooking)) {
+			showError("Please select a booking.");
+			return;
+		}
+		
+		final int userResponse = askConfirmationBeforeDeletion(
+			"This is a critical operation. Are you sure that you want to delete " + 
+			selectedSkier.getLastnameFormattedForDisplay() + " " + 
+			selectedSkier.getFirstNameFormattedForDisplay() + "'s booking?"
+		);
+		if (userResponse != 0) {
+			return;
+		}
+		
+		final boolean isDeleted = selectedBooking.deleteFromDatabase((BookingDAO) bookingDAO);
+		if(!isDeleted) {
+			showError(
+				"Error while deleting " +
+				selectedSkier.getFullNameFormattedForDisplay() + "'s booking."
+			);
+			return;
+		}
+		
+		confirmDeletion(selectedSkier.getFullNameFormattedForDisplay() + "'s booking has been successfully deleted.");
+		removeBookingFromSkier(selectedBooking);
+		displayBookingsInTable(skierMap.get(selectedSkier.getId()).getBookings());
+	}
+	
+	private void handleClickOnBookingRows(ListSelectionEvent ev) {
+	    if (ev.getValueIsAdjusting()) {
+	        return;
+	    }
+
+	    int selectedRow = bookingTable.getSelectedRow();
+	    if (selectedRow < 0) {
+	        return;
+	    }
+
+	    try {
+	        int bookingId = getBookingIdFromRow(selectedRow);
+	        selectedBooking = findBookingById(bookingId);
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	        showError("Error while fetching skier data.");
+	    }
+	}
+
+	private int getBookingIdFromRow(int row) {
+	    return (int) bookingTable.getValueAt(row, 0);
+	}
+
+	private Booking findBookingById(int bookingId) {
+	    return selectedSkier
+			.getBookings()
+		    .stream()
+		    .filter(booking -> booking.getId() == bookingId)
+		    .findFirst()
+		    .orElse(null); 
+	}
+
+	private void showError(String message) {
+	    JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 }
