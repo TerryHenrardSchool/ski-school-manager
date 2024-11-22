@@ -337,6 +337,7 @@ public class SearchAnInstructor extends JFrame {
 	private void displayLessonsInTable(Collection<Lesson> lessons) {
         DefaultTableModel model = (DefaultTableModel) upcomingLessonsTable.getModel();
 		lessons = lessons.stream()
+			.filter(lesson -> lesson.getDate().toLocalDate().isAfter(LocalDate.now()))
 			.sorted((lesson1, lesson2) -> lesson1.getDate().compareTo(lesson2.getDate()))
 			.collect(Collectors.toList());
 		

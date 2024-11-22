@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -89,7 +90,7 @@ public class AddABooking extends JFrame {
 	private JComboBox<String> comboBoxSearchByLessonType;
 	private JComboBox<String> comboBoxSearchByLocation;
 
-	public AddABooking(Skier selectedSkier) {
+	public AddABooking(Skier selectedSkier, BiConsumer<Boolean, Booking> onCreateCallback) {
 		DAOFactory daoFactory = new DAOFactory();
 		
 		this.lessonDAO = daoFactory.getLessonDAO();
@@ -190,7 +191,7 @@ public class AddABooking extends JFrame {
 		panel.add(cancelBtn);
 		
 		JButton addBtn = new JButton("Add");
-		addBtn.addActionListener(e -> handleClickOnAddBtn());
+		addBtn.addActionListener(e -> handleClickOnAddBtn(onCreateCallback));
 		addBtn.setOpaque(true);
 		addBtn.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		addBtn.setContentAreaFilled(true);
@@ -353,20 +354,21 @@ public class AddABooking extends JFrame {
 		return booking;
 	}
 	
-	private void handleClickOnAddBtn() {
+	private void handleClickOnAddBtn(BiConsumer<Boolean, Booking> onCreateCallback) {
 		if (!ObjectValidator.hasValue(selectedLesson)) {
 			JOptionPane.showMessageDialog(null, "Please select a lesson to add a booking.", "Watch out", JOptionPane.WARNING_MESSAGE);
             return;
         }
 			
-		Booking booking = buildBookingFromFields(); 
-		boolean isAdded = booking.insertIntoDatabase((BookingDAO) bookingDAO);
+		Booking newBooking = buildBookingFromFields(); 
+		boolean isAdded = newBooking.insertIntoDatabase((BookingDAO) bookingDAO);
 		if(!isAdded) {
 			JOptionPane.showMessageDialog(null, "An error occurred while adding the booking. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
 		JOptionPane.showMessageDialog(null, "The booking has been successfully added.", "Success", JOptionPane.INFORMATION_MESSAGE);
+		onCreateCallback.accept(isAdded, newBooking);
 		dispose();
 	}
 	
