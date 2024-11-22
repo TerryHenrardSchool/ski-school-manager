@@ -359,8 +359,20 @@ public class AddABooking extends JFrame {
 			JOptionPane.showMessageDialog(null, "Please select a lesson to add a booking.", "Watch out", JOptionPane.WARNING_MESSAGE);
             return;
         }
-			
-		Booking newBooking = buildBookingFromFields(); 
+		
+		Booking newBooking = null;
+		try {
+			newBooking = buildBookingFromFields();					
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(
+				null, 
+				e.getMessage(),
+				"Error", 
+				JOptionPane.ERROR_MESSAGE
+			);
+			return;
+		}
+		
 		boolean isAdded = newBooking.insertIntoDatabase((BookingDAO) bookingDAO);
 		if(!isAdded) {
 			JOptionPane.showMessageDialog(null, "An error occurred while adding the booking. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);

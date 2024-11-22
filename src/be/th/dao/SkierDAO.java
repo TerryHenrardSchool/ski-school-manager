@@ -95,48 +95,46 @@ public class SkierDAO extends DAO<Skier>{
 
 	@Override
 	public boolean delete(int id) {
-		String sqlGetPersonId = """
-		    SELECT person_id 
-		    FROM skiers 
-		    WHERE skier_id = ?
-		""";
+	    String sqlGetPersonId = """
+	        SELECT person_id 
+	        FROM skiers 
+	        WHERE skier_id = ?
+	    """;
 
-		String sqlDeleteSkier = """
-		    DELETE FROM skiers 
-		    WHERE skier_id = ?
-		""";
+	    String sqlDeleteSkier = """
+	        DELETE FROM skiers 
+	        WHERE skier_id = ?
+	    """;
 
-		String sqlDeletePerson = """
-		    DELETE FROM persons 
-		    WHERE person_id = ?
-		""";
-		
-	    try (
-	        PreparedStatement pstmtGetPersonId = connection.prepareStatement(sqlGetPersonId);
-	        PreparedStatement pstmtDeleteSkier = connection.prepareStatement(sqlDeleteSkier);
-	        PreparedStatement pstmtDeletePerson = connection.prepareStatement(sqlDeletePerson);
-	    ) {
+	    String sqlDeletePerson = """
+	        DELETE FROM persons 
+	        WHERE person_id = ?
+	    """;
+
+	    String sqlDeleteBooking = """
+	        DELETE FROM bookings 
+	        WHERE skier_id = ?
+	    """;
+
+	    try {
 	        connection.setAutoCommit(false);
 
-	        pstmtGetPersonId.setInt(1, id);
-	        ResultSet rs = pstmtGetPersonId.executeQuery();
-
-	        if (rs.next()) {
-	            int personId = rs.getInt("person_id");
-
-	            pstmtDeleteSkier.setInt(1, id);
-	            int affectedRowsSkier = pstmtDeleteSkier.executeUpdate();
-
-	            if (affectedRowsSkier > 0) {
-	                pstmtDeletePerson.setInt(1, personId);
-	                pstmtDeletePerson.executeUpdate();
-
-	                connection.commit();
-	                return true;
-	            }
+	        int personId = getPersonId(id, sqlGetPersonId);
+	        if (personId == -1) {
+	            return false;
 	        }
 
-	        return false;
+	        deleteBooking(id, sqlDeleteBooking);
+	        if (
+        		deleteSkier(id, sqlDeleteSkier) && 
+        		deletePerson(personId, sqlDeletePerson)
+            ) {
+	            connection.commit();
+	            return true;
+	        } else {
+	            connection.rollback();
+	            return false;
+	        }
 	    } catch (SQLException e) {
 	        DatabaseTransaction.rollbackTransaction(connection);
 	        return false;
@@ -144,7 +142,6 @@ public class SkierDAO extends DAO<Skier>{
 	        DatabaseTransaction.restoreAutoCommit(connection);
 	    }
 	}
-
 
 	@Override
 	public boolean update(Skier skier) {
@@ -320,6 +317,39 @@ public class SkierDAO extends DAO<Skier>{
 	    }
 
 	    return skiers;
+	}
+	
+	private int getPersonId(int skierId, String sql) throws SQLException {
+	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	        pstmt.setInt(1, skierId);
+	        ResultSet rs = pstmt.executeQuery();
+	        if (rs.next()) {
+	            return rs.getInt("person_id");
+	        }
+	    }
+	    
+	    return -1; 
+	}
+
+	private void deleteBooking(int skierId, String sql) throws SQLException {
+	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	        pstmt.setInt(1, skierId);
+	        pstmt.executeUpdate();
+	    }
+	}
+
+	private boolean deleteSkier(int skierId, String sql) throws SQLException {
+	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	        pstmt.setInt(1, skierId);
+	        return pstmt.executeUpdate() > 0;
+	    }
+	}
+
+	private boolean deletePerson(int personId, String sql) throws SQLException {
+	    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+	        pstmt.setInt(1, personId);
+	        return pstmt.executeUpdate() > 0;
+	    }
 	}
 
 	private Booking mapBooking(ResultSet rs, Skier skier) throws SQLException {
