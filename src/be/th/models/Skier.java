@@ -124,7 +124,7 @@ public class Skier extends Person {
     
     @Override
     public int hashCode() {
-    	return Objects.hash(super.hashCode(), bookings);
+    	return Objects.hash(super.hashCode());
     }
     
     @Override

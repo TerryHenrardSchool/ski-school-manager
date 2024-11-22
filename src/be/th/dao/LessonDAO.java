@@ -303,6 +303,7 @@ public class LessonDAO extends DAO<Lesson>{
         			rs.getDate("end_date").toLocalDate(),
         			rs.getBoolean("is_vacation"),
         			rs.getString("name"),
+        			lesson,
         			new Skier(
     					rs.getInt("skier_id_1"),
     					rs.getString("last_name"),

@@ -7,11 +7,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import be.th.formatters.DatabaseFormatter;
+import be.th.models.Accreditation;
 import be.th.models.Booking;
+import be.th.models.Instructor;
+import be.th.models.Lesson;
+import be.th.models.LessonType;
+import be.th.models.Location;
 import be.th.models.Period;
 import be.th.models.Skier;
 
@@ -244,12 +251,35 @@ public class SkierDAO extends DAO<Skier>{
 	@Override
 	public List<Skier> findAll() {
 	    String sql = """
-	        SELECT *
-	        FROM persons
-	        NATURAL JOIN skiers
-	        LEFT JOIN bookings b ON b.skier_id = skiers.skier_id
-	        LEFT JOIN periods p ON b.period_id = p.period_id
-	        ORDER BY skiers.skier_id DESC
+	        SELECT 
+			    pe.*, 
+			    b.*,
+			    p.*,
+			    l.*, l.start_date AS lesson_start_date, 
+			    lt.*, lt.name AS lesson_type_name,
+			    a.*,
+			    loc.*, loc.name AS location_name,
+			    i.instructor_id AS instructor_instructor_id,
+			    per.last_name AS instructor_last_name,
+			    per.first_name AS instructor_first_name,
+			    per.date_of_birth AS instructor_date_of_birth,
+			    per.phone_number AS instructor_phone_number,
+			    per.email AS instructor_email,
+			    per.city AS instructor_city,
+			    per.postcode AS instructor_postcode,
+			    per.street_number AS instructor_street_number,
+			    per.street_name AS instructor_street_name
+			FROM persons pe
+			INNER JOIN skiers s ON s.person_id = pe.person_id
+			LEFT JOIN bookings b ON b.skier_id = s.skier_id
+			LEFT JOIN periods p ON b.period_id = p.period_id
+			LEFT JOIN lessons l ON l.lesson_id = b.lesson_id
+			LEFT JOIN lesson_types lt ON lt.lesson_type_id = l.lesson_type_id
+			LEFT JOIN accreditations a ON a.accreditation_id = lt.accreditation_id
+			LEFT JOIN locations loc ON loc.location_id = l.location_id
+			LEFT JOIN instructors i ON i.instructor_id = l.instructor_id
+			LEFT JOIN persons per ON per.person_id = i.person_id
+			ORDER BY s.skier_id DESC
 	    """;
 
 	    List<Skier> skiers = new ArrayList<>();
@@ -260,8 +290,7 @@ public class SkierDAO extends DAO<Skier>{
 
 	        while (rs.next()) {
 	            int skierId = rs.getInt("skier_id");
-	            
-	            
+
 	            Skier skier = skierMap.get(skierId);
 	            if (skier == null) {
 	                skier = new Skier(
@@ -276,16 +305,15 @@ public class SkierDAO extends DAO<Skier>{
 	                    rs.getString("phone_number"),
 	                    rs.getString("email")
 	                );
-	                
-	                Booking booking = mapBooking(rs, skier);
+
 	                skierMap.put(skierId, skier);
 	                skiers.add(skier);
-	                
-	                if (booking != null) {
-	                	skier.addBooking(booking);
-	                }
 	            }
 
+	            Booking booking = mapBooking(rs, skier);
+	            if (booking != null) {
+	                skier.addBooking(booking);
+	            }
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
@@ -293,22 +321,124 @@ public class SkierDAO extends DAO<Skier>{
 
 	    return skiers;
 	}
-	
+
 	private Booking mapBooking(ResultSet rs, Skier skier) throws SQLException {
-	    if (rs.getInt("booking_id") == 0) {	    	
-	    	return null;
+	    if (rs.getInt("booking_id") == 0) {
+	        return null;
 	    }
-	    
+
+	    Lesson lesson = mapLesson(rs);
 	    return new Booking(
-    		rs.getInt("booking_id"),
-    		rs.getDate("booking_date").toLocalDate().atStartOfDay(),
-    		rs.getBoolean("is_insured"),
-    		rs.getInt("period_id"),
-    		rs.getDate("start_date").toLocalDate(),
-    		rs.getDate("end_date").toLocalDate(),
-    		rs.getBoolean("is_vacation"),
-    		rs.getString("name"),
-    		skier
+	        rs.getInt("booking_id"),
+	        rs.getDate("booking_date").toLocalDate().atStartOfDay(),
+	        rs.getBoolean("is_insured"),
+	        rs.getInt("period_id"), 
+			rs.getDate("start_date").toLocalDate(),
+			rs.getDate("end_date").toLocalDate(),
+			rs.getBoolean("is_vacation"),
+			rs.getString("name"),
+	        lesson,
+	        skier
+	    );
+	}
+	
+	private LessonType mapLessonType(ResultSet rs) throws SQLException {
+        if (rs.getInt("lesson_type_id") == 0) {
+            return null;
+        }
+        
+        Accreditation accreditation = new Accreditation(
+            rs.getInt("accreditation_id"),
+            rs.getString("sport"),
+            rs.getString("age_category_name")
         );
+        
+        int maxAgeDatabase = rs.getInt("max_age");
+        Optional<Integer> maxAge = rs.wasNull() ? Optional.empty() : Optional.of(maxAgeDatabase); 
+        return new LessonType(
+            rs.getInt("lesson_type_id"),
+            rs.getString("skill_level"),
+            rs.getDouble("price"),
+            rs.getString("lesson_type_name"),
+            rs.getString("age_category_name"),
+            rs.getInt("min_age"),
+            maxAge,
+            rs.getInt("min_bookings"),
+            rs.getInt("max_bookings"),
+            accreditation
+        );
+    }
+
+	private Lesson mapLesson(ResultSet rs) throws SQLException {
+	    if (rs.getInt("lesson_id") == 0) {
+	        return null;
+	    }
+
+	    LessonType lessonType = mapLessonType(rs);
+	    Instructor instructor = mapInstructor(rs);
+	    return new Lesson(
+	        rs.getInt("lesson_id"),
+	        rs.getTimestamp("lesson_start_date").toLocalDateTime(),
+	        lessonType,
+	        instructor,
+	        rs.getInt("location_id"),
+	        rs.getString("location_name")
+	    );
+	}
+
+	private Instructor mapInstructor(ResultSet rs) throws SQLException {
+	    if (rs.getInt("instructor_id") == 0) {
+	        return null;
+	    }
+
+	    Integer instructorId = rs.getInt("instructor_id");
+	    List<Accreditation> accreditations = fetchInstructorAccreditations(instructorId);
+	    Instructor instructor = new Instructor(
+    		instructorId,
+	        rs.getString("instructor_last_name"),
+	        rs.getString("instructor_first_name"),
+	        rs.getDate("instructor_date_of_birth").toLocalDate(),
+	        rs.getString("instructor_city"),
+	        rs.getString("instructor_postcode"),
+	        rs.getString("instructor_street_name"),
+	        rs.getString("instructor_street_number"),
+	        rs.getString("instructor_phone_number"),
+	        rs.getString("instructor_email"),
+	        new HashSet<>(accreditations)
+	    );
+
+
+	    return instructor;
+	}
+
+	private List<Accreditation> fetchInstructorAccreditations(int instructorId) {
+	    String sql = """
+	        SELECT *
+	        FROM instructors 
+	        NATURAL JOIN instructor_accreditation_details
+	        NATURAL JOIN accreditations
+	        WHERE instructor_id = ?
+	    """;
+
+	    List<Accreditation> accreditations = new ArrayList<>();
+
+	    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+	        stmt.setInt(1, instructorId);
+
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            while (rs.next()) {
+	                Accreditation accreditation = new Accreditation(
+	                    rs.getInt("accreditation_id"),
+	                    rs.getString("sport"),
+	                    rs.getString("age_category_name")
+	                );
+	                accreditations.add(accreditation);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return accreditations;
 	}
 }

@@ -345,6 +345,7 @@ public class AddABooking extends JFrame {
 			LocalDate.now().atStartOfDay(), 
 			chckbxAddInsurance.isSelected(),
 			getCurrentPeriod(),
+			selectedLesson,
 			selectedSkier
 		);
 		booking.setLesson(selectedLesson);
