@@ -31,8 +31,7 @@ public class SkierDAO extends DAO<Skier>{
 	@Override
 	public boolean create(Skier skier) {
 		String sqlPerson = """
-	        INSERT INTO persons
-		    (
+	        INSERT INTO persons(
 			    last_name,
 			    first_name,
 			    date_of_birth,

@@ -546,7 +546,6 @@ public class SearchASkier extends JFrame {
 	        int id = (int) table.getValueAt(selectedRow, 0);
 	        
 	        selectedSkier = skierMap.get(id);
-	        selectedSkier.getBookings().forEach(booking -> System.out.println(booking.getLesson().getLocation()));
 	        displayBookingsInTable(selectedSkier.getBookings());
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
@@ -659,6 +658,13 @@ public class SearchASkier extends JFrame {
 			return;
 		}
 		
-		new AddABooking(selectedSkier).setVisible(true);
+		new AddABooking(selectedSkier, this::handleCreateCallBackResult).setVisible(true);
+	}
+	
+	private void handleCreateCallBackResult(Boolean isCreated, Booking booking) {
+		if (isCreated) {
+			skierMap.get(booking.getSkier().getId()).addBooking(booking);
+			displayBookingsInTable(selectedSkier.getBookings());
+		}
 	}
 }
