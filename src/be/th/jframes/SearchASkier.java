@@ -110,7 +110,6 @@ public class SearchASkier extends JFrame {
 		addRowSelectionListener(table, this::handleClickOnRows);
 		addDoubleClickListener(table, doubleClickListener);
 
-
 		scrollPane.setViewportView(table);
 		
 		JButton btnDeleteSkier = new JButton("Delete");
@@ -640,6 +639,7 @@ public class SearchASkier extends JFrame {
 		confirmDeletion();
 		removeSkierFromSkiermap(selectedSkier.getId());
 		displaySkiersInTable(skierMap.values());
+		displayBookingsInTable(List.of());
 	}
     
 	private void handleClickOnResetFiltersButton(ActionEvent ev) {
