@@ -243,11 +243,8 @@ public class SearchAnInstructor extends JFrame {
 		
 		accreditationsTable = new JTable();
 		accreditationsTable.setModel(new DefaultTableModel(
-			new Object[][] {
-			},
-			new String[] {
-				"Sport", "Category"
-			}
+			new Object[][] {},
+			new String[] { "Sport", "Category" }
 		) {
 
 			private static final long serialVersionUID = 1L;

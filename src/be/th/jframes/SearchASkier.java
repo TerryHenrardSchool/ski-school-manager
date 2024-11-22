@@ -50,6 +50,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.awt.event.ActionEvent;
 import javax.swing.border.EtchedBorder;
 import com.toedter.calendar.JDateChooser;
@@ -72,6 +73,7 @@ public class SearchASkier extends JFrame {
 	private JTextField phoneNumberTextField;
 	
 	private Skier selectedSkier;
+	private JTable bookingsTable;
 
 	public SearchASkier() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -239,9 +241,89 @@ public class SearchASkier extends JFrame {
 		cancelBtn.setBackground(new Color(255, 57, 57));
 		cancelBtn.setBounds(20, 10, 154, 52);
 		contentPane.add(cancelBtn);
+		
+		JPanel panel_2 = new JPanel();
+		panel_2.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Bookings for upcoming lessons", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+		panel_2.setBounds(282, 388, 1231, 235);
+		contentPane.add(panel_2);
+		panel_2.setLayout(null);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBounds(10, 25, 1211, 199);
+		panel_2.add(scrollPane_1);
+		
+		bookingsTable = new JTable();
+		bookingsTable.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"id", "Insurance", "Lesson type", "Instructor", "Lesson date", "Days before start", "Price", "location"
+			}
+		){
+			private static final long serialVersionUID = 1L;
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		});
+		int columnCount = bookingsTable.getColumnModel().getColumnCount();
+		for (int i = 0; i < columnCount; i++) {
+		    bookingsTable.getColumnModel().getColumn(i).setResizable(false);
+		}
+		scrollPane_1.setViewportView(bookingsTable);
 				
 		loadSkierMap();
 		displaySkiersInTable(skierMap.values());
+	}
+	
+	private Collection<Booking> sortBookingsByDate(Collection<Booking> bookings) {
+	    return bookings
+	            .stream()
+	            .sorted((booking1, booking2) -> {
+	                LocalDateTime date1 = booking1.getLesson().getDate();
+	                LocalDateTime date2 = booking2.getLesson().getDate();
+	                LocalDateTime today = LocalDateTime.now();
+
+	                if (
+                		date1.isBefore(today) && date2.isBefore(today) || 
+	                    date1.isAfter(today) && date2.isAfter(today) || 
+	                    date1.isEqual(today) && date2.isEqual(today)
+                    ) {
+	                    return date1.compareTo(date2);
+	                }
+
+	                if (date1.isBefore(today)) {
+	                    return 1; 
+	                } else {
+	                    return -1; 
+	                }
+	            })
+	            .collect(Collectors.toList());
+	}
+
+	
+	private void displayBookingsInTable(Collection<Booking> bookings) {
+        DefaultTableModel model = (DefaultTableModel) bookingsTable.getModel();
+        model.setRowCount(0);
+        
+        bookings = sortBookingsByDate(bookings);
+        
+        for (final Booking booking : bookings) {
+            model.addRow(getPreparedBookingInfoForTableModel(booking));
+        }
+    }
+	
+	//FIX: bad information are displayed
+	private Object[] getPreparedBookingInfoForTableModel(Booking booking) {
+		return new Object[] { 
+			booking.getId(), 
+			booking.getInsurance() ? "Yes" : "No",
+			booking.getLesson().getLessonType().getLessonTypeInfoFormattedForDisplay(), 
+			booking.getLesson().getInstructor().getFullNameFormattedForDisplay(),
+			DatabaseFormatter.toBelgianFormat(booking.getLesson().getDate()), 
+			booking.calculateDaysUntilLesson() + " days",
+			booking.calculatePrice(), 
+			booking.getLesson().getLocation().getName() 
+		};
 	}
 	
 	private void warnThereIsNoSkierSlected() {
@@ -464,7 +546,8 @@ public class SearchASkier extends JFrame {
 	        int id = (int) table.getValueAt(selectedRow, 0);
 	        
 	        selectedSkier = skierMap.get(id);
-	        // TODO: Display selected skier's information (bookings (edit, delete), lesson date, insurance, days before start (todo), price of the booking, etc)
+	        selectedSkier.getBookings().forEach(booking -> System.out.println(booking.getLesson().getLocation()));
+	        displayBookingsInTable(selectedSkier.getBookings());
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
 	        JOptionPane.showMessageDialog(null, "Error while fetching skier data.", "Erreur", JOptionPane.ERROR_MESSAGE);

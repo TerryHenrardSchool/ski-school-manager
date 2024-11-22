@@ -30,7 +30,7 @@ public class BookingDAO extends DAO<Booking>{
 
 		try (PreparedStatement statement = this.connection.prepareStatement(query)) {
 			statement.setObject(1, booking.getBookingDate());
-			statement.setBoolean(2, booking.isInsured());
+			statement.setBoolean(2, booking.getInsurance());
 			statement.setInt(3, booking.getPeriod().getId());
 			statement.setInt(4, 21);
 			statement.setInt(5, booking.getLesson().getId());

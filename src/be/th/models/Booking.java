@@ -3,6 +3,7 @@ package be.th.models;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
@@ -80,7 +81,7 @@ public class Booking implements Serializable {
         return bookingDate;
     }
 
-    public boolean isInsured() {
+    public boolean getInsurance() {
         return isInsured;
     }
     
@@ -134,7 +135,14 @@ public class Booking implements Serializable {
 
     // Methods
     public double calculatePrice() {
-        return 0.0; // TODO: Implement price calculation logic
+        return 0.0; // TODO: Implement price calculation logic (insurance + 15% if evening and afternoon)
+    }
+    
+    public long calculateDaysUntilLesson() {
+        LocalDate now = LocalDate.now();
+        LocalDateTime lessonDate = lesson.getDate();
+
+        return Math.max(0, ChronoUnit.DAYS.between(now, lessonDate));
     }
     
     // Database methods
@@ -163,7 +171,7 @@ public class Booking implements Serializable {
     
     @Override
     public int hashCode() {
-        return Objects.hash(id, isInsured, bookingDate, period.hashCode(), skier.hashCode());
+        return Objects.hash(id, isInsured, bookingDate);
     }
     
     @Override
@@ -172,7 +180,7 @@ public class Booking implements Serializable {
             "id=" + id +
             ", insured=" + isInsured +
             ", booking date=" + bookingDate + 
-            ", period=" + period + 
+            ", period=" + period.getName() + 
             ", skier=" + skier.getFullNameFormattedForDisplay();
     }
 }
