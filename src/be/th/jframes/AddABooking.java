@@ -109,7 +109,7 @@ public class AddABooking extends JFrame {
 		loadUnbookedUpcommingLessonsMap();
 				
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 1232, 589);
+		setBounds(100, 100, 1619, 589);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -121,12 +121,12 @@ public class AddABooking extends JFrame {
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 24));
 		lblTitle.setBackground(new Color(0, 153, 255));
-		lblTitle.setBounds(10, 11, 1196, 52);
+		lblTitle.setBounds(10, 11, 1583, 52);
 		contentPane.add(lblTitle);
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Booking information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 74, 1196, 465);
+		panel.setBounds(10, 74, 1583, 465);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -142,11 +142,11 @@ public class AddABooking extends JFrame {
 		JPanel panel_1 = new JPanel();
 		panel_1.setLayout(null);
 		panel_1.setBorder(new TitledBorder(null, "Upcoming lessons", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_1.setBounds(345, 59, 841, 275);
+		panel_1.setBounds(345, 59, 1228, 275);
 		panel.add(panel_1);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 21, 821, 243);
+		scrollPane.setBounds(10, 21, 1208, 243);
 		panel_1.add(scrollPane);
 		
 		MouseListener doubleClickListener = new MouseAdapter() {
@@ -159,7 +159,7 @@ public class AddABooking extends JFrame {
 		upcomingLessonsTable = new JTable();
 		upcomingLessonsTable.setModel(new DefaultTableModel(
 			new Object[][] {},
-			new String[] { "lesson id", "Lesson type", "instructor", "date", "Bookings left", "Location", "Price", }
+			new String[] { "lesson id", "Lesson type", "Start date", "Time until start", "Instructor", "Bookings left", "Location", "Price" }
 		)
 		{
 			private static final long serialVersionUID = 1L;
@@ -187,7 +187,7 @@ public class AddABooking extends JFrame {
 		cancelBtn.setContentAreaFilled(true);
 		cancelBtn.setBorderPainted(false);
 		cancelBtn.setBackground(new Color(255, 57, 57));
-		cancelBtn.setBounds(430, 403, 154, 51);
+		cancelBtn.setBounds(631, 403, 154, 51);
 		panel.add(cancelBtn);
 		
 		JButton addBtn = new JButton("Add");
@@ -197,7 +197,7 @@ public class AddABooking extends JFrame {
 		addBtn.setContentAreaFilled(true);
 		addBtn.setBorderPainted(false);
 		addBtn.setBackground(new Color(139, 255, 96));
-		addBtn.setBounds(613, 403, 154, 51);
+		addBtn.setBounds(807, 403, 154, 51);
 		panel.add(addBtn);
 		
 		JPanel panel_2 = new JPanel();
@@ -312,8 +312,9 @@ public class AddABooking extends JFrame {
 		return new Object[] {
 			upcomingLesson.getId(),
 			upcomingLesson.getLessonType().getLessonTypeInfoFormattedForDisplay(),
-			upcomingLesson.getInstructor().getFullNameFormattedForDisplay(),
 			DatabaseFormatter.toBelgianFormat(upcomingLesson.getDate().toLocalDate()),
+			upcomingLesson.calculateDaysUntilStartDateFormattedForDisplay(),
+			upcomingLesson.getInstructor().getFullNameFormattedForDisplay(),
 			upcomingLesson.getRemainingBookingsCount(),
 			upcomingLesson.getLocation().getName(),
 			upcomingLesson.getLessonType().getPriceFormattedForDisplay()

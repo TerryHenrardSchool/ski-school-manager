@@ -20,7 +20,7 @@ public class MainMenu extends JFrame {
     
     public MainMenu() {
         setTitle("Ski School Manager");
-        setSize(1017, 694);
+        setSize(1017, 554);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -77,7 +77,7 @@ public class MainMenu extends JFrame {
 	    
 	    JPanel panel_1_1 = new JPanel();
 	    panel_1_1.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Lesson Actions", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-	    panel_1_1.setBounds(20, 365, 973, 136);
+	    panel_1_1.setBounds(20, 365, 971, 136);
 	    getContentPane().add(panel_1_1);
 	    panel_1_1.setLayout(new GridLayout(0, 2, 0, 0));
 	    
@@ -89,9 +89,10 @@ public class MainMenu extends JFrame {
 	    btnAddLesson.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	    panel_1_1.add(btnAddLesson);
 	    
-	    JButton btnSearchLesson = new JButton("Search a lesson");
-	    btnSearchLesson.setFont(new Font("Tahoma", Font.PLAIN, 14));
-	    panel_1_1.add(btnSearchLesson);
+	    JLabel lblNewLabel = new JLabel("To consult the lessons, go to the section search an instructor");
+	    lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+	    lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	    panel_1_1.add(lblNewLabel);
 	    btnAddInstructor.addActionListener(e ->{
 	    	openFrame(new AddAnInstructor());
 	    	dispose();

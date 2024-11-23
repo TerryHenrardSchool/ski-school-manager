@@ -74,8 +74,15 @@ public class Skier extends Person {
     }
 
     // Methods
+	public Booking findBookingById(int bookingId) {
+	    return bookings.stream()
+		    .filter(booking -> booking.getId() == bookingId)
+		    .findFirst()
+		    .orElse(null); 
+	}
+    
     public boolean hasValidAgeForLessonType(LessonType lessonType) {
-        int age = LocalDate.now().getYear() - getDateOfBirth().getYear();
+        int age = super.calculateAge();
         return lessonType.isAgeValid(age);
     }
     

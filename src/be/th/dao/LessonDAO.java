@@ -52,11 +52,35 @@ public class LessonDAO extends DAO<Lesson>{
 	    }
 	}
 
-
 	@Override
 	public boolean delete(int id) {
-		return false; // TODO
+	    String sqlDeleteBookings = """
+	        DELETE FROM bookings
+	        WHERE lesson_id = ?
+	    """;
+	    
+	    String sqlDeleteLesson = """
+	        DELETE FROM lessons
+	        WHERE lesson_id = ?
+	    """;
+
+	    try (
+	        PreparedStatement pstmtDeleteBookings = connection.prepareStatement(sqlDeleteBookings);
+	        PreparedStatement pstmtDeleteLesson = connection.prepareStatement(sqlDeleteLesson)
+	    ) {
+	        pstmtDeleteBookings.setInt(1, id);
+	        pstmtDeleteBookings.executeUpdate();
+
+	        pstmtDeleteLesson.setInt(1, id);
+	        int affectedRows = pstmtDeleteLesson.executeUpdate();
+
+	        return affectedRows > 0;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
 	}
+
 
 	@Override
 	public boolean update(Lesson obj) {
