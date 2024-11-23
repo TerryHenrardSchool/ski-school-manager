@@ -120,6 +120,10 @@ public class Lesson implements Serializable {
 		return lessonDAO.create(this);
 	}
 	
+	public boolean deleteFromDatabase(LessonDAO lessonDAO) {
+		return lessonDAO.delete(id);
+	}
+	
 	public static List<Lesson> findAllInDatabase(LessonDAO lessonDAO) {
 		return lessonDAO.findAll();
 	}
@@ -134,19 +138,18 @@ public class Lesson implements Serializable {
 			throw new IllegalArgumentException("Booking must have value.");
 		}
 		
+		if (bookings.contains(booking)) {
+			return false;
+		}
 		
-		if (bookings.size() >= lessonType.getMaxBookings()) {
+		if (!isAvailable()) {
 			throw new IllegalArgumentException("Lesson is fully booked.");
-			
 		}
 		
 		if (!booking.getSkier().hasValidAgeForLessonType(lessonType)) {
 			throw new IllegalArgumentException("Skier does not meet the age requirements for the lesson type.");
 		}
 		
-		if (bookings.contains(booking)) {
-			return false;
-		}
 		return bookings.add(booking);
 	}
 	
@@ -180,10 +183,42 @@ public class Lesson implements Serializable {
 	public int getRemainingBookingsCount() {
 		return lessonType.getMaxBookings() - bookings.size();
 	}
+
+	public boolean isFullyBooked() {
+		return bookings.size() >= lessonType.getMaxBookings();
+	}
+
+	public boolean isAvailable() {
+		return bookings.size() < lessonType.getMaxBookings();
+	}
 	
-	 public long calculateDaysUntilStartDate() {
-	        return Math.max(0, ChronoUnit.DAYS.between(LocalDate.now(), startDate));
+	public long calculateDaysUntilStartDate() {
+        return Math.max(0, ChronoUnit.DAYS.between(LocalDate.now(), startDate));
+    }
+
+	public String calculateDaysUntilStartDateFormattedForDisplay() {
+	    long days = calculateDaysUntilStartDate();
+
+	    long years = days / 365; 
+	    long remainingDays = days % 365;
+
+	    long months = remainingDays / 30;
+	    remainingDays %= 30;
+
+	    String result = "";
+	    if (years > 0) {
+	        result += years + " ans ";
 	    }
+	    if (months > 0) {
+	        result += months + " mois ";
+	    }
+	    if (remainingDays > 0 || result.length() == 0) {
+	        result += remainingDays + " jours";
+	    }
+
+	    return result.toString().trim();
+	}
+
 
     // Override methods
     @Override

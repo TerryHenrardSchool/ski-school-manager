@@ -112,6 +112,17 @@ public class Instructor extends Person {
 	}
 
     // Methods
+	public Lesson findLessonById(int lessonId) {
+		if (!IntegerValidator.isPositiveOrEqualToZero(lessonId)) {
+			throw new IllegalArgumentException("Lesson ID must be positive.");
+		}
+
+		return lessons.stream().
+			filter(lesson -> lesson.getId() == lessonId)
+			.findFirst()
+			.orElse(null);
+	}
+	
     public boolean removeAccreditation(Accreditation accreditation) {
         if (!ObjectValidator.hasValue(accreditation)) {
             throw new IllegalArgumentException("Accreditation must have value");

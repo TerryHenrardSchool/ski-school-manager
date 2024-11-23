@@ -121,8 +121,8 @@ public class SearchASkier extends JFrame {
 		panel.add(scrollPane);
 		
 		Object[][] data = {}; 
-		String[] columnNames = { "Id", "Full name", "Birthdate", "Address", "Phone number", "Email" };
-		int[] columnWidths = { 10, 75, 50, 200, 80, 180 };
+		String[] columnNames = { "Id", "Full name", "Birthdate", "Age", "Address", "Phone number", "Email" };
+		int[] columnWidths = { 10, 75, 50, 20, 200, 80, 180 };
 
 		skierTable = createJTable(data, columnNames, columnWidths);
 		MouseListener doubleClickListener = new MouseAdapter() {
@@ -607,8 +607,9 @@ public class SearchASkier extends JFrame {
 	private Object[] getPreparedSkierInfoForTableModel(Skier skier) {
 		return new Object[] {
 			skier.getId(),
-			skier.getLastnameFormattedForDisplay() + " " + skier.getFirstNameFormattedForDisplay(),
+			skier.getFullNameFormattedForDisplay(),
 			DatabaseFormatter.toBelgianFormat(skier.getDateOfBirth()),
+			skier.getAgeFormattedForDisplay(),
 			skier.getAddress().getAddressFormattedForDisplay(),
 			skier.getPhoneNumber(),
 			skier.getEmail()
@@ -928,7 +929,7 @@ public class SearchASkier extends JFrame {
 
 	    try {
 	        int bookingId = getBookingIdFromRow(selectedRow);
-	        selectedBooking = findBookingById(bookingId);
+	        selectedBooking = selectedSkier.findBookingById(bookingId);
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
 	        showError("Error while fetching skier data.");
@@ -937,15 +938,6 @@ public class SearchASkier extends JFrame {
 
 	private int getBookingIdFromRow(int row) {
 	    return (int) bookingTable.getValueAt(row, 0);
-	}
-
-	private Booking findBookingById(int bookingId) {
-	    return selectedSkier
-			.getBookings()
-		    .stream()
-		    .filter(booking -> booking.getId() == bookingId)
-		    .findFirst()
-		    .orElse(null); 
 	}
 
 	private void showError(String message) {

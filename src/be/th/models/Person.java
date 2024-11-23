@@ -207,6 +207,15 @@ public abstract class Person implements Serializable {
 	public String getFullNameFormattedForDisplay() {
 		return getLastnameFormattedForDisplay() + " " + getFirstNameFormattedForDisplay();
 	}
+	
+	public int calculateAge() {
+		return LocalDate.now().getYear() - getDateOfBirth().getYear();
+	}
+	
+	public String getAgeFormattedForDisplay() {
+		int age = calculateAge();
+		return age + (age > 1 ? " years" : " year");
+	}
     
     // Override methods
     @Override
