@@ -282,7 +282,7 @@ public class SearchASkier extends JFrame {
 			new Object[][] {
 			},
 			new String[] {
-				"id", "Insurance", "Lesson type", "Instructor", "Lesson date", "Days before start", "Price", "location"
+				"id", "Insurance", "Lesson type", "Instructor", "Lesson date", "Time until start", "Location", "Price"
 			}
 		){
 			private static final long serialVersionUID = 1L;
@@ -419,10 +419,10 @@ public class SearchASkier extends JFrame {
 			booking.getInsurance() ? "Yes" : "No",
 			booking.getLesson().getLessonType().getLessonTypeInfoFormattedForDisplay(), 
 			booking.getLesson().getInstructor().getFullNameFormattedForDisplay(),
-			DatabaseFormatter.toBelgianFormat(booking.getLesson().getDate()), 
-			booking.getLesson().calculateDaysUntilStartDate() + " days",
-			booking.calculatePrice(), 
-			booking.getLesson().getLocation().getName() 
+			DatabaseFormatter.toBelgianFormat(booking.getLesson().getDate()),
+			booking.getLesson().getCalculatedDaysUntilStartDateFormattedForDisplay(),
+			booking.getLesson().getLocation().getName(), 
+			booking.getCalculatedPriceFormattedForDisplay()
 		};
 	}
 	
@@ -883,7 +883,6 @@ public class SearchASkier extends JFrame {
 	
 	private void handleCreateCallBackResult(Boolean isCreated, Booking booking) {
 		if (isCreated) {
-			skierMap.get(booking.getSkier().getId()).addBooking(booking);
 			displayBookingsInTable(selectedSkier.getBookings());
 		}
 	}

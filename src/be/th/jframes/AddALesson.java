@@ -32,12 +32,14 @@ import be.th.models.Lesson;
 import be.th.models.LessonType;
 import be.th.models.Location;
 import be.th.parsers.DateParser;
+import be.th.validators.ObjectValidator;
 
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.print.event.PrintJobAttributeEvent;
 import javax.swing.AbstractListModel;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.DefaultComboBoxModel;
@@ -78,6 +80,9 @@ public class AddALesson extends JFrame {
 	private JComboBox<String> eligibleInstructorsComboBox;
 	private JComboBox<String> locationComboBox;
 	private JDateChooser startDateField;
+	private JRadioButton rdbtnMorningLesson;
+	private JRadioButton rdbtnAfternoonLesson;
+	private ButtonGroup startHourRadioButtonGroup;
 
 	/**
 	 * Create the frame.
@@ -203,6 +208,19 @@ public class AddALesson extends JFrame {
 		cancelBtn.setBackground(new Color(255, 57, 57));
 		cancelBtn.setBounds(146, 216, 154, 51);
 		panel.add(cancelBtn);
+		
+		rdbtnMorningLesson = new JRadioButton("Morning (09h - 12h)");
+		rdbtnMorningLesson.setBounds(10, 71, 142, 23);
+		rdbtnMorningLesson.setSelected(true);
+		panel.add(rdbtnMorningLesson);
+		
+		rdbtnAfternoonLesson = new JRadioButton("Afternoon (14h - 17h)");
+		rdbtnAfternoonLesson.setBounds(154, 71, 167, 23);
+		panel.add(rdbtnAfternoonLesson);
+		
+		startHourRadioButtonGroup = new ButtonGroup();
+		startHourRadioButtonGroup.add(rdbtnAfternoonLesson);
+		startHourRadioButtonGroup.add(rdbtnMorningLesson);
 	}
 	
 	private void setModelToJComboBox(JComboBox<String> comboBox, String[] values) {
@@ -422,11 +440,25 @@ public class AddALesson extends JFrame {
 		);
 	}
 	
+	private LocalDateTime adjustTimeOfStartDate(LocalDateTime dateTime) {
+	    ButtonModel selectedModel = startHourRadioButtonGroup.getSelection();
+	    
+	    if (selectedModel.equals(rdbtnAfternoonLesson.getModel())) {
+	        return dateTime.withHour(14);
+	    } else if (selectedModel.equals(rdbtnMorningLesson.getModel())) {
+	        return dateTime.withHour(9);
+	    }
+	    	    
+	    return dateTime; 
+	}
+
+	
 	private Lesson buildLessonFromFields() {
 		LessonType lessonType = lessonTypeMap.get(lessonTypeComboBox.getSelectedItem());
 		Instructor instructor = instructorMap.get(eligibleInstructorsComboBox.getSelectedItem());
 		Location location = locationMap.get(locationComboBox.getSelectedItem());
 		LocalDateTime startDate = DateParser.toLocalDateTime(startDateField.getDate());
+		startDate = adjustTimeOfStartDate(startDate);
 						
 		return new Lesson(startDate, lessonType, instructor, location.getId(), location.getName());
 	}

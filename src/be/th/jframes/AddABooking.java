@@ -312,8 +312,8 @@ public class AddABooking extends JFrame {
 		return new Object[] {
 			upcomingLesson.getId(),
 			upcomingLesson.getLessonType().getLessonTypeInfoFormattedForDisplay(),
-			DatabaseFormatter.toBelgianFormat(upcomingLesson.getDate().toLocalDate()),
-			upcomingLesson.calculateDaysUntilStartDateFormattedForDisplay(),
+			DatabaseFormatter.toBelgianFormat(upcomingLesson.getDate()),
+			upcomingLesson.getCalculatedDaysUntilStartDateFormattedForDisplay(),
 			upcomingLesson.getInstructor().getFullNameFormattedForDisplay(),
 			upcomingLesson.getRemainingBookingsCount(),
 			upcomingLesson.getLocation().getName(),
@@ -373,15 +373,33 @@ public class AddABooking extends JFrame {
 			);
 			return;
 		}
+
+		boolean isAddedIntoSelectedSkier = false;
+		try {
+			isAddedIntoSelectedSkier = selectedSkier.addBooking(newBooking);
+			if (!isAddedIntoSelectedSkier) {
+				JOptionPane.showMessageDialog(
+					null, 
+					"The selected skier already has this booking",
+					"Error", 
+					JOptionPane.ERROR_MESSAGE
+				);
+				
+				return;
+			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		
-		boolean isAdded = newBooking.insertIntoDatabase((BookingDAO) bookingDAO);
-		if(!isAdded) {
+		boolean isAddedIntoDatabase = newBooking.insertIntoDatabase((BookingDAO) bookingDAO);
+		if(!isAddedIntoDatabase) {
 			JOptionPane.showMessageDialog(null, "An error occurred while adding the booking. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
 		JOptionPane.showMessageDialog(null, "The booking has been successfully added.", "Success", JOptionPane.INFORMATION_MESSAGE);
-		onCreateCallback.accept(isAdded, newBooking);
+		onCreateCallback.accept(isAddedIntoDatabase, newBooking);
 		dispose();
 	}
 	

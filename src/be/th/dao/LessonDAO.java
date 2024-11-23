@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public class LessonDAO extends DAO<Lesson>{
     		VALUES (?, ?, ?, ?, ?)
 		""";
 	    try (PreparedStatement ps = connection.prepareStatement(query)) {
-	        ps.setDate(1, Date.valueOf(lesson.getDate().toLocalDate()));
+	        ps.setTimestamp(1, Timestamp.valueOf(lesson.getDate()));
 	        ps.setInt(2, lesson.getLocation().getId());
 	        ps.setInt(3, 21);
 	        ps.setInt(4, lesson.getInstructor().getId());
@@ -320,7 +321,7 @@ public class LessonDAO extends DAO<Lesson>{
 	        while (rs.next()) {
 	        	Booking booking = new Booking(
         			rs.getInt("booking_id"),
-        			rs.getDate("booking_date").toLocalDate().atStartOfDay(),
+        			rs.getTimestamp("booking_date").toLocalDateTime(),
         			rs.getBoolean("is_insured"),
         			rs.getInt("period_id"),
         			rs.getDate("start_date").toLocalDate(),

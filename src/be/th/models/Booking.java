@@ -5,6 +5,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
+
 import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
 import be.th.dao.BookingDAO;
@@ -15,6 +18,8 @@ public class Booking implements Serializable {
     
     // Static attributes
     private static final long serialVersionUID = 6020444951685458127L;
+    private static final double INSURANCE_PRICE = 20.0;
+    private static final double FULL_DAY_BOOKING_DISCOUNT = 0.15;
     
     // Attributes
     private int id;
@@ -132,13 +137,28 @@ public class Booking implements Serializable {
         }
         this.isInsured = isInsured;
     }
+    
+    public double calculateInsuranceSupplement() {
+    	return isInsured ? INSURANCE_PRICE : 0;
+    }
+    
+	public double calculateFullDayDiscount() {
+		return getSkier().isFullDayBooked(this) ? 1 - FULL_DAY_BOOKING_DISCOUNT : 1;
+	}
 
     // Methods
     public double calculatePrice() {
-        return 0.0; // TODO: Implement price calculation logic (insurance + 15% if evening and afternoon)
+        double insuranceSupplement = calculateInsuranceSupplement();
+        double fullDayDiscount = calculateFullDayDiscount();
+        
+        return getLesson().getLessonType().getPrice() * fullDayDiscount + insuranceSupplement;
     }
     
-	
+    public String getCalculatedPriceFormattedForDisplay() {
+    	String discountText = getSkier().isFullDayBooked(this) ? " (-15%)" : "";
+    	String insuranceText = isInsured ? " (+20€)" : "";
+		return String.format("%.2f €", calculatePrice()) + discountText + insuranceText;
+	}
     
     // Database methods
 	public boolean insertIntoDatabase(BookingDAO bookingDAO) {

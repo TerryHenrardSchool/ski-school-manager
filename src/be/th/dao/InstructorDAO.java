@@ -274,7 +274,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	        while (rs3.next()) {
 	        	Booking booking = new Booking(
         			rs3.getInt("booking_id"),
-        			rs3.getDate("booking_date").toLocalDate().atStartOfDay(),
+        			rs3.getTimestamp("booking_date").toLocalDateTime(),
         			rs3.getBoolean("is_insured"),
         			rs3.getInt("period_id"),
         			rs3.getDate("start_date").toLocalDate(),
@@ -326,7 +326,7 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	    return new Lesson(
 	        rs.getInt("lesson_id"),
-	        rs.getDate("start_date").toLocalDate().atStartOfDay(),
+	        rs.getTimestamp("start_date").toLocalDateTime(),
 	        lessonType,
 	        instructor,
 	        rs.getInt("location_id_1"),

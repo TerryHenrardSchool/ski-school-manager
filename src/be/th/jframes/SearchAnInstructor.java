@@ -477,13 +477,13 @@ public class SearchAnInstructor extends JFrame {
 	private Object[] getPreparedLessonInfoForTableModel(Lesson lesson) {
 		return new Object[] { 
 			lesson.getId(),
-			lesson.getLessonType().getName(), 
-			DatabaseFormatter.toBelgianFormat(lesson.getDate().toLocalDate()),
-			lesson.calculateDaysUntilStartDateFormattedForDisplay(),
+			lesson.getLessonType().getLessonTypeInfoFormattedForDisplay(), 
+			DatabaseFormatter.toBelgianFormat(lesson.getDate()),
+			lesson.getCalculatedDaysUntilStartDateFormattedForDisplay(),
 			lesson.getBookingCount(),
 			lesson.isFullyBooked() ? "Full" : "Available",
 			lesson.getLocation().getName(),
-			lesson.getCalculatePriceFormattedForDisplay()
+			lesson.getCalculatedPriceFormattedForDisplay()
 		};
 	}
 	

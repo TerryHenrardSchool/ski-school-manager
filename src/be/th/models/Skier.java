@@ -1,6 +1,7 @@
 package be.th.models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -73,7 +74,17 @@ public class Skier extends Person {
     	return skierDAO.findAll();
     }
 
-    // Methods
+ // Methods
+    public boolean isFullDayBooked(Booking booking) {
+        return bookings.stream().anyMatch(skierBooking -> {
+            LocalDateTime skierBookingDate = skierBooking.getLesson().getDate();
+            LocalDateTime newBookingDate = booking.getLesson().getDate();
+
+            return skierBookingDate.toLocalDate().equals(newBookingDate.toLocalDate()) &&
+                   skierBookingDate.getHour() != newBookingDate.getHour();
+        });
+    }
+	
 	public Booking findBookingById(int bookingId) {
 	    return bookings.stream()
 		    .filter(booking -> booking.getId() == bookingId)
@@ -90,18 +101,30 @@ public class Skier extends Person {
         return lesson.getBookings().stream().anyMatch(booking -> booking.getSkier().equals(this));
     }
 
-	public boolean addBooking(Booking booking) {
-		if (!ObjectValidator.hasValue(booking)) {
-			throw new IllegalArgumentException("Booking must have value.");
+    public boolean addBooking(Booking newBooking) {
+        if (!ObjectValidator.hasValue(newBooking)) {
+            throw new IllegalArgumentException("Booking must have value.");
         }
-		
-		if (bookings.contains(booking)) {
-			return false;
-		}
-		
-		return bookings.add(booking);
 
-	}
+        boolean hasBookingForSameDateAndTime = 
+    		bookings.stream() 
+    		.anyMatch(booking -> {
+    			LocalDateTime skierBookingDate = booking.getLesson().getDate();
+    			LocalDateTime newBookingDate = newBooking.getLesson().getDate();
+    			
+    			return skierBookingDate.equals(newBookingDate);
+    		});
+        if (hasBookingForSameDateAndTime) {
+            throw new IllegalArgumentException("Skier already has a booking for this date and time.");
+        }
+
+        if (bookings.contains(newBooking)) {
+            return false;
+        }
+
+        return bookings.add(newBooking);
+    }
+
 	
 	public boolean removeBooking(Booking booking) {
 		if (!ObjectValidator.hasValue(booking)) {

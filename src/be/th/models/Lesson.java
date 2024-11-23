@@ -168,7 +168,7 @@ public class Lesson implements Serializable {
         return lessonType.getPrice() * bookings.size();
     }
     
-	public String getCalculatePriceFormattedForDisplay() {
+	public String getCalculatedPriceFormattedForDisplay() {
 		return String.format("%.2f €", calculatePrice());
 	}
 
@@ -196,7 +196,7 @@ public class Lesson implements Serializable {
         return Math.max(0, ChronoUnit.DAYS.between(LocalDate.now(), startDate));
     }
 
-	public String calculateDaysUntilStartDateFormattedForDisplay() {
+	public String getCalculatedDaysUntilStartDateFormattedForDisplay() {
 	    long days = calculateDaysUntilStartDate();
 
 	    long years = days / 365; 
