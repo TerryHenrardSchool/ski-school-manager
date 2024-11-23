@@ -420,7 +420,7 @@ public class SearchASkier extends JFrame {
 			booking.getLesson().getLessonType().getLessonTypeInfoFormattedForDisplay(), 
 			booking.getLesson().getInstructor().getFullNameFormattedForDisplay(),
 			DatabaseFormatter.toBelgianFormat(booking.getLesson().getDate()), 
-			booking.calculateDaysUntilLesson() + " days",
+			booking.getLesson().calculateDaysUntilStartDate() + " days",
 			booking.calculatePrice(), 
 			booking.getLesson().getLocation().getName() 
 		};
@@ -515,7 +515,7 @@ public class SearchASkier extends JFrame {
 		}
 			
 		stream = applyFilter(stream, instructorFullName, booking -> booking.getLesson().getInstructor().getFullNameFormattedForDisplay());
-		stream = applyFilter(stream, lessonDate, Booking::getLessonDate);
+		stream = applyFilter(stream, lessonDate, booking -> booking.getLesson().getDate().toLocalDate());
 		
 		return stream.collect(Collectors.toList());
 	}
