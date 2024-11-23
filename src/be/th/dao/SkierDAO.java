@@ -360,7 +360,7 @@ public class SkierDAO extends DAO<Skier>{
 	    Lesson lesson = mapLesson(rs);
 	    return new Booking(
 	        rs.getInt("booking_id"),
-	        rs.getDate("booking_date").toLocalDate().atStartOfDay(),
+	        rs.getTimestamp("booking_date").toLocalDateTime(),
 	        rs.getBoolean("is_insured"),
 	        rs.getInt("period_id"), 
 			rs.getDate("start_date").toLocalDate(),
