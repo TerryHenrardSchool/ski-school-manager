@@ -3,6 +3,7 @@ package be.th.models;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -24,7 +25,7 @@ public class Lesson implements Serializable {
 
     // Attributes
     private int id;
-    private LocalDateTime date;
+    private LocalDateTime startDate;
     
     // References
     Location location;
@@ -66,7 +67,7 @@ public class Lesson implements Serializable {
     }
 
     public LocalDateTime getDate() {
-        return date;
+        return startDate;
     }
     
     public Location getLocation() {
@@ -97,7 +98,7 @@ public class Lesson implements Serializable {
     	if (!DateValidator.hasValue(date)) {
             throw new IllegalArgumentException("Date must have a value.");
         }
-        this.date = date;
+        this.startDate = date;
     }
 
 	public void setLessonType(LessonType lessonType) {
@@ -179,6 +180,10 @@ public class Lesson implements Serializable {
 	public int getRemainingBookingsCount() {
 		return lessonType.getMaxBookings() - bookings.size();
 	}
+	
+	 public long calculateDaysUntilStartDate() {
+	        return Math.max(0, ChronoUnit.DAYS.between(LocalDate.now(), startDate));
+	    }
 
     // Override methods
     @Override
@@ -193,19 +198,19 @@ public class Lesson implements Serializable {
 
         Lesson lesson = (Lesson) object;
         return id == lesson.id &&
-            Objects.equals(date, lesson.date);
+            Objects.equals(startDate, lesson.startDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date);
+        return Objects.hash(id, startDate);
     }
 
     @Override
     public String toString() {
         return "Lesson:" +
            "id=" + id +
-           ", date=" + date + '\'' + 
+           ", date=" + startDate + '\'' + 
            ", " + location + '\'' +
            ", " + lessonType + '\'' + 
            ", " + bookings.toString() + '\'' +

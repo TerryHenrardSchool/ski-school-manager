@@ -1,5 +1,6 @@
 package be.th.jframes;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -107,14 +108,14 @@ public class SearchAnInstructor extends JFrame {
 		
 		instructorsJScrollPane.setViewportView(instructorsTable);
 		
-		JButton btnDeleteInstructor = new JButton("Delete instructor");
+		JButton btnDeleteInstructor = new JButton("Delete");
 		btnDeleteInstructor.setBounds(10, 271, 150, 31);
 		instructorsPanel.add(btnDeleteInstructor);
 		btnDeleteInstructor.addActionListener(this::handleClickOnDeleteButton);
 		btnDeleteInstructor.setFont(FontStyles.BUTTON);
 		btnDeleteInstructor.setBackground(ColorStyles.RED);
 		
-		JButton btnUpdateInformation = new JButton("Update instructor");
+		JButton btnUpdateInformation = new JButton("Update");
 		btnUpdateInformation.setBounds(170, 271, 150, 31);
 		instructorsPanel.add(btnUpdateInformation);
 		btnUpdateInformation.addActionListener(this::handleClickOnUpdateButton);
@@ -261,33 +262,41 @@ public class SearchAnInstructor extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Upcoming lessons", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(20, 388, 439, 229);
+		panel.setBounds(282, 388, 1239, 229);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 21, 419, 197);
+		scrollPane.setBounds(10, 21, 1219, 155);
 		panel.add(scrollPane);
 		
 		upcomingLessonsTable = new JTable();
+		String[] columnNames = { "Lesson type", "Start date", "Days before start", "Location", "Participants", "Revenue" };
+		boolean[] columnEditables = new boolean[columnNames.length];
+		Arrays.fill(columnEditables, false); 
 		upcomingLessonsTable.setModel(new DefaultTableModel(
-			new Object[][] {},
-			new String[] { "Start date", "Location", "Lesson type", "Participants", "Revenue" }
-		){
-			private static final long serialVersionUID = 1L;
-			boolean[] columnEditables = new boolean[] {
-				false, false, false, false, false
-			};
-			public boolean isCellEditable(int row, int column) {
-				return columnEditables[column];
-			}
+		    new Object[][] {},
+		    columnNames
+		) {
+		    private static final long serialVersionUID = 1L;
+		    @Override
+		    public boolean isCellEditable(int row, int column) {
+		        return columnEditables[column];
+		    }
 		});
-		upcomingLessonsTable.getColumnModel().getColumn(0).setResizable(false);
-		upcomingLessonsTable.getColumnModel().getColumn(1).setResizable(false);
-		upcomingLessonsTable.getColumnModel().getColumn(2).setResizable(false);
-		upcomingLessonsTable.getColumnModel().getColumn(3).setResizable(false);
-		upcomingLessonsTable.getColumnModel().getColumn(4).setResizable(false);
+
+		for (int i = 0; i < columnNames.length; i++) {
+		    upcomingLessonsTable.getColumnModel().getColumn(i).setResizable(false);
+		}
+
 		scrollPane.setViewportView(upcomingLessonsTable);
+		
+		JButton btnDeleteInstructor_1 = new JButton("Delete");
+		btnDeleteInstructor_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnDeleteInstructor_1.setBackground(new Color(255, 57, 57));
+		btnDeleteInstructor_1.setBounds(10, 187, 150, 31);
+		panel.add(btnDeleteInstructor_1);
+
 				
 		loadInstructorMap();
 		displayInstructorsInTable(instructorMap.values());
@@ -456,10 +465,11 @@ public class SearchAnInstructor extends JFrame {
 	
 	private Object[] getPreparedLessonInfoForTableModel(Lesson lesson) {
 		return new Object[] { 
-			DatabaseFormatter.toBelgianFormat(lesson.getDate().toLocalDate()), 
-			lesson.getLocation().getName(),
 			lesson.getLessonType().getName(), 
+			DatabaseFormatter.toBelgianFormat(lesson.getDate().toLocalDate()), 
+			lesson.calculateDaysUntilStartDate() + " days",
 			lesson.getBookingCount(),
+			lesson.getLocation().getName(),
 			lesson.getCalculatePriceFormattedForDisplay()
 		};
 	}

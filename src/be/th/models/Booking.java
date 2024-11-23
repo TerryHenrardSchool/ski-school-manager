@@ -138,16 +138,7 @@ public class Booking implements Serializable {
         return 0.0; // TODO: Implement price calculation logic (insurance + 15% if evening and afternoon)
     }
     
-    public long calculateDaysUntilLesson() {
-        LocalDate now = LocalDate.now();
-        LocalDateTime lessonDate = lesson.getDate();
-
-        return Math.max(0, ChronoUnit.DAYS.between(now, lessonDate));
-    }
-    
-	public LocalDate getLessonDate() {
-		return lesson.getDate().toLocalDate();
-	}
+	
     
     // Database methods
 	public boolean insertIntoDatabase(BookingDAO bookingDAO) {
