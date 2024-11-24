@@ -143,7 +143,7 @@ public class Booking implements Serializable {
     }
     
 	public double calculateFullDayDiscount() {
-		return getSkier().isFullDayBooked(this) ? 1 - FULL_DAY_BOOKING_DISCOUNT : 1;
+		return getSkier().isFullyBookedDay(this) ? 1 - FULL_DAY_BOOKING_DISCOUNT : 1;
 	}
 
     // Methods
@@ -155,7 +155,7 @@ public class Booking implements Serializable {
     }
     
     public String getCalculatedPriceFormattedForDisplay() {
-    	String discountText = getSkier().isFullDayBooked(this) ? " (-15%)" : "";
+    	String discountText = getSkier().isFullyBookedDay(this) ? " (-15%)" : "";
     	String insuranceText = isInsured ? " (+20€)" : "";
 		return String.format("%.2f€", calculatePrice()) + discountText + insuranceText;
 	}

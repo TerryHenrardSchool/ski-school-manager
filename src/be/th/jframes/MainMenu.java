@@ -28,7 +28,7 @@ public class MainMenu extends JFrame {
         
         JPanel panel = new JPanel();
         panel.setBorder(new TitledBorder(null, "Skier actions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel.setBounds(20, 72, 973, 136);
+        panel.setBounds(10, 72, 983, 136);
         getContentPane().add(panel);
         panel.setLayout(new GridLayout(0, 2, 0, 0));
 
@@ -58,7 +58,7 @@ public class MainMenu extends JFrame {
                 
         JPanel panel_1 = new JPanel();
         panel_1.setBorder(new TitledBorder(null, "Skier actions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_1.setBounds(20, 218, 973, 136);
+        panel_1.setBounds(10, 218, 983, 136);
         getContentPane().add(panel_1);
         panel_1.setLayout(new GridLayout(0, 2, 0, 0));
         
@@ -77,7 +77,7 @@ public class MainMenu extends JFrame {
 	    
 	    JPanel panel_1_1 = new JPanel();
 	    panel_1_1.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Lesson Actions", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-	    panel_1_1.setBounds(20, 365, 971, 136);
+	    panel_1_1.setBounds(10, 365, 981, 136);
 	    getContentPane().add(panel_1_1);
 	    panel_1_1.setLayout(new GridLayout(0, 2, 0, 0));
 	    

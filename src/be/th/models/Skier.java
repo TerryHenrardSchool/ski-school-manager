@@ -87,7 +87,7 @@ public class Skier extends Person {
         });
     }
     
-    public boolean isFullDayBooked(Booking booking) {
+    public boolean isFullyBookedDay(Booking booking) {
         return bookings.stream().anyMatch(skierBooking -> {
             LocalDateTime skierBookingDate = skierBooking.getLesson().getDate();
             LocalDateTime newBookingDate = booking.getLesson().getDate();
