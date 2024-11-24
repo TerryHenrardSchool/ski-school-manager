@@ -279,10 +279,10 @@ public class AddALesson extends JFrame {
 	private Collection<Instructor> getEligibleInstructors(
         Collection<Instructor> instructors, 
         Accreditation accreditation, 
-        LocalDate date
+        LocalDateTime dateTime
     ) {
 	    return instructors.stream()
-            .filter(i -> i.isAccreditate(accreditation) && i.isAvailable(date))
+            .filter(instructor -> instructor.isAccreditate(accreditation) && instructor.isAvailable(dateTime))
             .collect(Collectors.toList());
 	}
 
@@ -306,8 +306,11 @@ public class AddALesson extends JFrame {
 				
 		Collection<JComponent> components = List.of(eligibleInstructorsComboBox, locationComboBox);
 		Collection<JComboBox<?>> comboBoxes = List.of(eligibleInstructorsComboBox, locationComboBox);
-		Collection<Instructor> eligibleInstructors = 
-				getEligibleInstructors(instructorMap.values(), associatedAccreditation, selectedDate);
+		Collection<Instructor> eligibleInstructors = getEligibleInstructors(
+			instructorMap.values(), 
+			associatedAccreditation, 
+			adjustTimeOfStartDate(selectedDate.atStartOfDay())
+		);
 		
 		if(eligibleInstructors.isEmpty()) {
 			if(!isComboBoxEmpty(eligibleInstructorsComboBox)) {
@@ -389,11 +392,8 @@ public class AddALesson extends JFrame {
         }
 
         Accreditation accreditation = lessonType.getAccreditation();
-        return instructors.stream()
-    		.anyMatch(
-				instructor -> instructor.isAccreditate(accreditation) && 
-							  instructor.isAvailable(DateParser.toLocalDate(startDateField.getDate()))
-		    );
+        LocalDateTime dateTime = adjustTimeOfStartDate(DateParser.toLocalDateTime(startDateField.getDate()));
+        return instructors.stream().anyMatch(instructor -> instructor.isEligible(accreditation, dateTime));
     }
 	
 	private void handleClickOnCancelButton() {
@@ -406,12 +406,21 @@ public class AddALesson extends JFrame {
 	private void handleClickOnCreateButton() {
 		try {
 			Lesson lesson = buildLessonFromFields();
-			boolean isAdded = insertLessonIntoDatabase(lesson);
+			boolean isAddedIntoInstructor = false;
 			
-			if(isAdded) {
+			isAddedIntoInstructor = lesson.getInstructor().addLesson(lesson);
+			if (!isAddedIntoInstructor) {
+				displayAddLessonFailure(JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
+			boolean isAddedIntoDatabase = insertLessonIntoDatabase(lesson);
+			
+			if(isAddedIntoDatabase) {
 				displayAddLessonSuccess(JOptionPane.INFORMATION_MESSAGE);
 	        	resetFormFields();
 	        } else {
+	        	lesson.getInstructor().removeLesson(lesson);
 	        	displayAddLessonFailure(JOptionPane.ERROR_MESSAGE);
 	        }
 		} catch (Exception ex) {
@@ -459,7 +468,7 @@ public class AddALesson extends JFrame {
 		Location location = locationMap.get(locationComboBox.getSelectedItem());
 		LocalDateTime startDate = DateParser.toLocalDateTime(startDateField.getDate());
 		startDate = adjustTimeOfStartDate(startDate);
-						
+								
 		return new Lesson(startDate, lessonType, instructor, location.getId(), location.getName());
 	}
 	

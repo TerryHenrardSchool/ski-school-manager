@@ -1,6 +1,7 @@
 package be.th.models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -96,20 +97,6 @@ public class Instructor extends Person {
         	addAccreditation(accreditation);
         }
     }
-    
-	public void setLessons(Set<Lesson> lessons) {
-		if (!ObjectValidator.hasValue(lessons)) {
-			throw new IllegalArgumentException("Lessons must be set.");
-		}
-
-		if (!IntegerValidator.isGreaterOrEqual(lessons.size(), 1)) {
-			throw new IllegalArgumentException("Lessons must have at least one value.");
-		}
-
-		for (Lesson lesson : lessons) {
-			addLesson(lesson);
-		}
-	}
 
     // Methods
 	public Lesson findLessonById(int lessonId) {
@@ -149,10 +136,22 @@ public class Instructor extends Person {
 		return lessons.remove(lesson);
     }
     
+	public boolean isLessonSlotFree(Lesson newLesson) {
+		LocalDateTime lessonDate = newLesson.getDate();
+		
+		return lessons.stream().noneMatch(instructorLesson -> {
+			return instructorLesson.getDate().equals(lessonDate);
+		});
+	}
+    
     public boolean addLesson(Lesson lesson) {
         if (!ObjectValidator.hasValue(lesson)) {
         	throw new IllegalArgumentException("Lesson must have value");
         }
+        
+		if (!isLessonSlotFree(lesson)) {
+			throw new IllegalArgumentException("Instructor already has a lesson for this date and time.");
+		}
         
 		if (lessons.contains(lesson)) {
 			throw new IllegalArgumentException("Lesson already exists.");
@@ -164,8 +163,13 @@ public class Instructor extends Person {
         return accreditations.stream().anyMatch(accreditation -> accreditation.equals(accreditationToCheck));
     }
     
-    public boolean isAvailable(LocalDate date) {
-    	return !lessons.stream().anyMatch(lesson -> lesson.getDate().toLocalDate().equals(date));
+    public boolean isAvailable(LocalDateTime dateTime) {
+    	return lessons.stream().noneMatch(lesson -> lesson.getDate().equals(dateTime));
+    }
+    
+    public boolean isEligible(Accreditation accreditation, LocalDateTime lessonStartTime) {
+        return isAccreditate(accreditation) && 
+    		   isAvailable(lessonStartTime);
     }
 
     public boolean hasScheduledLesson() {
