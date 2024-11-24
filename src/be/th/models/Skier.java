@@ -91,13 +91,15 @@ public class Skier extends Person {
         });
     }
     
-    public boolean isFullyBookedDay(Booking booking) {
+    public boolean isFullyBookedDay(LocalDateTime lessonDateTime) {
         return bookings.stream().anyMatch(skierBooking -> {
-            LocalDateTime skierBookingDate = skierBooking.getLesson().getDate();
-            LocalDateTime newBookingDate = booking.getLesson().getDate();
-
-            return skierBookingDate.toLocalDate().equals(newBookingDate.toLocalDate()) &&
-                   skierBookingDate.getHour() != newBookingDate.getHour();
+            LocalDateTime skierBookingDateTime = skierBooking.getLesson().getDate();
+            LocalDate skierBookingDate = skierBookingDateTime.toLocalDate();
+            LocalDate lessonDate = lessonDateTime.toLocalDate();
+            
+            return 
+            	skierBookingDate.equals(lessonDate) && 
+        		skierBookingDateTime.getHour() != lessonDateTime.getHour();
         });
     }
 	

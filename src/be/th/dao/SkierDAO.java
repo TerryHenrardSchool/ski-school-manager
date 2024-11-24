@@ -205,71 +205,73 @@ public class SkierDAO extends DAO<Skier>{
 
 	@Override
 	public Skier find(int id) {
-		String sql = """
+	    String sql = """
 	        SELECT 
-			    pe.*, 
-			    b.*,
-			    p.*,
-			    l.*, l.start_date AS lesson_start_date, 
-			    lt.*, lt.name AS lesson_type_name,
-			    a.*,
-			    loc.*, loc.name AS location_name,
-			    i.instructor_id AS instructor_instructor_id,
-			    per.last_name AS instructor_last_name,
-			    per.first_name AS instructor_first_name,
-			    per.date_of_birth AS instructor_date_of_birth,
-			    per.phone_number AS instructor_phone_number,
-			    per.email AS instructor_email,
-			    per.city AS instructor_city,
-			    per.postcode AS instructor_postcode,
-			    per.street_number AS instructor_street_number,
-			    per.street_name AS instructor_street_name,
-                s.skier_id AS skier_skier_id
-			FROM 
-				persons pe
-			INNER JOIN 
-				skiers s ON s.person_id = pe.person_id
-			LEFT JOIN 
-				bookings b ON b.skier_id = s.skier_id
-			LEFT JOIN 
-				periods p ON b.period_id = p.period_id
-			LEFT JOIN 
-				lessons l ON l.lesson_id = b.lesson_id
-			LEFT JOIN 
-				lesson_types lt ON lt.lesson_type_id = l.lesson_type_id
-			LEFT JOIN 
-				accreditations a ON a.accreditation_id = lt.accreditation_id
-			LEFT JOIN 
-				locations loc ON loc.location_id = l.location_id
-			LEFT JOIN 
-				instructors i ON i.instructor_id = l.instructor_id
-			LEFT JOIN 
-				persons per ON per.person_id = i.person_id
-			WHERE 
-				s.skier_id = ?
-			ORDER BY 
-				s.skier_id DESC
+	            pe.*, 
+	            b.*, 
+	            p.*, 
+	            l.*, l.start_date AS lesson_start_date, 
+	            lt.*, lt.name AS lesson_type_name, 
+	            a.*, 
+	            loc.*, loc.name AS location_name, 
+	            i.instructor_id AS instructor_instructor_id, 
+	            per.last_name AS instructor_last_name, 
+	            per.first_name AS instructor_first_name, 
+	            per.date_of_birth AS instructor_date_of_birth, 
+	            per.phone_number AS instructor_phone_number, 
+	            per.email AS instructor_email, 
+	            per.city AS instructor_city, 
+	            per.postcode AS instructor_postcode, 
+	            per.street_number AS instructor_street_number, 
+	            per.street_name AS instructor_street_name, 
+	            s.skier_id AS skier_skier_id
+	        FROM 
+	            persons pe 
+	        INNER JOIN 
+	            skiers s ON s.person_id = pe.person_id 
+	        LEFT JOIN 
+	            bookings b ON b.skier_id = s.skier_id 
+	        LEFT JOIN 
+	            periods p ON b.period_id = p.period_id 
+	        LEFT JOIN 
+	            lessons l ON l.lesson_id = b.lesson_id 
+	        LEFT JOIN 
+	            lesson_types lt ON lt.lesson_type_id = l.lesson_type_id 
+	        LEFT JOIN 
+	            accreditations a ON a.accreditation_id = lt.accreditation_id 
+	        LEFT JOIN 
+	            locations loc ON loc.location_id = l.location_id 
+	        LEFT JOIN 
+	            instructors i ON i.instructor_id = l.instructor_id 
+	        LEFT JOIN 
+	            persons per ON per.person_id = i.person_id 
+	        WHERE 
+	            s.skier_id = ? 
+	        ORDER BY 
+	            b.booking_date DESC
 	    """;
 
 	    Skier skier = null;
 
 	    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, id);
+	        stmt.setInt(1, id);
 	        ResultSet rs = stmt.executeQuery();
-	        
+
 	        while (rs.next()) {
-                skier = new Skier(
-                	rs.getInt("skier_skier_id"),
-                    rs.getString("last_name"),
-                    rs.getString("first_name"),
-                    rs.getDate("date_of_birth").toLocalDate(),
-                    rs.getString("city"),
-                    rs.getString("postcode"),
-                    rs.getString("street_name"),
-                    rs.getString("street_number"),
-                    rs.getString("phone_number"),
-                    rs.getString("email")
-                ); 
+	            if (skier == null) {
+	                skier = new Skier(
+	                    rs.getInt("skier_skier_id"),
+	                    rs.getString("last_name"),
+	                    rs.getString("first_name"),
+	                    rs.getDate("date_of_birth").toLocalDate(),
+	                    rs.getString("city"),
+	                    rs.getString("postcode"),
+	                    rs.getString("street_name"),
+	                    rs.getString("street_number"),
+	                    rs.getString("phone_number"),
+	                    rs.getString("email")
+	                );
+	            }
 
 	            Booking booking = mapBooking(rs, skier);
 	            if (booking != null) {
@@ -311,17 +313,28 @@ public class SkierDAO extends DAO<Skier>{
 			    per.street_number AS instructor_street_number,
 			    per.street_name AS instructor_street_name,
                 s.skier_id AS skier_skier_id
-			FROM persons pe
-			INNER JOIN skiers s ON s.person_id = pe.person_id
-			LEFT JOIN bookings b ON b.skier_id = s.skier_id
-			LEFT JOIN periods p ON b.period_id = p.period_id
-			LEFT JOIN lessons l ON l.lesson_id = b.lesson_id
-			LEFT JOIN lesson_types lt ON lt.lesson_type_id = l.lesson_type_id
-			LEFT JOIN accreditations a ON a.accreditation_id = lt.accreditation_id
-			LEFT JOIN locations loc ON loc.location_id = l.location_id
-			LEFT JOIN instructors i ON i.instructor_id = l.instructor_id
-			LEFT JOIN persons per ON per.person_id = i.person_id
-			ORDER BY s.skier_id DESC
+			FROM 
+	    		persons pe
+			INNER JOIN 
+	    		skiers s ON s.person_id = pe.person_id
+			LEFT JOIN 
+	    		bookings b ON b.skier_id = s.skier_id
+			LEFT JOIN 
+	    		periods p ON b.period_id = p.period_id
+			LEFT JOIN 
+	    		lessons l ON l.lesson_id = b.lesson_id
+			LEFT JOIN 
+	    		lesson_types lt ON lt.lesson_type_id = l.lesson_type_id
+			LEFT JOIN 
+	    		accreditations a ON a.accreditation_id = lt.accreditation_id
+			LEFT JOIN 
+	    		locations loc ON loc.location_id = l.location_id
+			LEFT JOIN 
+	    		instructors i ON i.instructor_id = l.instructor_id
+			LEFT JOIN 
+	    		persons per ON per.person_id = i.person_id
+			ORDER BY 
+	    		s.skier_id DESC
 	    """;
 
 	    Map<Integer, Skier> skierMap = new HashMap<>();
