@@ -167,10 +167,6 @@ public class Lesson implements Serializable {
     public double calculatePrice() {
         return lessonType.getPrice() * bookings.size();
     }
-    
-	public String getCalculatedPriceFormattedForDisplay() {
-		return String.format("%.2f €", calculatePrice());
-	}
 
     public boolean hasBooking() {
         return !bookings.isEmpty();

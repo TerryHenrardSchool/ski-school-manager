@@ -41,7 +41,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	        
 	        return true;
 	    } catch (SQLException e) {
-            DatabaseTransaction.rollbackTransaction(connection);
+            DatabaseTransaction.rollback(connection);
 	        e.printStackTrace();
 	        return false;
 	    } finally {
@@ -61,7 +61,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	        connection.commit();
 	        return true;
 		} catch (SQLException e) {
-            DatabaseTransaction.rollbackTransaction(connection);
+            DatabaseTransaction.rollback(connection);
 	        e.printStackTrace();
 	        return false;
 		} finally {
@@ -76,7 +76,7 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	        boolean isUpdated = updateInstructorInfo(instructor);
 	        if (!isUpdated) {
-	            DatabaseTransaction.rollbackTransaction(connection);
+	            DatabaseTransaction.rollback(connection);
 	            return false;
 	        }
 
@@ -91,7 +91,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	        connection.commit();
 	        return true;
 	    } catch (SQLException e) {
-            DatabaseTransaction.rollbackTransaction(connection);
+            DatabaseTransaction.rollback(connection);
 	        return false;
 	    } finally {
             DatabaseTransaction.restoreAutoCommit(connection);
@@ -382,7 +382,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	private int insertInstructor(int personId) throws SQLException {
 		String sqlInstructor = """
     		INSERT INTO instructors (person_id)
-    		VALUES(?)
+    		VALUES (?)
 		""";
 		
 		try (PreparedStatement pstmtInstructor = connection.prepareStatement(sqlInstructor, new String[] {"instructor_id"})) {

@@ -74,7 +74,19 @@ public class Skier extends Person {
     	return skierDAO.findAll();
     }
 
- // Methods
+    // Methods
+    public double calculateTotalSpent() {
+    	return bookings.stream().mapToDouble(Booking::calculatePrice).sum();
+    }
+    
+    public boolean isBookingSlotFree(Booking newBooking) {
+        LocalDateTime newBookingDate = newBooking.getLesson().getDate();
+        
+        return bookings.stream().noneMatch(booking -> {        	
+        	return booking.getLesson().getDate().equals(newBookingDate);
+        });
+    }
+    
     public boolean isFullDayBooked(Booking booking) {
         return bookings.stream().anyMatch(skierBooking -> {
             LocalDateTime skierBookingDate = skierBooking.getLesson().getDate();
@@ -106,15 +118,7 @@ public class Skier extends Person {
             throw new IllegalArgumentException("Booking must have value.");
         }
 
-        boolean hasBookingForSameDateAndTime = 
-    		bookings.stream() 
-    		.anyMatch(booking -> {
-    			LocalDateTime skierBookingDate = booking.getLesson().getDate();
-    			LocalDateTime newBookingDate = newBooking.getLesson().getDate();
-    			
-    			return skierBookingDate.equals(newBookingDate);
-    		});
-        if (hasBookingForSameDateAndTime) {
+        if (!isBookingSlotFree(newBooking)) {
             throw new IllegalArgumentException("Skier already has a booking for this date and time.");
         }
 
@@ -125,7 +129,6 @@ public class Skier extends Person {
         return bookings.add(newBooking);
     }
 
-	
 	public boolean removeBooking(Booking booking) {
 		if (!ObjectValidator.hasValue(booking)) {
 			throw new IllegalArgumentException("Booking must have value.");

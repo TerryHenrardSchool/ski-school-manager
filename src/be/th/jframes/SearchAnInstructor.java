@@ -26,6 +26,7 @@ import be.th.dao.DAOFactory;
 import be.th.dao.InstructorDAO;
 import be.th.dao.LessonDAO;
 import be.th.formatters.DatabaseFormatter;
+import be.th.formatters.NumericFormatter;
 import be.th.models.Accreditation;
 import be.th.models.Instructor;
 import be.th.models.Lesson;
@@ -483,7 +484,7 @@ public class SearchAnInstructor extends JFrame {
 			lesson.getBookingCount(),
 			lesson.isFullyBooked() ? "Full" : "Available",
 			lesson.getLocation().getName(),
-			lesson.getCalculatedPriceFormattedForDisplay()
+			NumericFormatter.toCurrency(lesson.calculatePrice(), '€')
 		};
 	}
 	

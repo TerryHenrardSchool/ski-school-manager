@@ -86,7 +86,7 @@ public class SkierDAO extends DAO<Skier>{
 	            }
 	        }
 	    } catch (SQLException e) {
-	        DatabaseTransaction.rollbackTransaction(connection);
+	        DatabaseTransaction.rollback(connection);
 	        return false;
 	    } finally {
             DatabaseTransaction.restoreAutoCommit(connection);
@@ -136,7 +136,7 @@ public class SkierDAO extends DAO<Skier>{
 	            return false;
 	        }
 	    } catch (SQLException e) {
-	        DatabaseTransaction.rollbackTransaction(connection);
+	        DatabaseTransaction.rollback(connection);
 	        return false;
 	    } finally {
 	        DatabaseTransaction.restoreAutoCommit(connection);
@@ -196,7 +196,7 @@ public class SkierDAO extends DAO<Skier>{
 	        
 	        return false;
 	    } catch (SQLException e) {
-	        DatabaseTransaction.rollbackTransaction(connection);
+	        DatabaseTransaction.rollback(connection);
 	        return false;
 	    } finally {
 	        DatabaseTransaction.restoreAutoCommit(connection);
