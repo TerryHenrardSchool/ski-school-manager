@@ -165,7 +165,7 @@ public class Lesson implements Serializable {
 	}
 	
     public double calculatePrice() {
-        return lessonType.getPrice() * bookings.size();
+        return bookings.stream().mapToDouble(booking -> booking.calculatePrice()).sum();
     }
 
     public boolean hasBooking() {

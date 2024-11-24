@@ -73,6 +73,10 @@ public class Skier extends Person {
     public static List<Skier> findAllInDatabase(SkierDAO skierDAO){
     	return skierDAO.findAll();
     }
+    
+	public static Skier findInDatabaseById(int id, SkierDAO skierDAO) {
+		return skierDAO.find(id);
+	}
 
     // Methods
     public double calculateTotalSpent() {

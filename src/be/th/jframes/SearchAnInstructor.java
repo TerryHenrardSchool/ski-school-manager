@@ -103,8 +103,8 @@ public class SearchAnInstructor extends JFrame {
 		instructorsPanel.add(instructorsJScrollPane);
 		
 		Object[][] instructorsTableData = {}; 
-		String[] instructorsTableColumnNames = { "Id", "Full name", "Birthdate", "Age", "Address", "Phone number", "Email" };
-		int[] instructorsTableColumnWidths = { 10, 75, 50, 15, 200, 80, 180 };
+		String[] instructorsTableColumnNames = { "Id", "Full name", "Birthdate", "Age", "Address", "Phone number", "Email", "Total revenue" };
+		int[] instructorsTableColumnWidths = { 10, 85, 50, 15, 210, 60, 160, 60 };
 
 		instructorsTable = createJTable(instructorsTableData, instructorsTableColumnNames, instructorsTableColumnWidths);
 		MouseListener doubleClickListener = new MouseAdapter() {
@@ -464,7 +464,8 @@ public class SearchAnInstructor extends JFrame {
 			instructor.getAgeFormattedForDisplay(),
 			instructor.getAddress().getAddressFormattedForDisplay(),
 			instructor.getPhoneNumber(),
-			instructor.getEmail()
+			instructor.getEmail(),
+			NumericFormatter.toCurrency(instructor.calculateGeneratedRevenue(), '€')
 		};
 	}
 	
@@ -577,6 +578,7 @@ public class SearchAnInstructor extends JFrame {
 	    try {
 	        int id = (int) instructorsTable.getValueAt(selectedRow, 0);
 	        selectedInstructor = instructorMap.get(id);
+	        selectedInstructor.calculateGeneratedRevenue();
 	        displayAccreditaionsInTable(selectedInstructor.getAccreditations());    
 	        displayLessonsInTable(selectedInstructor.getLessons());
         } catch (Exception ex) {

@@ -175,11 +175,15 @@ public class Instructor extends Person {
     public boolean hasScheduledLesson() {
         return !lessons.isEmpty();
     }
-
-    public ArrayList<Lesson> getSchedule(int instructorId) {
-        return new ArrayList<>(); //TODO
-    }
     
+	public double calculateGeneratedRevenue() { 
+		return getLessons().stream().mapToDouble(lesson -> {
+			return lesson.getBookings().stream().mapToDouble(booking -> {
+				return booking.calculatePrice(); 
+			}).sum();
+		}).sum();
+	}
+	
     // Database methods
     public boolean insertIntoDatabase(InstructorDAO instructorDAO) {
     	return instructorDAO.create(this);
