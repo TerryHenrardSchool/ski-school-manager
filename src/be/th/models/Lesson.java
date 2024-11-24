@@ -165,7 +165,7 @@ public class Lesson implements Serializable {
 	}
 	
     public double calculatePrice() {
-        return bookings.stream().mapToDouble(booking -> booking.calculatePrice()).sum();
+        return bookings.stream().mapToDouble(Booking::calculatePrice).sum();
     }
 
     public boolean hasBooking() {

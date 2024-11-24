@@ -103,7 +103,7 @@ public class SearchAnInstructor extends JFrame {
 		instructorsPanel.add(instructorsJScrollPane);
 		
 		Object[][] instructorsTableData = {}; 
-		String[] instructorsTableColumnNames = { "Id", "Full name", "Birthdate", "Age", "Address", "Phone number", "Email", "Total revenue" };
+		String[] instructorsTableColumnNames = { "Id", "Full name", "Birthdate", "Age", "Address", "Phone number", "Email", "Total revenu", "Revenue this month" };
 		int[] instructorsTableColumnWidths = { 10, 85, 50, 15, 210, 60, 160, 60 };
 
 		instructorsTable = createJTable(instructorsTableData, instructorsTableColumnNames, instructorsTableColumnWidths);
@@ -224,7 +224,7 @@ public class SearchAnInstructor extends JFrame {
 		birthDateTextField.setBounds(130, 131, 110, 31);
 		panel_1.add(birthDateTextField);
 		
-		JLabel lblTitle = new JLabel("Search for a instructor");
+		JLabel lblTitle = new JLabel("Search for an instructor");
 		lblTitle.setBounds(20, 10, 1501, 52);
 		contentPane.add(lblTitle);
 		lblTitle.setOpaque(true);
@@ -363,38 +363,31 @@ public class SearchAnInstructor extends JFrame {
 		
         model.setRowCount(0);
         
-        for (final Lesson lesson : lessons) {
-            model.addRow(getPreparedLessonInfoForTableModel(lesson));
-        }
+        lessons.forEach(lesson -> model.addRow(getPreparedLessonInfoForTableModel(lesson)));
     }
 	
 	private void displayAccreditaionsInTable(Collection<Accreditation> accreditations) {		
 		DefaultTableModel model = (DefaultTableModel) accreditationsTable.getModel();
 		model.setRowCount(0);
 		
-		for (final Accreditation accreditation : accreditations) {
-			model.addRow(getPreparedAccreditationsInfoForTableModel(accreditation));
-		}
+		accreditations.forEach(accreditation -> model.addRow(getPreparedAccreditationsInfoForTableModel(accreditation)));
 	}
 	
 	private void displayInstructorsInTable(Collection<Instructor> instructors) {
 		DefaultTableModel model = (DefaultTableModel) instructorsTable.getModel();
 		model.setRowCount(0);
 		
-		for (final Instructor instructor : instructors) {
-			model.addRow(getPreparedInstructorInfoForTableModel(instructor));
-		}
+		instructors.forEach(instructor -> model.addRow(getPreparedInstructorInfoForTableModel(instructor)));
 	}	
 	
 	private void loadInstructorMap() {	
 		List<Instructor> instructors = Instructor.findAllInDatabase((InstructorDAO) instructorDAO);
 		
-		if(!instructorMap.isEmpty()) {
+		if (!instructorMap.isEmpty()) {
 			instructorMap.clear();
 		}
-		for (final Instructor instructor : instructors) {
-            instructorMap.put(instructor.getId(), instructor);
-        }
+		
+		instructors.forEach(instructor -> instructorMap.put(instructor.getId(), instructor));
 	}
 	
 	private List<Instructor> searchInstructors(
@@ -465,7 +458,8 @@ public class SearchAnInstructor extends JFrame {
 			instructor.getAddress().getAddressFormattedForDisplay(),
 			instructor.getPhoneNumber(),
 			instructor.getEmail(),
-			NumericFormatter.toCurrency(instructor.calculateGeneratedRevenue(), '€')
+			NumericFormatter.toCurrency(instructor.calculateGeneratedRevenue(), '€'),
+			NumericFormatter.toCurrency(instructor.calculateGeneratedRevenueForCurrentMonthOfCurrentYear(), '€')
 		};
 	}
 	
@@ -477,6 +471,7 @@ public class SearchAnInstructor extends JFrame {
 	}
 	
 	private Object[] getPreparedLessonInfoForTableModel(Lesson lesson) {
+		System.out.println(lesson);
 		return new Object[] { 
 			lesson.getId(),
 			lesson.getLessonType().getLessonTypeInfoFormattedForDisplay(), 

@@ -280,8 +280,10 @@ public class InstructorDAO extends DAO<Instructor> {
         			rs3.getBoolean("is_vacation"),
         			rs3.getString("name"),
         			lesson,
-        			mapSkier(rs3)
+        			mapSkier(rs3.getInt("skier_id_1"))
 	            );
+	        	
+	        	System.out.println("skier bookings -> " + mapSkier(rs3.getInt("skier_id_1")).getBookings());
 	
 	            lesson.addBooking(booking);
 	        }
@@ -453,8 +455,8 @@ public class InstructorDAO extends DAO<Instructor> {
 	    }
 	}
 	
-	private Skier mapSkier(ResultSet rs) throws SQLException {
-	    return Skier.findInDatabaseById(rs.getInt("skier_id_1"), (SkierDAO) new DAOFactory().getSkierDAO());
+	private Skier mapSkier(int id) throws SQLException {
+	    return Skier.findInDatabaseById(id, (SkierDAO) new DAOFactory().getSkierDAO());
 	}
 
 	private boolean updateInstructorInfo(Instructor instructor) {

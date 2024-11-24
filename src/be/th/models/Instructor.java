@@ -2,6 +2,8 @@ package be.th.models;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -176,12 +178,38 @@ public class Instructor extends Person {
         return !lessons.isEmpty();
     }
     
-	public double calculateGeneratedRevenue() { 
-		return getLessons().stream().mapToDouble(lesson -> {
-			return lesson.getBookings().stream().mapToDouble(booking -> {
-				return booking.calculatePrice(); 
-			}).sum();
-		}).sum();
+    public double calculateGeneratedRevenue() {
+        return calculateTotalRevenue(lessons);
+    }
+	
+    public double calculateGeneratedRevenueForCurrentMonthOfCurrentYear() {
+        LocalDate now = LocalDate.now();
+        Month currentMonth = now.getMonth();
+        int currentYear = now.getYear();
+
+        return calculateTotalRevenue(getLessons().stream()
+            .filter(lesson -> isLessonInMonth(lesson, currentMonth) && isLessonInYear(lesson, currentYear))
+            .toList());
+    }
+
+	private boolean isLessonInMonth(Lesson lesson, Month month) {
+	    return lesson.getDate().getMonth().equals(month);
+	}
+	
+	private boolean isLessonInYear(Lesson lesson, int year) {
+		return lesson.getDate().getYear() == year;
+   }
+	
+	private double calculateTotalRevenue(Collection<Lesson> lessons) {
+        return lessons.stream()
+            .mapToDouble(this::calculateTotalRevenueForLesson)
+            .sum();
+    }
+
+	private double calculateTotalRevenueForLesson(Lesson lesson) {
+	    return lesson.getBookings().stream()
+	        .mapToDouble(Booking::calculatePrice)
+	        .sum();
 	}
 	
     // Database methods
