@@ -89,7 +89,7 @@ public class MainMenu extends JFrame {
 	    btnAddLesson.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	    panel_1_1.add(btnAddLesson);
 	    
-	    JLabel lblNewLabel = new JLabel("To consult the lessons, go to the section search an instructor");
+	    JLabel lblNewLabel = new JLabel("To consult the lessons, go to the section \"search an instructor\"");
 	    lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	    lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	    panel_1_1.add(lblNewLabel);

@@ -38,6 +38,7 @@ import be.th.dao.LocationDAO;
 import be.th.dao.PeriodDAO;
 import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
+import be.th.formatters.NumericFormatter;
 import be.th.models.Booking;
 import be.th.models.Instructor;
 import be.th.models.Lesson;
@@ -58,6 +59,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
@@ -317,7 +319,7 @@ public class AddABooking extends JFrame {
 			upcomingLesson.getInstructor().getFullNameFormattedForDisplay(),
 			upcomingLesson.getRemainingBookingsCount(),
 			upcomingLesson.getLocation().getName(),
-			upcomingLesson.getLessonType().getPriceFormattedForDisplay()
+			NumericFormatter.toCurrency(upcomingLesson.getLessonType().getPrice(), '€')
 		};
 	}
 	
@@ -344,63 +346,92 @@ public class AddABooking extends JFrame {
 	
 	private Booking buildBookingFromFields() {
 		Booking booking = new Booking(
-			LocalDate.now().atStartOfDay(), 
+			LocalDateTime.now(), 
 			chckbxAddInsurance.isSelected(),
 			getCurrentPeriod(),
 			selectedLesson,
 			selectedSkier
 		);
-		booking.setLesson(selectedLesson);
 		
 		return booking;
 	}
 	
 	private void handleClickOnAddBtn(BiConsumer<Boolean, Booking> onCreateCallback) {
-		if (!ObjectValidator.hasValue(selectedLesson)) {
-			JOptionPane.showMessageDialog(null, "Please select a lesson to add a booking.", "Watch out", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-		
-		Booking newBooking = null;
-		try {
-			newBooking = buildBookingFromFields();					
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(
-				null, 
-				e.getMessage(),
-				"Error", 
-				JOptionPane.ERROR_MESSAGE
-			);
-			return;
-		}
+	    if (!validateSelectedLesson()) {
+	    	return;
+	    }
 
-		boolean isAddedIntoSelectedSkier = false;
-		try {
-			isAddedIntoSelectedSkier = selectedSkier.addBooking(newBooking);
-			if (!isAddedIntoSelectedSkier) {
-				JOptionPane.showMessageDialog(
-					null, 
-					"The selected skier already has this booking",
-					"Error", 
-					JOptionPane.ERROR_MESSAGE
-				);
-				
-				return;
-			}
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-			return;
+	    Booking newBooking = createBooking();
+	    if (!ObjectValidator.hasValue(newBooking)) {
+	    	return;
+	    }
+
+	    if (!persistAndAddBooking(newBooking, onCreateCallback)) {
+	    	return;
+	    }
+	    
+	    dispose();
+	}
+
+	private boolean validateSelectedLesson() {
+	    if (!ObjectValidator.hasValue(selectedLesson)) {
+	        showMessage("Please select a lesson to add a booking.", "Watch out", JOptionPane.WARNING_MESSAGE);
+	        return false;
+	    }
+	    return true;
+	}
+
+	private Booking createBooking() {
+	    try {
+	        return buildBookingFromFields();
+	    } catch (Exception e) {
+	        showMessage(e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	        return null;
+	    }
+	}
+	
+	private boolean persistAndAddBooking(Booking booking, BiConsumer<Boolean, Booking> onCreateCallback) {
+	    try {
+	        int bookingId = insertBookingIntoDatabase(booking);
+	        if (!IntegerValidator.isPositiveOrEqualToZero(bookingId)) {
+	            showMessage("Failed to save booking to database.", "Error", JOptionPane.ERROR_MESSAGE);
+	            return false;
+	        }
+
+	        booking.setId(bookingId);
+	        if (!addBookingToSkier(booking)) {
+	            showMessage("The selected skier already has this booking.", "Error", JOptionPane.ERROR_MESSAGE);
+	            return false;
+	        }
+
+	        executeCallback(onCreateCallback, booking);
+	        return true;
+
+	    } catch (Exception e) {
+	        showMessage(e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	        return false;
+	    }
+	}
+
+	private int insertBookingIntoDatabase(Booking booking) throws Exception {
+		if (!selectedSkier.isBookingSlotFree(booking)) {
+			throw new IllegalArgumentException("The selected skier already has a booking for this date and time.");
 		}
-		
-		boolean isAddedIntoDatabase = newBooking.insertIntoDatabase((BookingDAO) bookingDAO);
-		if(!isAddedIntoDatabase) {
-			JOptionPane.showMessageDialog(null, "An error occurred while adding the booking. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		
-		JOptionPane.showMessageDialog(null, "The booking has been successfully added.", "Success", JOptionPane.INFORMATION_MESSAGE);
-		onCreateCallback.accept(isAddedIntoDatabase, newBooking);
-		dispose();
+	    return booking.insertIntoDatabaseAndGetId((BookingDAO) bookingDAO);
+	}
+
+	private boolean addBookingToSkier(Booking booking) {
+	    return selectedSkier.addBooking(booking);
+	}
+
+	private void executeCallback(BiConsumer<Boolean, Booking> callback, Booking booking) {
+	    if (ObjectValidator.hasValue(callback)) {
+	        callback.accept(true, booking);
+	    }
+	}
+
+	private void showMessage(String message, String title, int messageType) {
+	    JOptionPane.showMessageDialog(null, message, title, messageType);
 	}
 	
 	private JTextField createFilterTextField() {

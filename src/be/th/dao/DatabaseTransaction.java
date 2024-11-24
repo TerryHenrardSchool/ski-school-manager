@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 public class DatabaseTransaction {
 	
-	public static void rollbackTransaction(Connection connection) {
+	public static void rollback(Connection connection) {
 	    try {
 	        connection.rollback();
 	    } catch (SQLException e) {

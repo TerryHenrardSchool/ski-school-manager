@@ -157,12 +157,16 @@ public class Booking implements Serializable {
     public String getCalculatedPriceFormattedForDisplay() {
     	String discountText = getSkier().isFullDayBooked(this) ? " (-15%)" : "";
     	String insuranceText = isInsured ? " (+20€)" : "";
-		return String.format("%.2f €", calculatePrice()) + discountText + insuranceText;
+		return String.format("%.2f€", calculatePrice()) + discountText + insuranceText;
 	}
     
     // Database methods
 	public boolean insertIntoDatabase(BookingDAO bookingDAO) {
 		return bookingDAO.create(this);
+	}
+	
+	public int insertIntoDatabaseAndGetId(BookingDAO bookingDAO) {
+		return bookingDAO.createAndGetId(this);
 	}
     
 	public boolean deleteFromDatabase(BookingDAO bookingDAO) {

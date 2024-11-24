@@ -27,6 +27,7 @@ import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
 import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
+import be.th.formatters.NumericFormatter;
 import be.th.models.Address;
 import be.th.models.Booking;
 import be.th.models.Instructor;
@@ -121,7 +122,7 @@ public class SearchASkier extends JFrame {
 		panel.add(scrollPane);
 		
 		Object[][] data = {}; 
-		String[] columnNames = { "Id", "Full name", "Birthdate", "Age", "Address", "Phone number", "Email" };
+		String[] columnNames = { "Id", "Full name", "Birthdate", "Age", "Address", "Phone number", "Email", "Total spent" };
 		int[] columnWidths = { 10, 75, 50, 20, 200, 80, 180 };
 
 		skierTable = createJTable(data, columnNames, columnWidths);
@@ -279,11 +280,8 @@ public class SearchASkier extends JFrame {
 		
 		bookingTable = new JTable();
 		bookingTable.setModel(new DefaultTableModel(
-			new Object[][] {
-			},
-			new String[] {
-				"id", "Insurance", "Lesson type", "Instructor", "Lesson date", "Time until start", "Location", "Price"
-			}
+			new Object[][] {},
+			new String[] { "id", "Insurance", "Lesson type", "Instructor", "Lesson date", "Time until start", "Location", "Price" }
 		){
 			private static final long serialVersionUID = 1L;
 			public boolean isCellEditable(int row, int column) {
@@ -612,7 +610,8 @@ public class SearchASkier extends JFrame {
 			skier.getAgeFormattedForDisplay(),
 			skier.getAddress().getAddressFormattedForDisplay(),
 			skier.getPhoneNumber(),
-			skier.getEmail()
+			skier.getEmail(),
+			NumericFormatter.toCurrency(skier.calculateTotalSpent(), '€')
 		};
 	}
 	
@@ -883,6 +882,7 @@ public class SearchASkier extends JFrame {
 	
 	private void handleCreateCallBackResult(Boolean isCreated, Booking booking) {
 		if (isCreated) {
+			JOptionPane.showMessageDialog(null, "The booking has been successfully created.", "Success", JOptionPane.INFORMATION_MESSAGE);
 			displayBookingsInTable(selectedSkier.getBookings());
 		}
 	}
