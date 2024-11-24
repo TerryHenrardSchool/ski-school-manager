@@ -162,7 +162,6 @@ public class InstructorDAO extends DAO<Instructor> {
 	        ORDER BY instructor_id DESC
 	    """;
 
-	    List<Instructor> instructors = new ArrayList<>();
 	    Map<Integer, Instructor> instructorMap = new HashMap<>();
 
 	    try (ResultSet rs = connection.prepareStatement(sql).executeQuery()) {
@@ -175,7 +174,6 @@ public class InstructorDAO extends DAO<Instructor> {
 	                instructor = mapInstructor(rs, accreditation);
 	                loadInstructorLessons(instructor);
 	                instructorMap.put(instructorId, instructor);
-	                instructors.add(instructor);
 	            } else {
 	                instructor.addAccreditation(accreditation);
 	            }
@@ -184,7 +182,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	        e.printStackTrace();
 	    }
 
-	    return instructors;
+	    return instructorMap.values().stream().toList();
 	}
 
 	@Override
@@ -282,18 +280,7 @@ public class InstructorDAO extends DAO<Instructor> {
         			rs3.getBoolean("is_vacation"),
         			rs3.getString("name"),
         			lesson,
-        			new Skier(
-    					rs3.getInt("skier_id_1"),
-    					rs3.getString("last_name"),
-    					rs3.getString("first_name"),
-    					rs3.getDate("date_of_birth").toLocalDate(),
-    					rs3.getString("city"),
-    					rs3.getString("postcode"),
-    					rs3.getString("street_name"),
-    					rs3.getString("street_number"),
-    					rs3.getString("phone_number"),
-    					rs3.getString("email")
-					)
+        			mapSkier(rs3)
 	            );
 	
 	            lesson.addBooking(booking);
@@ -464,6 +451,10 @@ public class InstructorDAO extends DAO<Instructor> {
 	    } catch (SQLException ex) {
 	        throw new SQLException("Error while deleting instructor. Error: " + ex.getMessage(), ex);
 	    }
+	}
+	
+	private Skier mapSkier(ResultSet rs) throws SQLException {
+	    return Skier.findInDatabaseById(rs.getInt("skier_id_1"), (SkierDAO) new DAOFactory().getSkierDAO());
 	}
 
 	private boolean updateInstructorInfo(Instructor instructor) {
