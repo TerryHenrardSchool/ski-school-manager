@@ -258,7 +258,6 @@ public class SkierDAO extends DAO<Skier>{
 	        ResultSet rs = stmt.executeQuery();
 
 	        while (rs.next()) {
-	            // Initialize Skier once
 	            if (skier == null) {
 	                skier = new Skier(
 	                    rs.getInt("skier_skier_id"),

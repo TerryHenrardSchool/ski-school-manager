@@ -282,9 +282,7 @@ public class InstructorDAO extends DAO<Instructor> {
         			lesson,
         			mapSkier(rs3.getInt("skier_id_1"))
 	            );
-	        	
-	        	System.out.println("skier bookings -> " + mapSkier(rs3.getInt("skier_id_1")).getBookings());
-	
+	        		
 	            lesson.addBooking(booking);
 	        }
 	    } catch (SQLException e) {

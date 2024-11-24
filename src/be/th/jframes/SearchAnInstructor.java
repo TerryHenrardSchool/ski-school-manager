@@ -471,7 +471,6 @@ public class SearchAnInstructor extends JFrame {
 	}
 	
 	private Object[] getPreparedLessonInfoForTableModel(Lesson lesson) {
-		System.out.println(lesson);
 		return new Object[] { 
 			lesson.getId(),
 			lesson.getLessonType().getLessonTypeInfoFormattedForDisplay(), 

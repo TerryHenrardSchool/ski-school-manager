@@ -150,11 +150,7 @@ public class Booking implements Serializable {
     public double calculatePrice() {
         double insuranceSupplement = calculateInsuranceSupplement();
         double fullDayDiscount = calculateFullDayDiscount();
-        
-        System.out.println("Insurance supplement: " + insuranceSupplement);
-        System.out.println("Full day discount: " + fullDayDiscount);
-        System.out.println("price -> " + getLesson().getLessonType().getPrice() * fullDayDiscount + insuranceSupplement);
-                
+                        
         return getLesson().getLessonType().getPrice() * fullDayDiscount + insuranceSupplement;
     }
     
