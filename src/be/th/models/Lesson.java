@@ -44,7 +44,7 @@ public class Lesson implements Serializable {
 		String LocationName
 	) {
         setId(id);
-        setDate(startDate);
+        setStartDate(startDate);
         setLessonType(lessonType);
         setInstructor(instructor);
         location = new Location(locationId, LocationName);
@@ -94,10 +94,15 @@ public class Lesson implements Serializable {
         this.id = id;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setStartDate(LocalDateTime date) {
     	if (!DateValidator.hasValue(date)) {
             throw new IllegalArgumentException("Date must have a value.");
         }
+    	
+		if (!DateValidator.isInRange(date.toLocalDate(), Period.SKI_SCHOOL_OPENING_DATE, Period.SKI_SCHOOL_CLOSING_DATE)) {
+			throw new IllegalArgumentException("Date must be within the ski school's opening dates.");
+    		
+    	}
         this.startDate = date;
     }
 
