@@ -883,6 +883,7 @@ public class SearchASkier extends JFrame {
 	private void handleCreateCallBackResult(Boolean isCreated, Booking booking) {
 		if (isCreated) {
 			JOptionPane.showMessageDialog(null, "The booking has been successfully created.", "Success", JOptionPane.INFORMATION_MESSAGE);
+			displaySkiersInTable(skierMap.values());
 			displayBookingsInTable(selectedSkier.getBookings());
 		}
 	}
