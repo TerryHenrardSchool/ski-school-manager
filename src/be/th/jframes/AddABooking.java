@@ -12,6 +12,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -58,6 +60,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.security.KeyStore.PrivateKeyEntry;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.awt.event.ActionEvent;
@@ -111,7 +114,7 @@ public class AddABooking extends JFrame {
 		loadUnbookedUpcommingLessonsMap();
 				
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 1619, 589);
+		setBounds(100, 100, 1619, 593);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -123,12 +126,12 @@ public class AddABooking extends JFrame {
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 24));
 		lblTitle.setBackground(new Color(0, 153, 255));
-		lblTitle.setBounds(10, 11, 1583, 52);
+		lblTitle.setBounds(10, 23, 1583, 52);
 		contentPane.add(lblTitle);
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Booking information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 74, 1583, 465);
+		panel.setBounds(10, 86, 1583, 465);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		

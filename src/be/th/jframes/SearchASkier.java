@@ -104,7 +104,7 @@ public class SearchASkier extends JFrame {
 		skierMap = new LinkedHashMap<>();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(0, 0, 1539, 846);
+		setBounds(0, 0, 1539, 884);
 
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -113,7 +113,7 @@ public class SearchASkier extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Skiers", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel.setBounds(282, 64, 1239, 364);
+		panel.setBounds(272, 95, 1239, 364);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -164,7 +164,7 @@ public class SearchASkier extends JFrame {
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Skier search criteria", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel_1.setBounds(20, 64, 252, 364);
+		panel_1.setBounds(10, 95, 252, 364);
 		contentPane.add(panel_1);
 		panel_1.setLayout(null);
 		
@@ -251,26 +251,16 @@ public class SearchASkier extends JFrame {
 		panel_1.add(birthDateTextField);
 		
 		JLabel lblTitle = new JLabel("Search for a skier");
-		lblTitle.setBounds(20, 10, 1501, 52);
+		lblTitle.setBounds(10, 32, 1501, 52);
 		contentPane.add(lblTitle);
 		lblTitle.setOpaque(true);
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 24));
 		lblTitle.setBackground(new Color(0, 153, 255));
 		
-		JButton cancelBtn = new JButton("Back");
-		cancelBtn.addActionListener(this::handleClickOnBackButton);
-		cancelBtn.setOpaque(true);
-		cancelBtn.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		cancelBtn.setContentAreaFilled(true);
-		cancelBtn.setBorderPainted(false);
-		cancelBtn.setBackground(new Color(255, 57, 57));
-		cancelBtn.setBounds(20, 10, 154, 52);
-		contentPane.add(cancelBtn);
-		
 		JPanel panel_2 = new JPanel();
 		panel_2.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Bookings for upcoming lessons", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel_2.setBounds(282, 439, 1231, 364);
+		panel_2.setBounds(272, 470, 1239, 364);
 		contentPane.add(panel_2);
 		panel_2.setLayout(null);
 		
@@ -306,7 +296,7 @@ public class SearchASkier extends JFrame {
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBorder(new TitledBorder(null, "Booking search criteria", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_3.setBounds(20, 439, 252, 364);
+		panel_3.setBounds(10, 470, 252, 364);
 		contentPane.add(panel_3);
 		panel_3.setLayout(null);
 		
@@ -369,6 +359,16 @@ public class SearchASkier extends JFrame {
 		buttonGroup.add(bookingIsInsuredYesRadioButton);
 		buttonGroup.add(bookingIsInsuredNoRadioButton);
 		buttonGroup.add(bookingIsInsuredNoneRadioButton);
+		
+		JButton cancelBtn = new JButton("Back");
+		cancelBtn.setBounds(10, 32, 154, 52);
+		contentPane.add(cancelBtn);
+		cancelBtn.addActionListener(this::handleClickOnBackButton);
+		cancelBtn.setOpaque(true);
+		cancelBtn.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		cancelBtn.setContentAreaFilled(true);
+		cancelBtn.setBorderPainted(false);
+		cancelBtn.setBackground(new Color(255, 57, 57));
 				
 		loadSkierMap();
 		displaySkiersInTable(skierMap.values());
@@ -765,6 +765,7 @@ public class SearchASkier extends JFrame {
 		}
 		
 		UpdateASkier updateASkierFrame = new UpdateASkier(selectedSkier, this::handleUpdateResult);
+		ClockElement.create(updateASkierFrame);
 		updateASkierFrame.setVisible(true);
 	}
 	
@@ -877,7 +878,9 @@ public class SearchASkier extends JFrame {
 			return;
 		}
 		
-		new AddABooking(selectedSkier, this::handleCreateCallBackResult).setVisible(true);
+		JFrame addABookingFrame = new AddABooking(selectedSkier, this::handleCreateCallBackResult);
+		ClockElement.create(addABookingFrame);
+		addABookingFrame.setVisible(true);
 	}
 	
 	private void handleCreateCallBackResult(Boolean isCreated, Booking booking) {

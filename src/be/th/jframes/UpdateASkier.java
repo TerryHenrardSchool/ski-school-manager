@@ -55,7 +55,7 @@ public class UpdateASkier extends JFrame {
 		this.skierToUpdate = skierToUpdate;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 630, 554);
+		setBounds(100, 100, 630, 561);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -64,7 +64,7 @@ public class UpdateASkier extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Skier information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 72, 600, 435);
+		panel.setBounds(10, 85, 600, 435);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -200,7 +200,7 @@ public class UpdateASkier extends JFrame {
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_1.setBackground(new Color(0, 153, 255));
 		lblNewLabel_1.setOpaque(true);
-		lblNewLabel_1.setBounds(10, 10, 600, 52);
+		lblNewLabel_1.setBounds(10, 23, 600, 52);
 		contentPane.add(lblNewLabel_1);
 		
 		preFillTexteFields(skierToUpdate);
