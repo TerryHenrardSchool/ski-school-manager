@@ -123,7 +123,6 @@ public class LessonDAO extends DAO<Lesson>{
 	        ORDER BY l.lesson_id
 	    """;
 
-	    List<Lesson> lessons = new ArrayList<>();
 	    Map<Integer, Lesson> lessonMap = new HashMap<>();
 
 	    try (ResultSet rs = connection.prepareStatement(sql).executeQuery()) {
@@ -181,7 +180,6 @@ public class LessonDAO extends DAO<Lesson>{
 	                    location.getName()
 	                );
 	                lessonMap.put(lessonId, lesson);
-	                lessons.add(lesson);
 	            }
 
 	            lessonType.setAccreditation(accreditation);
@@ -193,7 +191,7 @@ public class LessonDAO extends DAO<Lesson>{
 	        e.printStackTrace();
 	    }
 
-	    return lessons;
+	    return lessonMap.values().stream().toList();
 	}
 	
 	public List<Lesson> findAll(LocalDate date) {
@@ -222,7 +220,6 @@ public class LessonDAO extends DAO<Lesson>{
 	        ORDER BY l.lesson_id
 	    """;
 
-	    List<Lesson> lessons = new ArrayList<>();
 	    Map<Integer, Lesson> lessonMap = new HashMap<>();
 	    
 	    try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -283,7 +280,6 @@ public class LessonDAO extends DAO<Lesson>{
 	                    location.getName()
 	                );
 	                lessonMap.put(lessonId, lesson);
-	                lessons.add(lesson);
 	            }
 
 	            lessonType.setAccreditation(accreditation);
@@ -295,7 +291,7 @@ public class LessonDAO extends DAO<Lesson>{
 	        e.printStackTrace();
 	    }
 
-	    return lessons;
+	    return lessonMap.values().stream().toList();
 	}
 	
 	private void loadLessonBookings(Lesson lesson) throws SQLException {
