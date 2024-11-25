@@ -152,6 +152,7 @@ public class LessonDAO extends DAO<Lesson>{
 	                maxAgeOptional,
 	                rs.getInt("min_bookings"),
 	                rs.getInt("max_bookings"),
+	                rs.getBoolean("is_private"),
 	                accreditation
 	            );
 
@@ -252,6 +253,7 @@ public class LessonDAO extends DAO<Lesson>{
 	                maxAgeOptional,
 	                rs.getInt("min_bookings"),
 	                rs.getInt("max_bookings"),
+	                rs.getBoolean("is_private"),
 	                accreditation
 	            );
 

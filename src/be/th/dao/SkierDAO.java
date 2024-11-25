@@ -451,6 +451,7 @@ public class SkierDAO extends DAO<Skier>{
             maxAge,
             rs.getInt("min_bookings"),
             rs.getInt("max_bookings"),
+            rs.getBoolean("is_private"),
             accreditation
         );
     }

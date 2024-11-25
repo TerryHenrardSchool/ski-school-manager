@@ -45,56 +45,58 @@ public class LessonTypeDAO extends DAO<LessonType>{
 
 	@Override
 	public List<LessonType> findAll() {
-        List<LessonType> lessonTypes = new ArrayList<>();
-        String sql = """
-    		SELECT 
-			    lesson_type_id, 	
-			    name, price, 
-			    skill_level, 
-			    age_category_name, 
-			    min_age, 
-			    max_age ,
-			    min_bookings,
-			    max_bookings,
-			    accreditation_id,
-			    sport
-			FROM 
-			    lesson_types 
-			NATURAL JOIN 
-			    accreditations
-			ORDER BY 
-			    lesson_type_id
-		""";
+	    String sql = """
+	        SELECT 
+	            lesson_type_id, name, price, skill_level, 
+	            age_category_name, min_age, max_age, 
+	            min_bookings, max_bookings, is_private,
+	            accreditation_id, sport
+	        FROM 
+	            lesson_types 
+	        NATURAL JOIN 
+	            accreditations
+	        ORDER BY 
+	            lesson_type_id
+	    """;
 
-        try (PreparedStatement stmt = super.connection.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+	    List<LessonType> lessonTypes = new ArrayList<>();
 
-            while (rs.next()) {
-                int lessonTypeId = rs.getInt("lesson_type_id");
-                String name = rs.getString("name");
-                double price = rs.getDouble("price");
-                String skillLevel = rs.getString("skill_level");
-                String ageCategoryName = rs.getString("age_category_name");
-                int minAge = rs.getInt("min_age");
-                int maxAgeDatabase = rs.getInt("max_age");
-                Optional<Integer> maxAge = rs.wasNull() ? Optional.empty() : Optional.of(maxAgeDatabase);    
-                int minBookings = rs.getInt("min_bookings");
-                int maxBookings = rs.getInt("max_bookings");
-                
-                int accreditationId = rs.getInt("accreditation_id");
-                String sport = rs.getString("sport");
+	    try (PreparedStatement stmt = super.connection.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
 
-                Accreditation accreditation = new Accreditation(accreditationId, sport, ageCategoryName);
-                LessonType lessonType = new LessonType(lessonTypeId, skillLevel, price, name, ageCategoryName, minAge, maxAge, minBookings, maxBookings, accreditation);
-                
-                lessonTypes.add(lessonType);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+	        while (rs.next()) {
+	            Accreditation accreditation = new Accreditation(
+	                rs.getInt("accreditation_id"),
+	                rs.getString("sport"),
+	                rs.getString("age_category_name")
+	            );
 
-        return lessonTypes;
-    }
+	            Optional<Integer> maxAge = Optional.of(rs.getInt("max_age"));
+	            if (rs.wasNull()) maxAge = Optional.empty();
+
+	            LessonType lessonType = new LessonType(
+	                rs.getInt("lesson_type_id"),
+	                rs.getString("skill_level"),
+	                rs.getDouble("price"),
+	                rs.getString("name"),
+	                rs.getString("age_category_name"),
+	                rs.getInt("min_age"),
+	                maxAge,
+	                rs.getInt("min_bookings"),
+	                rs.getInt("max_bookings"),
+	                rs.getBoolean("is_private"),
+	                accreditation
+	            );
+
+	            lessonTypes.add(lessonType);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return lessonTypes;
+	}
+
 
 	@Override
 	public List<LessonType> findAll(Map<String, Object> criteria) {
