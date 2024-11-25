@@ -208,13 +208,13 @@ public class Lesson implements Serializable {
 
 	    String result = "";
 	    if (years > 0) {
-	        result += years + " ans ";
+	        result += years + " years ";
 	    }
 	    if (months > 0) {
-	        result += months + " mois ";
+	        result += months + " months ";
 	    }
 	    if (remainingDays > 0 || result.length() == 0) {
-	        result += remainingDays + " jours";
+	        result += remainingDays + " days";
 	    }
 
 	    return result.toString().trim();

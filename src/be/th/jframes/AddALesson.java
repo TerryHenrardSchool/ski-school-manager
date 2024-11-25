@@ -10,6 +10,7 @@ import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import be.th.validators.ObjectValidator;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.print.event.PrintJobAttributeEvent;
+import javax.swing.AbstractButton;
 import javax.swing.AbstractListModel;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
@@ -84,7 +86,10 @@ public class AddALesson extends JFrame {
 	private JDateChooser startDateField;
 	private JRadioButton rdbtnMorningLesson;
 	private JRadioButton rdbtnAfternoonLesson;
-	private ButtonGroup startHourRadioButtonGroup;
+	private ButtonGroup startHourLessonRadioButtonGroup;
+	private JRadioButton rdbtnPrivateLessonHour;
+	private List<AbstractButton> privateLessonRadioButtonGroup;
+	private List<AbstractButton> groupLessonRadioButtonGroup;
 
 	public AddALesson() {
 		DAOFactory daoFactory = new DAOFactory();
@@ -102,7 +107,7 @@ public class AddALesson extends JFrame {
         loadLocationMap();
         
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 676, 405);
+		setBounds(100, 100, 676, 450);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -119,18 +124,18 @@ public class AddALesson extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Lesson information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 74, 640, 281);
+		panel.setBounds(10, 74, 640, 326);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
 		JLabel lblSport = new JLabel("Lesson type");
 		lblSport.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblSport.setBounds(340, 59, 90, 31);
+		lblSport.setBounds(340, 100, 90, 31);
 		panel.add(lblSport);
 		
 		lessonTypeComboBox = new JComboBox<String>();
 		
-		lessonTypeComboBox.setBounds(440, 59, 190, 31);
+		lessonTypeComboBox.setBounds(440, 100, 190, 31);
 		lessonTypeComboBox.setRenderer(createLessonTypeRenderer(lessonTypeMap, instructorMap.values()));
 		panel.add(lessonTypeComboBox);
 		
@@ -140,43 +145,46 @@ public class AddALesson extends JFrame {
 		
 		JLabel lblInstructor = new JLabel("Instructor");
 		lblInstructor.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblInstructor.setBounds(340, 143, 90, 31);
+		lblInstructor.setBounds(340, 194, 90, 31);
 		panel.add(lblInstructor);
 		
 		eligibleInstructorsComboBox = new JComboBox<String>();
 		eligibleInstructorsComboBox.setEnabled(false);
 		eligibleInstructorsComboBox.setSelectedIndex(-1);
-		eligibleInstructorsComboBox.setBounds(440, 143, 190, 31);
+		eligibleInstructorsComboBox.setBounds(440, 194, 190, 31);
 		panel.add(eligibleInstructorsComboBox);
 		
 		JTextArea txtrAGrayLesson = new JTextArea();
+		txtrAGrayLesson.setEditable(false);
 		txtrAGrayLesson.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		txtrAGrayLesson.setBackground(UIManager.getColor("Button.background"));
 		txtrAGrayLesson.setWrapStyleWord(true);
 		txtrAGrayLesson.setLineWrap(true);
 		txtrAGrayLesson.setText("A gray lesson type indicates no eligible instructor for this lesson type at this date.");
-		txtrAGrayLesson.setBounds(340, 101, 290, 31);
+		txtrAGrayLesson.setBounds(340, 58, 290, 31);
 		panel.add(txtrAGrayLesson);
 		
 		locationComboBox = new JComboBox<String>();
 		locationComboBox.setSelectedIndex(-1);
 		locationComboBox.setEnabled(false);
-		locationComboBox.setBounds(110, 143, 190, 31);
+		locationComboBox.setBounds(120, 194, 190, 31);
 		panel.add(locationComboBox);
 		
 		JLabel lblLocation = new JLabel("Location");
 		lblLocation.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblLocation.setBounds(10, 143, 90, 31);
+		lblLocation.setBounds(10, 194, 90, 31);
 		panel.add(lblLocation);
 		
 		startDateField = new JDateChooser();
-	    startDateField.setBounds(110, 59, 190, 31);
+	    startDateField.setBounds(120, 100, 190, 31);
 	    Calendar calendar = Calendar.getInstance();
 	    calendar.add(Calendar.DAY_OF_YEAR, 1); 
 	    startDateField.setDate(calendar.getTime()); 
 	    startDateField.addPropertyChangeListener("date", new PropertyChangeListener() {
 	        @Override
 	        public void propertyChange(PropertyChangeEvent evt) {
+	        	setComponentsEnabled(List.of(eligibleInstructorsComboBox, locationComboBox), false);
+	        	setGroupDisabled(getButtonsFromGroup(startHourLessonRadioButtonGroup));
 	            clearJComboBox(List.of(eligibleInstructorsComboBox, locationComboBox));
 	        }
 	    });
@@ -185,7 +193,7 @@ public class AddALesson extends JFrame {
 		
 		JLabel lblStartDate = new JLabel("Start date");
 		lblStartDate.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblStartDate.setBounds(10, 59, 90, 31);
+		lblStartDate.setBounds(10, 100, 90, 31);
 		panel.add(lblStartDate);
 		
 		JButton createBtn = new JButton("Create");
@@ -195,7 +203,7 @@ public class AddALesson extends JFrame {
 		createBtn.setContentAreaFilled(true);
 		createBtn.setBorderPainted(false);
 		createBtn.setBackground(new Color(139, 255, 96));
-		createBtn.setBounds(340, 216, 154, 51);
+		createBtn.setBounds(340, 264, 154, 51);
 		panel.add(createBtn);
 		
 		JButton cancelBtn = new JButton("Cancel");
@@ -205,21 +213,20 @@ public class AddALesson extends JFrame {
 		cancelBtn.setContentAreaFilled(true);
 		cancelBtn.setBorderPainted(false);
 		cancelBtn.setBackground(new Color(255, 57, 57));
-		cancelBtn.setBounds(146, 216, 154, 51);
+		cancelBtn.setBounds(146, 264, 154, 51);
 		panel.add(cancelBtn);
 		
 		rdbtnMorningLesson = new JRadioButton("Morning (09h - 12h)");
-		rdbtnMorningLesson.setBounds(10, 109, 142, 23);
+		rdbtnMorningLesson.setBounds(120, 138, 190, 23);
 		rdbtnMorningLesson.setSelected(true);
+		rdbtnMorningLesson.addActionListener(e -> handleRadioButtonSelection(rdbtnMorningLesson.getModel()));
 		panel.add(rdbtnMorningLesson);
 		
 		rdbtnAfternoonLesson = new JRadioButton("Afternoon (14h - 17h)");
-		rdbtnAfternoonLesson.setBounds(154, 109, 167, 23);
+		rdbtnAfternoonLesson.setBounds(120, 164, 190, 23);
+		rdbtnAfternoonLesson.addActionListener(e -> handleRadioButtonSelection(rdbtnAfternoonLesson.getModel()));
 		panel.add(rdbtnAfternoonLesson);
 		
-		startHourRadioButtonGroup = new ButtonGroup();
-		startHourRadioButtonGroup.add(rdbtnAfternoonLesson);
-		startHourRadioButtonGroup.add(rdbtnMorningLesson);
 		
 		JLabel lblOpeningDates = new JLabel(
 			"The ski school is open from " + DatabaseFormatter.toBelgianFormat(Period.SKI_SCHOOL_OPENING_DATE)  + 
@@ -229,7 +236,60 @@ public class AddALesson extends JFrame {
 		lblOpeningDates.setFont(new Font("Leelawadee UI Semilight", Font.PLAIN, 16));
 		lblOpeningDates.setBounds(10, 11, 620, 45);
 		panel.add(lblOpeningDates);
+		
+		JLabel lblGroupLessonHours = new JLabel("Group lessons");
+		lblGroupLessonHours.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		lblGroupLessonHours.setBounds(10, 138, 105, 24);
+		panel.add(lblGroupLessonHours);
+		
+		JLabel lblPrivateLessonHours = new JLabel("Private lesson");
+		lblPrivateLessonHours.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		lblPrivateLessonHours.setBounds(340, 142, 105, 24);
+		panel.add(lblPrivateLessonHours);
+		
+		rdbtnPrivateLessonHour = new JRadioButton("From 12h");
+		rdbtnPrivateLessonHour.setBounds(450, 141, 180, 23);
+		rdbtnPrivateLessonHour.addActionListener(e -> handleRadioButtonSelection(rdbtnPrivateLessonHour.getModel()));
+		panel.add(rdbtnPrivateLessonHour);		
+		
+		startHourLessonRadioButtonGroup = new ButtonGroup();
+		startHourLessonRadioButtonGroup.add(rdbtnAfternoonLesson);
+		startHourLessonRadioButtonGroup.add(rdbtnMorningLesson);
+		startHourLessonRadioButtonGroup.add(rdbtnPrivateLessonHour);
+		
+		privateLessonRadioButtonGroup = List.of(rdbtnPrivateLessonHour);
+		groupLessonRadioButtonGroup = List.of(rdbtnMorningLesson, rdbtnAfternoonLesson);
+		
+		setGroupDisabled(getButtonsFromGroup(startHourLessonRadioButtonGroup));
 	}
+
+	private void setFirstButtonSelected(List<AbstractButton> buttons) {;
+	    buttons.get(0).setSelected(true);    
+	}
+
+	private void setGroupEnabled(List<AbstractButton> buttons) {
+        for (AbstractButton button : buttons) {
+            button.setEnabled(true);
+        }
+    }
+	
+	private void setGroupDisabled(List<AbstractButton> buttons) {
+        for (AbstractButton button : buttons) {
+            button.setEnabled(false);
+        }
+    }
+	
+	private static List<AbstractButton> getButtonsFromGroup(ButtonGroup group) {
+	    List<AbstractButton> buttons = new ArrayList<>();
+	    Enumeration<AbstractButton> elements = group.getElements();
+	    
+	    while (elements.hasMoreElements()) {
+	        buttons.add(elements.nextElement());
+	    }
+	    
+	    return buttons;
+	}
+
 	
 	private void setModelToJComboBox(JComboBox<String> comboBox, String[] values) {
 		comboBox.setModel(new DefaultComboBoxModel<String>(values));
@@ -290,7 +350,7 @@ public class AddALesson extends JFrame {
         LocalDateTime dateTime
     ) {
 	    return instructors.stream()
-            .filter(instructor -> instructor.isAccreditate(accreditation) && instructor.isAvailable(dateTime))
+            .filter(instructor -> instructor.isEligible(accreditation, dateTime))
             .collect(Collectors.toList());
 	}
 
@@ -311,13 +371,14 @@ public class AddALesson extends JFrame {
 		LocalDate selectedDate = DateParser.toLocalDate(startDateField.getDate());
 		Object lessonTypeKey = lessonTypeComboBox.getSelectedItem();
 		Accreditation associatedAccreditation = lessonTypeMap.get(lessonTypeKey).getAccreditation();
+		boolean isPrivateLessonType = lessonTypeMap.get(lessonTypeKey).getIsPrivate();
 				
 		Collection<JComponent> components = List.of(eligibleInstructorsComboBox, locationComboBox);
 		Collection<JComboBox<?>> comboBoxes = List.of(eligibleInstructorsComboBox, locationComboBox);
 		Collection<Instructor> eligibleInstructors = getEligibleInstructors(
 			instructorMap.values(), 
 			associatedAccreditation, 
-			adjustTimeOfStartDate(selectedDate.atStartOfDay())
+			adjustTimeOfStartDate(selectedDate.atStartOfDay(), isPrivateLessonType)
 		);
 		
 		if(eligibleInstructors.isEmpty()) {
@@ -336,16 +397,34 @@ public class AddALesson extends JFrame {
 			return;
 		}
 		
+		
 		String[] eligibleInstructorsFormatted = 	
 			eligibleInstructors
 				.stream()
 				.map(eligibleInstructor -> getInstructorFormattedNames(eligibleInstructor))
 				.toArray(String[]::new);
 		
+		updateLessonTypeGroups(isPrivateLessonType);
 		setModelToJComboBox(eligibleInstructorsComboBox, eligibleInstructorsFormatted);
 		setModelToJComboBox(locationComboBox, locationMap.keySet().toArray(String[]::new));
 		setComponentsEnabled(components, true);
 	}
+	
+	private void updateLessonTypeGroups(boolean isPrivateLessonType) {
+	    List<AbstractButton> enableGroup = isPrivateLessonType 
+	        ? privateLessonRadioButtonGroup 
+	        : groupLessonRadioButtonGroup;
+	    
+	    List<AbstractButton> disableGroup = isPrivateLessonType 
+	        ? groupLessonRadioButtonGroup 
+	        : privateLessonRadioButtonGroup;
+
+	    
+	    setFirstButtonSelected(enableGroup);
+	    setGroupEnabled(enableGroup);
+	    setGroupDisabled(disableGroup);
+	}
+
 	
 	private void clearJComboBox (Collection<JComboBox<?>> comboBoxes) {
 		for (JComboBox<?> comboBox: comboBoxes) {			
@@ -400,15 +479,18 @@ public class AddALesson extends JFrame {
         }
 
         Accreditation accreditation = lessonType.getAccreditation();
-        LocalDateTime dateTime = adjustTimeOfStartDate(DateParser.toLocalDateTime(startDateField.getDate()));
+        LocalDateTime dateTime = adjustTimeOfStartDate(DateParser.toLocalDateTime(startDateField.getDate()), lessonType.getIsPrivate());
         return instructors.stream().anyMatch(instructor -> instructor.isEligible(accreditation, dateTime));
     }
 	
 	private void handleClickOnCancelButton() {
+		openMainMenu();
+		dispose();
+	}
+	
+	private void openMainMenu() {
 		MainMenu mainMenu = new MainMenu();
 		mainMenu.setVisible(true);
-		
-		dispose();
 	}
 	
 	private void handleClickOnCreateButton() {
@@ -426,7 +508,8 @@ public class AddALesson extends JFrame {
 			
 			if(isAddedIntoDatabase) {
 				displayAddLessonSuccess(JOptionPane.INFORMATION_MESSAGE);
-	        	resetFormFields();
+				openMainMenu();
+				dispose();
 	        } else {
 	        	lesson.getInstructor().removeLesson(lesson);
 	        	displayAddLessonFailure(JOptionPane.ERROR_MESSAGE);
@@ -457,33 +540,51 @@ public class AddALesson extends JFrame {
 		);
 	}
 	
-	private LocalDateTime adjustTimeOfStartDate(LocalDateTime dateTime) {
-	    ButtonModel selectedModel = startHourRadioButtonGroup.getSelection();
-	    
-	    if (selectedModel.equals(rdbtnAfternoonLesson.getModel())) {
-	        return dateTime.withHour(14);
-	    } else if (selectedModel.equals(rdbtnMorningLesson.getModel())) {
-	        return dateTime.withHour(9);
+	private LocalDateTime adjustTimeOfStartDate(LocalDateTime dateTime, boolean isPrivate) {
+		dateTime = dateTime.toLocalDate().atStartOfDay();
+		
+	    if (isPrivate) {
+	        return dateTime.withHour(12);
 	    }
-	    	    
-	    return dateTime; 
+
+	    Map<ButtonModel, Integer> hourMapping = Map.of(
+	        rdbtnPrivateLessonHour.getModel(), 12,
+	        rdbtnAfternoonLesson.getModel(), 14,
+	        rdbtnMorningLesson.getModel(), 9
+	    );
+
+	    ButtonModel selectedModel = startHourLessonRadioButtonGroup.getSelection();
+
+	    return dateTime.withHour(hourMapping.get(selectedModel));
 	}
 
 	
 	private Lesson buildLessonFromFields() {
-		LessonType lessonType = lessonTypeMap.get(lessonTypeComboBox.getSelectedItem());
-		Instructor instructor = instructorMap.get(eligibleInstructorsComboBox.getSelectedItem());
-		Location location = locationMap.get(locationComboBox.getSelectedItem());
-		LocalDateTime startDate = DateParser.toLocalDateTime(startDateField.getDate());
-		startDate = adjustTimeOfStartDate(startDate);
-								
-		return new Lesson(startDate, lessonType, instructor, location.getId(), location.getName());
+		try {
+			LessonType lessonType = lessonTypeMap.get(lessonTypeComboBox.getSelectedItem());
+			Instructor instructor = instructorMap.get(eligibleInstructorsComboBox.getSelectedItem());
+			Location location = locationMap.get(locationComboBox.getSelectedItem());
+			LocalDateTime startDate = DateParser.toLocalDateTime(startDateField.getDate());
+			startDate = adjustTimeOfStartDate(startDate, lessonType.getIsPrivate());
+			
+			return new Lesson(startDate, lessonType, instructor, location.getId(), location.getName());			
+		} catch (Exception ex) {
+            throw new IllegalArgumentException("Failed to build lesson from fields.");
+		}
 	}
 	
-	private void resetFormFields() {
-		lessonTypeComboBox.setSelectedIndex(-1);
-		eligibleInstructorsComboBox.setSelectedIndex(-1);
-		locationComboBox.setSelectedIndex(-1);
-		startDateField.setDate(null);
+	private void handleRadioButtonSelection(ButtonModel selectedModel) {
+		LessonType lessonType = lessonTypeMap.get(lessonTypeComboBox.getSelectedItem());
+		Collection<Instructor> eligibleInstructors = getEligibleInstructors(
+			instructorMap.values(),
+			lessonType.getAccreditation(),
+			adjustTimeOfStartDate(DateParser.toLocalDateTime(startDateField.getDate()), lessonType.getIsPrivate())
+		);
+		
+		clearJComboBox(List.of(eligibleInstructorsComboBox));
+		setModelToJComboBox(
+			eligibleInstructorsComboBox, 
+			eligibleInstructors.stream().map(this::getInstructorFormattedNames).toArray(String[]::new)
+		);
 	}
 }

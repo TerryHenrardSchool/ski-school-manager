@@ -304,6 +304,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	        maxAgeOptional,
 	        rs.getInt("min_bookings"),
 	        rs.getInt("max_bookings"),
+	        rs.getBoolean("is_private"),
 	        new Accreditation(
 	            rs.getInt("accreditation_id"),
 	            rs.getString("sport"),
