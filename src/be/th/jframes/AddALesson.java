@@ -26,11 +26,13 @@ import be.th.dao.InstructorDAO;
 import be.th.dao.LessonDAO;
 import be.th.dao.LessonTypeDAO;
 import be.th.dao.LocationDAO;
+import be.th.formatters.DatabaseFormatter;
 import be.th.models.Accreditation;
 import be.th.models.Instructor;
 import be.th.models.Lesson;
 import be.th.models.LessonType;
 import be.th.models.Location;
+import be.th.models.Period;
 import be.th.parsers.DateParser;
 import be.th.validators.ObjectValidator;
 
@@ -84,9 +86,6 @@ public class AddALesson extends JFrame {
 	private JRadioButton rdbtnAfternoonLesson;
 	private ButtonGroup startHourRadioButtonGroup;
 
-	/**
-	 * Create the frame.
-	 */
 	public AddALesson() {
 		DAOFactory daoFactory = new DAOFactory();
 		
@@ -126,12 +125,12 @@ public class AddALesson extends JFrame {
 		
 		JLabel lblSport = new JLabel("Lesson type");
 		lblSport.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblSport.setBounds(340, 21, 90, 31);
+		lblSport.setBounds(340, 59, 90, 31);
 		panel.add(lblSport);
 		
 		lessonTypeComboBox = new JComboBox<String>();
 		
-		lessonTypeComboBox.setBounds(440, 21, 190, 31);
+		lessonTypeComboBox.setBounds(440, 59, 190, 31);
 		lessonTypeComboBox.setRenderer(createLessonTypeRenderer(lessonTypeMap, instructorMap.values()));
 		panel.add(lessonTypeComboBox);
 		
@@ -141,13 +140,13 @@ public class AddALesson extends JFrame {
 		
 		JLabel lblInstructor = new JLabel("Instructor");
 		lblInstructor.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblInstructor.setBounds(340, 105, 90, 31);
+		lblInstructor.setBounds(340, 143, 90, 31);
 		panel.add(lblInstructor);
 		
 		eligibleInstructorsComboBox = new JComboBox<String>();
 		eligibleInstructorsComboBox.setEnabled(false);
 		eligibleInstructorsComboBox.setSelectedIndex(-1);
-		eligibleInstructorsComboBox.setBounds(440, 105, 190, 31);
+		eligibleInstructorsComboBox.setBounds(440, 143, 190, 31);
 		panel.add(eligibleInstructorsComboBox);
 		
 		JTextArea txtrAGrayLesson = new JTextArea();
@@ -156,22 +155,22 @@ public class AddALesson extends JFrame {
 		txtrAGrayLesson.setWrapStyleWord(true);
 		txtrAGrayLesson.setLineWrap(true);
 		txtrAGrayLesson.setText("A gray lesson type indicates no eligible instructor for this lesson type at this date.");
-		txtrAGrayLesson.setBounds(340, 63, 290, 31);
+		txtrAGrayLesson.setBounds(340, 101, 290, 31);
 		panel.add(txtrAGrayLesson);
 		
 		locationComboBox = new JComboBox<String>();
 		locationComboBox.setSelectedIndex(-1);
 		locationComboBox.setEnabled(false);
-		locationComboBox.setBounds(110, 105, 190, 31);
+		locationComboBox.setBounds(110, 143, 190, 31);
 		panel.add(locationComboBox);
 		
 		JLabel lblLocation = new JLabel("Location");
 		lblLocation.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblLocation.setBounds(10, 105, 90, 31);
+		lblLocation.setBounds(10, 143, 90, 31);
 		panel.add(lblLocation);
 		
 		startDateField = new JDateChooser();
-	    startDateField.setBounds(110, 21, 190, 31);
+	    startDateField.setBounds(110, 59, 190, 31);
 	    Calendar calendar = Calendar.getInstance();
 	    calendar.add(Calendar.DAY_OF_YEAR, 1); 
 	    startDateField.setDate(calendar.getTime()); 
@@ -186,7 +185,7 @@ public class AddALesson extends JFrame {
 		
 		JLabel lblStartDate = new JLabel("Start date");
 		lblStartDate.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		lblStartDate.setBounds(10, 21, 90, 31);
+		lblStartDate.setBounds(10, 59, 90, 31);
 		panel.add(lblStartDate);
 		
 		JButton createBtn = new JButton("Create");
@@ -210,17 +209,26 @@ public class AddALesson extends JFrame {
 		panel.add(cancelBtn);
 		
 		rdbtnMorningLesson = new JRadioButton("Morning (09h - 12h)");
-		rdbtnMorningLesson.setBounds(10, 71, 142, 23);
+		rdbtnMorningLesson.setBounds(10, 109, 142, 23);
 		rdbtnMorningLesson.setSelected(true);
 		panel.add(rdbtnMorningLesson);
 		
 		rdbtnAfternoonLesson = new JRadioButton("Afternoon (14h - 17h)");
-		rdbtnAfternoonLesson.setBounds(154, 71, 167, 23);
+		rdbtnAfternoonLesson.setBounds(154, 109, 167, 23);
 		panel.add(rdbtnAfternoonLesson);
 		
 		startHourRadioButtonGroup = new ButtonGroup();
 		startHourRadioButtonGroup.add(rdbtnAfternoonLesson);
 		startHourRadioButtonGroup.add(rdbtnMorningLesson);
+		
+		JLabel lblOpeningDates = new JLabel(
+			"The ski school is open from " + DatabaseFormatter.toBelgianFormat(Period.SKI_SCHOOL_OPENING_DATE)  + 
+			" to " + DatabaseFormatter.toBelgianFormat(Period.SKI_SCHOOL_CLOSING_DATE)
+		);
+		lblOpeningDates.setHorizontalAlignment(SwingConstants.CENTER);
+		lblOpeningDates.setFont(new Font("Leelawadee UI Semilight", Font.PLAIN, 16));
+		lblOpeningDates.setBounds(10, 11, 620, 45);
+		panel.add(lblOpeningDates);
 	}
 	
 	private void setModelToJComboBox(JComboBox<String> comboBox, String[] values) {
