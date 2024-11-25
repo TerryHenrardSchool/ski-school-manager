@@ -323,8 +323,7 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	private int insertPerson(Instructor instructor) throws SQLException {
 		String sqlPerson = """
-    		INSERT INTO persons
-	        (
+    		INSERT INTO persons(
 	            last_name, 
 	            first_name, 
 	            date_of_birth, 
@@ -394,8 +393,7 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	private void insertAccreditations(int instructorId, Set<Accreditation> accreditations) throws SQLException {
 		String sqlAccreditation = """
-	        INSERT INTO instructor_accreditation_details 
-	        (
+	        INSERT INTO instructor_accreditation_details(
 			    instructor_id, 
 			    accreditation_id
 		    )
