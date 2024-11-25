@@ -70,7 +70,7 @@ public class UpdateAnInstructor extends JFrame {
 		this.instructorToUpdate = instructorToUpdate;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 630, 739);
+		setBounds(100, 100, 630, 755);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -79,7 +79,7 @@ public class UpdateAnInstructor extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Instructor information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 72, 600, 617);
+		panel.setBounds(10, 88, 600, 617);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -230,7 +230,7 @@ public class UpdateAnInstructor extends JFrame {
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_1.setBackground(new Color(0, 153, 255));
 		lblNewLabel_1.setOpaque(true);
-		lblNewLabel_1.setBounds(10, 10, 600, 52);
+		lblNewLabel_1.setBounds(10, 26, 600, 52);
 		contentPane.add(lblNewLabel_1);
 		
 		preFillFields(instructorToUpdate);

@@ -85,7 +85,7 @@ public class SearchAnInstructor extends JFrame {
 		this.instructorMap = new LinkedHashMap<>();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(0, 0, 1539, 750);
+		setBounds(0, 0, 1539, 780);
 
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -94,7 +94,7 @@ public class SearchAnInstructor extends JFrame {
 		
 		JPanel instructorsPanel = new JPanel();
 		instructorsPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Instructors", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		instructorsPanel.setBounds(282, 64, 977, 313);
+		instructorsPanel.setBounds(272, 82, 977, 313);
 		contentPane.add(instructorsPanel);
 		instructorsPanel.setLayout(null);
 		
@@ -138,7 +138,7 @@ public class SearchAnInstructor extends JFrame {
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new TitledBorder(null, "Search criteria", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_1.setBounds(20, 64, 252, 313);
+		panel_1.setBounds(10, 82, 252, 313);
 		contentPane.add(panel_1);
 		panel_1.setLayout(null);
 		
@@ -225,7 +225,7 @@ public class SearchAnInstructor extends JFrame {
 		panel_1.add(birthDateTextField);
 		
 		JLabel lblTitle = new JLabel("Search for an instructor");
-		lblTitle.setBounds(20, 10, 1501, 52);
+		lblTitle.setBounds(10, 28, 1501, 52);
 		contentPane.add(lblTitle);
 		lblTitle.setOpaque(true);
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
@@ -239,12 +239,12 @@ public class SearchAnInstructor extends JFrame {
 		cancelBtn.setContentAreaFilled(true);
 		cancelBtn.setBorderPainted(false);
 		cancelBtn.setBackground(new Color(255, 57, 57));
-		cancelBtn.setBounds(20, 10, 154, 52);
+		cancelBtn.setBounds(10, 28, 154, 52);
 		contentPane.add(cancelBtn);
 		
 		JPanel accreditationsPanel = new JPanel();
 		accreditationsPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Accreditations", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		accreditationsPanel.setBounds(1269, 64, 252, 313);
+		accreditationsPanel.setBounds(1259, 82, 252, 313);
 		contentPane.add(accreditationsPanel);
 		accreditationsPanel.setLayout(null);
 		
@@ -272,7 +272,7 @@ public class SearchAnInstructor extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Upcoming lessons", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(282, 388, 1239, 313);
+		panel.setBounds(272, 406, 1239, 313);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -606,6 +606,7 @@ public class SearchAnInstructor extends JFrame {
 		}
 		
 		UpdateAnInstructor updateAnInstructorFrame = new UpdateAnInstructor(selectedInstructor, this::handleUpdateResult);
+		ClockElement.create(updateAnInstructorFrame);
 		updateAnInstructorFrame.setVisible(true);
 	}
 	

@@ -68,7 +68,7 @@ public class AddAnInstructor extends JFrame {
 		
 		// I'll add some library
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 630, 711);
+		setBounds(100, 100, 630, 722);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -77,7 +77,7 @@ public class AddAnInstructor extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Instructor information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 72, 600, 589);
+		panel.setBounds(10, 92, 600, 589);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -224,7 +224,7 @@ public class AddAnInstructor extends JFrame {
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_1.setBackground(new Color(0, 153, 255));
 		lblNewLabel_1.setOpaque(true);
-		lblNewLabel_1.setBounds(10, 10, 600, 52);
+		lblNewLabel_1.setBounds(10, 30, 600, 52);
 		contentPane.add(lblNewLabel_1);
 	}
 	

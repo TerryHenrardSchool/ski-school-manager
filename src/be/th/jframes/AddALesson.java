@@ -107,7 +107,7 @@ public class AddALesson extends JFrame {
         loadLocationMap();
         
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 676, 450);
+		setBounds(100, 100, 676, 451);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -119,12 +119,12 @@ public class AddALesson extends JFrame {
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 24));
 		lblTitle.setBackground(new Color(0, 153, 255));
-		lblTitle.setBounds(10, 11, 640, 52);
+		lblTitle.setBounds(10, 22, 640, 52);
 		contentPane.add(lblTitle);
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Lesson information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 74, 640, 326);
+		panel.setBounds(10, 85, 640, 326);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
