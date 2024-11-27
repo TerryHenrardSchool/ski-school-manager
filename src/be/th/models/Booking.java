@@ -74,7 +74,7 @@ public class Booking implements Serializable {
 		Lesson lesson,
 		Skier skier
 		) {
-    	this(0, bookingDate, isInsured, period.getId(), period.getStartDate(), period.getEndDate(), period.isVacation(), period.getName(), lesson, skier);
+    	this(0, bookingDate, isInsured, period.getId(), period.getStartDate(), period.getEndDate(), period.getIsVacation(), period.getName(), lesson, skier);
     }
 
     // Getters

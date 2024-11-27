@@ -104,7 +104,7 @@ public class SearchASkier extends JFrame {
 		skierMap = new LinkedHashMap<>();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(0, 0, 1539, 884);
+		setBounds(0, 0, 1476, 740);
 
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -113,12 +113,12 @@ public class SearchASkier extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Skiers", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel.setBounds(272, 95, 1239, 364);
+		panel.setBounds(272, 95, 1183, 314);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 24, 1219, 287);
+		scrollPane.setBounds(10, 24, 1163, 239);
 		panel.add(scrollPane);
 		
 		Object[][] data = {}; 
@@ -138,33 +138,33 @@ public class SearchASkier extends JFrame {
 		scrollPane.setViewportView(skierTable);
 		
 		JButton btnDeleteSkier = new JButton("Delete");
-		btnDeleteSkier.setBounds(130, 322, 110, 31);
+		btnDeleteSkier.setBounds(130, 273, 110, 31);
 		panel.add(btnDeleteSkier);
 		btnDeleteSkier.addActionListener(this::handleClickOnDeleteSkierButton);
 		btnDeleteSkier.setFont(FontStyles.BUTTON);
 		btnDeleteSkier.setBackground(ColorStyles.RED);
 		
 		JButton btnUpdateInformation = new JButton("Update");
-		btnUpdateInformation.setBounds(250, 322, 110, 31);
+		btnUpdateInformation.setBounds(250, 273, 110, 31);
 		panel.add(btnUpdateInformation);
 		btnUpdateInformation.addActionListener(this::handleClickOnUpdateButton);
 		btnUpdateInformation.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnUpdateInformation.setBackground(ColorStyles.ORANGE);
 		
 		JLabel lblNewLabel = new JLabel("(or double click on the row...)");
-		lblNewLabel.setBounds(370, 332, 196, 14);
+		lblNewLabel.setBounds(370, 283, 196, 14);
 		panel.add(lblNewLabel);
 		
 		JButton btnAddBooking = new JButton("Book");
 		btnAddBooking.addActionListener(this::handleClickOnAddBookingButton);
-		btnAddBooking.setBounds(10, 322, 110, 31);
+		btnAddBooking.setBounds(10, 273, 110, 31);
 		panel.add(btnAddBooking);
 		btnAddBooking.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnAddBooking.setBackground(Color.GREEN);
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Skier search criteria", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel_1.setBounds(10, 95, 252, 364);
+		panel_1.setBounds(10, 95, 252, 314);
 		contentPane.add(panel_1);
 		panel_1.setLayout(null);
 		
@@ -205,7 +205,7 @@ public class SearchASkier extends JFrame {
 		btnResetSkierSearchCriteria.setBackground(ColorStyles.BLUE);
 		btnResetSkierSearchCriteria.addActionListener(this::handleClickOnResetSkierFiltersButton);
 		btnResetSkierSearchCriteria.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		btnResetSkierSearchCriteria.setBounds(130, 322, 110, 31);
+		btnResetSkierSearchCriteria.setBounds(130, 273, 110, 31);
 		panel_1.add(btnResetSkierSearchCriteria);
 		
 		JLabel lblSearchBirthdate = new JLabel("Birthdate:");
@@ -251,7 +251,7 @@ public class SearchASkier extends JFrame {
 		panel_1.add(birthDateTextField);
 		
 		JLabel lblTitle = new JLabel("Search for a skier");
-		lblTitle.setBounds(10, 32, 1501, 52);
+		lblTitle.setBounds(10, 32, 1445, 52);
 		contentPane.add(lblTitle);
 		lblTitle.setOpaque(true);
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
@@ -260,12 +260,12 @@ public class SearchASkier extends JFrame {
 		
 		JPanel panel_2 = new JPanel();
 		panel_2.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Bookings for upcoming lessons", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel_2.setBounds(272, 470, 1239, 364);
+		panel_2.setBounds(272, 419, 1183, 279);
 		contentPane.add(panel_2);
 		panel_2.setLayout(null);
 		
 		JScrollPane scrollPane_1 = new JScrollPane();
-		scrollPane_1.setBounds(10, 25, 1211, 286);
+		scrollPane_1.setBounds(10, 25, 1163, 202);
 		panel_2.add(scrollPane_1);
 		
 		bookingTable = new JTable();
@@ -290,13 +290,13 @@ public class SearchASkier extends JFrame {
 		JButton btnDeleteSkierBooking = new JButton("Delete");
 		btnDeleteSkierBooking.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnDeleteSkierBooking.setBackground(new Color(255, 57, 57));
-		btnDeleteSkierBooking.setBounds(10, 322, 110, 31);
+		btnDeleteSkierBooking.setBounds(10, 237, 110, 31);
 		btnDeleteSkierBooking.addActionListener(this::handleClickOnDeleteBookingButton);
 		panel_2.add(btnDeleteSkierBooking);
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBorder(new TitledBorder(null, "Booking search criteria", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_3.setBounds(10, 470, 252, 364);
+		panel_3.setBounds(10, 419, 252, 279);
 		contentPane.add(panel_3);
 		panel_3.setLayout(null);
 		
@@ -304,7 +304,7 @@ public class SearchASkier extends JFrame {
 		btnResetBookingSearchCriteria.addActionListener(this::handleClickOnResetBookingFiltersButton);
 		btnResetBookingSearchCriteria.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnResetBookingSearchCriteria.setBackground(new Color(0, 147, 255));
-		btnResetBookingSearchCriteria.setBounds(132, 322, 110, 31);
+		btnResetBookingSearchCriteria.setBounds(132, 238, 110, 31);
 		panel_3.add(btnResetBookingSearchCriteria);
 		
 		JLabel lblSearchBookingByBookingId = new JLabel("Id:");

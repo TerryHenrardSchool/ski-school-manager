@@ -31,6 +31,8 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
+import com.toedter.calendar.JDateChooser;
+
 import be.th.dao.BookingDAO;
 import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
@@ -66,7 +68,6 @@ import java.time.LocalDateTime;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
-import com.toedter.calendar.JDateChooser;
 
 // Review release 1.3.0 
 // Code pretty clean, could have split methods at some point but it's not a priority.
@@ -114,7 +115,7 @@ public class AddABooking extends JFrame {
 		loadUnbookedUpcommingLessonsMap();
 				
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 1619, 593);
+		setBounds(100, 100, 1456, 593);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -126,12 +127,12 @@ public class AddABooking extends JFrame {
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 24));
 		lblTitle.setBackground(new Color(0, 153, 255));
-		lblTitle.setBounds(10, 23, 1583, 52);
+		lblTitle.setBounds(10, 23, 1429, 52);
 		contentPane.add(lblTitle);
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Booking information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 86, 1583, 465);
+		panel.setBounds(10, 86, 1429, 465);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -147,11 +148,11 @@ public class AddABooking extends JFrame {
 		JPanel panel_1 = new JPanel();
 		panel_1.setLayout(null);
 		panel_1.setBorder(new TitledBorder(null, "Upcoming lessons", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_1.setBounds(345, 59, 1228, 275);
+		panel_1.setBounds(345, 59, 1074, 275);
 		panel.add(panel_1);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 21, 1208, 243);
+		scrollPane.setBounds(10, 21, 1054, 243);
 		panel_1.add(scrollPane);
 		
 		MouseListener doubleClickListener = new MouseAdapter() {

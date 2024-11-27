@@ -103,13 +103,15 @@ public class MainMenu extends JFrame {
 	    	openFrame(new AddAnInstructor());
 	    	dispose();
 	    });
+	    
+	    ClockElement.create(this);
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 MainMenu frame = new MainMenu();
-                ClockElement.create(frame);
+                
                 frame.setVisible(true);
             }
         });

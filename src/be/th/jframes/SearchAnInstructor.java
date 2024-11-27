@@ -85,7 +85,7 @@ public class SearchAnInstructor extends JFrame {
 		this.instructorMap = new LinkedHashMap<>();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(0, 0, 1539, 780);
+		setBounds(0, 0, 1539, 689);
 
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -272,12 +272,12 @@ public class SearchAnInstructor extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Upcoming lessons", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(272, 406, 1239, 313);
+		panel.setBounds(272, 406, 1239, 240);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 21, 1219, 239);
+		scrollPane.setBounds(10, 21, 1219, 167);
 		panel.add(scrollPane);
 		
 		upcomingLessonsTable = new JTable();
@@ -304,7 +304,7 @@ public class SearchAnInstructor extends JFrame {
 		JButton btnDeleteUpcomingLesson = new JButton("Delete");
 		btnDeleteUpcomingLesson.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		btnDeleteUpcomingLesson.setBackground(new Color(255, 57, 57));
-		btnDeleteUpcomingLesson.setBounds(10, 271, 150, 31);
+		btnDeleteUpcomingLesson.setBounds(10, 198, 150, 31);
 		btnDeleteUpcomingLesson.addActionListener(this::handleClickOnDeleteUpcomingLessonButton);
 		panel.add(btnDeleteUpcomingLesson);
 
