@@ -288,21 +288,22 @@ public class UpdateAnInstructor extends JFrame {
 		    return checkBoxMap;
 		}
 	
-	private Instructor buildInstructorFromFields() {
-		int id = instructorToUpdate.getId();
-		String lastName = lastNameField.getText();
-        String firstName = firstNameField.getText();
-        LocalDate dateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
-        String phoneNumber = phoneNumberField.getText();
-        String email = emailField.getText();
-        String city = cityField.getText();
-        String postcode = postcodeField.getText();
-        String streetName = streetNameField.getText();
-        String streetNumber = streetNumberField.getText();
-        
-        Set<Accreditation> selectedAccreditations = getSelectedAccreditations(checkBoxMap);
-        
-        return new Instructor(id, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email, selectedAccreditations);
+	private Instructor updateInstructorFromFields(Instructor instructorToUpdate) {
+		instructorToUpdate.setLastName(lastNameField.getText());
+	    instructorToUpdate.setFirstName(firstNameField.getText());
+	    instructorToUpdate.setDateOfBirth(DateParser.toLocalDate(dateOfBirthField.getDate()));
+	    instructorToUpdate.setPhoneNumber(phoneNumberField.getText());
+	    instructorToUpdate.setEmail(emailField.getText());
+	    instructorToUpdate.getAddress().setCity(cityField.getText());
+	    instructorToUpdate.getAddress().setPostcode(postcodeField.getText());
+	    instructorToUpdate.getAddress().setStreetName(streetNameField.getText());
+	    instructorToUpdate.getAddress().setStreetNumber(streetNumberField.getText());
+	    
+	    Set<Accreditation> selectedAccreditations = getSelectedAccreditations(checkBoxMap);
+	    instructorToUpdate.clearAccreditations();
+	    instructorToUpdate.setAccreditations(selectedAccreditations);
+	    
+	    return instructorToUpdate;
 	}
 	
 	private void preFillFields(Instructor instructor) {
@@ -328,7 +329,7 @@ public class UpdateAnInstructor extends JFrame {
 	
 	private void handleClickOnUpdateButton(BiConsumer<Boolean, Instructor> onUpdateCallBack) {
         try {		   
-            Instructor instructorWithNewData = buildInstructorFromFields();
+            Instructor instructorWithNewData = updateInstructorFromFields(instructorToUpdate);
             boolean isUpdated = instructorWithNewData.updateInDatabase((InstructorDAO) instructorDAO);
             if (!isUpdated) {
             	displayFailedToUpdateMessage();

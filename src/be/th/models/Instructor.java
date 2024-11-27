@@ -101,6 +101,9 @@ public class Instructor extends Person {
     }
 
     // Methods
+	public void clearAccreditations() {
+		accreditations.clear();
+	}
 	public Lesson findLessonById(int lessonId) {
 		if (!IntegerValidator.isPositiveOrEqualToZero(lessonId)) {
 			throw new IllegalArgumentException("Lesson ID must be positive.");
