@@ -44,7 +44,7 @@ public class Period {
         return endDate;
     }
 
-    public boolean isVacation() {
+    public boolean getIsVacation() {
         return isVacation;
     }
 

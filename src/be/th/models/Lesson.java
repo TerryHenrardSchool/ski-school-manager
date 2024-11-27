@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.IntToDoubleFunction;
 
 import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
@@ -137,10 +138,29 @@ public class Lesson implements Serializable {
 		return lessonDAO.findAll(date);
 	}
 
-    // Methods
+	public boolean isBookingEarlyEnoughForPrivateLesson(Booking booking) {
+	    if (!getLessonType().getIsPrivate()) {
+	        return false;
+	    }
+
+	    if (booking.getPeriod().getIsVacation()) {
+	        return booking.getBookingDate().isBefore(booking.getLesson().getDate().minusWeeks(1));
+	    } else {
+	        return booking.getBookingDate().isBefore(booking.getLesson().getDate().minusMonths(1));
+	    }
+	}
+	
 	public boolean addBooking(Booking booking) {
 		if (!ObjectValidator.hasValue(booking)) {
 			throw new IllegalArgumentException("Booking must have value.");
+		}
+		
+		if (isBookingEarlyEnoughForPrivateLesson(booking)) { 
+		    throw new IllegalArgumentException(
+		        "It's too early to book for this private lesson. "
+		        + "Private lessons during school vacation must be booked at least 1 week in advance and "
+		        + "private lessons during non-school vacation must be booked at least 1 month in advance."
+		    );
 		}
 		
 		if (bookings.contains(booking)) {
