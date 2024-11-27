@@ -138,15 +138,15 @@ public class Lesson implements Serializable {
 		return lessonDAO.findAll(date);
 	}
 
-	public boolean isBookingEarlyEnoughForPrivateLesson(Booking booking) {
+	public boolean isBookingWithinAllowedTimeframe(Booking booking) {
 	    if (!getLessonType().getIsPrivate()) {
-	        return false;
+	        return true;
 	    }
 
 	    if (booking.getPeriod().getIsVacation()) {
-	        return booking.getBookingDate().isBefore(booking.getLesson().getDate().minusWeeks(1));
+	        return booking.getBookingDate().isAfter(booking.getLesson().getDate().minusWeeks(1));
 	    } else {
-	        return booking.getBookingDate().isBefore(booking.getLesson().getDate().minusMonths(1));
+	        return booking.getBookingDate().isAfter(booking.getLesson().getDate().minusMonths(1));
 	    }
 	}
 	
@@ -155,7 +155,7 @@ public class Lesson implements Serializable {
 			throw new IllegalArgumentException("Booking must have value.");
 		}
 		
-		if (isBookingEarlyEnoughForPrivateLesson(booking)) { 
+		if (!isBookingWithinAllowedTimeframe(booking)) { 
 		    throw new IllegalArgumentException(
 		        "It's too early to book for this private lesson. "
 		        + "Private lessons during school vacation must be booked at least 1 week in advance and "

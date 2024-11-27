@@ -268,6 +268,8 @@ public class SearchAnInstructor extends JFrame {
 		});
 		accreditationsTable.getColumnModel().getColumn(0).setResizable(false);
 		accreditationsTable.getColumnModel().getColumn(1).setResizable(false);
+		accreditationsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		accreditationsTable.getTableHeader().setReorderingAllowed(false);
 		accreditationsJScrollPane.setViewportView(accreditationsTable);
 		
 		JPanel panel = new JPanel();
@@ -298,7 +300,8 @@ public class SearchAnInstructor extends JFrame {
 		for (int i = 0; i < columnNames.length; i++) {
 		    upcomingLessonsTable.getColumnModel().getColumn(i).setResizable(false);
 		}
-
+        upcomingLessonsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        upcomingLessonsTable.getTableHeader().setReorderingAllowed(false);
 		scrollPane.setViewportView(upcomingLessonsTable);
 		
 		JButton btnDeleteUpcomingLesson = new JButton("Delete");
