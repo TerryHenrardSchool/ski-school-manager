@@ -109,8 +109,8 @@ public class Instructor extends Person {
 			throw new IllegalArgumentException("Lesson ID must be positive.");
 		}
 
-		return lessons.stream().
-			filter(lesson -> lesson.getId() == lessonId)
+		return lessons.stream()
+			.filter(lesson -> lesson.getId() == lessonId)
 			.findFirst()
 			.orElse(null);
 	}

@@ -679,6 +679,8 @@ public class SearchAnInstructor extends JFrame {
 		confirmDeletion();
 		removeInstructorFromInstructorMap(selectedInstructor.getId());
 		displayInstructorsInTable(instructorMap.values());
+		displayAccreditaionsInTable(List.of());
+		displayLessonsInTable(List.of());
 	}
 	
 	private void handleClickOnResetFiltersButton(ActionEvent ev) {
