@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import be.th.dao.DatabaseConstant;
+import be.th.formatters.DatabaseFormatter;
 import be.th.formatters.StringFormatter;
 import be.th.validators.DateValidator;
 import be.th.validators.IntegerValidator;
@@ -26,8 +27,11 @@ public abstract class Person implements Serializable {
     private final static LocalDate MIN_VALID_BIRTHDATE = LocalDate.of(1900, 1, 1);
     private final static LocalDate MAX_VALID_BIRTHDATE = LocalDate.now();
     
+    private final static int MIN_AGE = 4;
+    
     private final static String SPLIT_LAST_NAME_AND_FIRST_NAME_REGEX = "^([A-Z\\s]+)\\s+([A-Z][a-zA-Z\\s]+)$";
 	private final static String EMAIL_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+	private final static String NAMES_REGEX = "^[a-zA-ZÀ-ÖØ-öø-ÿ\\s'\\-,.]{2,}$";
 	private final static String PHONE_NUMBER_REGEX = 
 		"^(((\\+|00)32[ ]?(?:\\(0\\)[ ]?)?)|0){1}(4(60|[789]\\d)\\/?(\\s?\\d{2}\\.?){2}" +  
 		"(\\s?\\d{2})|(\\d\\/?\\s?\\d{3}|\\d{2}\\/?\\s?\\d{2})(\\.?\\s?\\d{2}){2})$";
@@ -112,6 +116,13 @@ public abstract class Person implements Serializable {
         if(!StringValidator.isLengthSmallerOrEqual(lastName, DatabaseConstant.MAX_CHARACTERS)) {
             throw new IllegalArgumentException("Last name's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
+        
+		if (!StringValidator.isValidUsingRegex(lastName, NAMES_REGEX)) {
+			throw new IllegalArgumentException(""
+				+ "The last name format is invalid. Please enter a valid last name. "
+				+ "Special characters and numbers aren't allowed."
+			);
+		}
         this.lastName = lastName;
     }
 
@@ -123,6 +134,13 @@ public abstract class Person implements Serializable {
         if(!StringValidator.isLengthSmallerOrEqual(firstName, DatabaseConstant.MAX_CHARACTERS)) {
             throw new IllegalArgumentException("First name's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
+        
+        if (!StringValidator.isValidUsingRegex(lastName, NAMES_REGEX)) {
+			throw new IllegalArgumentException(""
+				+ "The last name format is invalid. Please enter a valid last name. "
+				+ "Special characters and numbers aren't allowed."
+			);
+		}
         this.firstName = firstName;
     }
 
@@ -132,8 +150,15 @@ public abstract class Person implements Serializable {
         }
         
         if (!DateValidator.isInRange(dateOfBirth, MIN_VALID_BIRTHDATE, MAX_VALID_BIRTHDATE)) {
-    		throw new IllegalArgumentException("The birtdate must be between " + MIN_VALID_BIRTHDATE.toString() + " and " + MAX_VALID_BIRTHDATE.toString());
+        	throw new IllegalArgumentException(""
+				+ "The birthdate must be between " + DatabaseFormatter.toBelgianFormat(MIN_VALID_BIRTHDATE) 
+				+ " and " + DatabaseFormatter.toBelgianFormat(MAX_VALID_BIRTHDATE)
+    		);        
         }
+        
+		if (!hasRequiredMinimumAge(dateOfBirth)) {
+			throw new IllegalArgumentException("The person must be at least " + MIN_AGE + " years old.");
+		}
         this.dateOfBirth = dateOfBirth;
     }
     
@@ -143,11 +168,25 @@ public abstract class Person implements Serializable {
     	}
     	
     	if (!DateValidator.isInRange(dateOfBirth, DATE_PATTERN, MIN_VALID_BIRTHDATE, MAX_VALID_BIRTHDATE)) {
-    		throw new IllegalArgumentException("The birtdate must be between " + MIN_VALID_BIRTHDATE.toString() + " and " + MAX_VALID_BIRTHDATE.toString());
+    		throw new IllegalArgumentException(""
+				+ "The birthdate must be between " + DatabaseFormatter.toBelgianFormat(MIN_VALID_BIRTHDATE) 
+				+ " and " + DatabaseFormatter.toBelgianFormat(MAX_VALID_BIRTHDATE)
+    		);
     	}
     	
-    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
-    	this.dateOfBirth = LocalDate.parse(dateOfBirth, formatter);
+    	LocalDate dateOfBirthParsed = null;
+    	try {
+    		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
+    		dateOfBirthParsed = LocalDate.parse(dateOfBirth, formatter);    		
+    	} catch (DateTimeParseException ex) {
+    		throw new IllegalArgumentException("The birthdate format is invalid. Please enter a valid date in the format " + DATE_PATTERN);
+    	}
+    	
+    	if (!hasRequiredMinimumAge(dateOfBirthParsed)) {
+			throw new IllegalArgumentException("The person must be at least " + MIN_AGE + " years old.");
+		}
+    	
+    	this.dateOfBirth = dateOfBirthParsed;
     }
 
     public void setPhoneNumber(String phoneNumber) {
@@ -195,7 +234,14 @@ public abstract class Person implements Serializable {
         return nameParts;
     }
     
-    // Methods    
+    // Methods
+    public static boolean hasRequiredMinimumAge(LocalDate birthDate) {
+        LocalDate today = LocalDate.now();
+        java.time.Period age = java.time.Period.between(birthDate, today);
+
+        return age.getYears() >= MIN_AGE;
+    }
+    
     public String getFirstNameFormattedForDisplay() {
 		return StringFormatter.firstToUpper(firstName);	
     }

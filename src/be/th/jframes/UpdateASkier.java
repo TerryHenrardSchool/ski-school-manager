@@ -222,24 +222,23 @@ public class UpdateASkier extends JFrame {
 		dispose();
 	}
 	
-	private Skier buildSkierFromFields() {
-		int skierId = skierToUpdate.getId();
-        String skierLastName = DatabaseFormatter.format(lastNameField.getText());
-        String skierFirstName = DatabaseFormatter.format(firstNameField.getText());
-        LocalDate skierDateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
-        String phoneNumber = DatabaseFormatter.format(phoneNumberField.getText());
-        String email = DatabaseFormatter.format(emailField.getText());
-        String city = DatabaseFormatter.format(cityField.getText());
-        String postcode = DatabaseFormatter.format(postcodeField.getText());
-        String streetName = DatabaseFormatter.format(streetNameField.getText());
-        String streetNumber = DatabaseFormatter.format(streetNumberField.getText());
-        
-        return new Skier(skierId, skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+	private Skier updateSkierFromFields(Skier skierToUpdate) {
+	    skierToUpdate.setLastName(DatabaseFormatter.format(lastNameField.getText()));
+	    skierToUpdate.setFirstName(DatabaseFormatter.format(firstNameField.getText()));
+	    skierToUpdate.setDateOfBirth(DateParser.toLocalDate(dateOfBirthField.getDate()));
+	    skierToUpdate.setPhoneNumber(DatabaseFormatter.format(phoneNumberField.getText()));
+	    skierToUpdate.setEmail(DatabaseFormatter.format(emailField.getText()));
+	    skierToUpdate.getAddress().setCity(DatabaseFormatter.format(cityField.getText()));
+	    skierToUpdate.getAddress().setPostcode(DatabaseFormatter.format(postcodeField.getText()));
+	    skierToUpdate.getAddress().setStreetName(DatabaseFormatter.format(streetNameField.getText()));
+	    skierToUpdate.getAddress().setStreetNumber(DatabaseFormatter.format(streetNumberField.getText()));
+	    
+	    return skierToUpdate;
 	}
 	
 	private void handleCLickOnUpdateButton(BiConsumer<Boolean, Skier> onUpdateCallBack) {
         try {		   
-            Skier skierWithNewData = buildSkierFromFields();
+            Skier skierWithNewData = updateSkierFromFields(skierToUpdate);
             boolean isUpdated = skierWithNewData.updateInDatabase((SkierDAO) skierDAO);
             if (!isUpdated) {
             	displayFailedToUpdateMessage();

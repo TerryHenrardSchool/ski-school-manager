@@ -569,7 +569,7 @@ public class AddALesson extends JFrame {
 			
 			return new Lesson(startDate, lessonType, instructor, location.getId(), location.getName());			
 		} catch (Exception ex) {
-            throw new IllegalArgumentException("Failed to build lesson from fields.");
+            throw new IllegalArgumentException(ex.getMessage());
 		}
 	}
 	
