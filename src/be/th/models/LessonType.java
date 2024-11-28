@@ -27,6 +27,7 @@ public class LessonType {
     private Optional<Integer> maxAge;
     private int minBookings;
     private int maxBookings;
+    private boolean isPrivate;
     
     // References
     private Accreditation accreditation;
@@ -42,6 +43,7 @@ public class LessonType {
 		Optional<Integer> maxAge, 
 		int minBookings, 
 		int maxBookings,
+		boolean isPrivate,
 		Accreditation accreditation
 	) {
         setId(id);
@@ -53,6 +55,7 @@ public class LessonType {
         setMaxAge(maxAge);
         setMinBookings(minBookings);
         setMaxBookings(maxBookings);
+        setIsPrivate(isPrivate);
         setAccreditation(accreditation);
     }
 
@@ -92,6 +95,10 @@ public class LessonType {
     public int getMaxBookings() {
     	return maxBookings;
     }
+    
+	public boolean getIsPrivate() {
+		return isPrivate;
+	}
     
     public Accreditation getAccreditation() {
     	return accreditation;
@@ -177,6 +184,10 @@ public class LessonType {
     	this.maxBookings = maxBookings;
     }
     
+	public void setIsPrivate(boolean isPrivate) {
+		this.isPrivate = isPrivate;
+	}
+    
     public void setAccreditation(Accreditation accreditation) {
     	if(!ObjectValidator.hasValue(accreditation)) {    		
     		throw new IllegalArgumentException("A lesson type must have an accreditation.");    		    		
@@ -197,10 +208,6 @@ public class LessonType {
     public String getLessonTypeInfoFormattedForDisplay() {
     	return name + " " + ageCategoryName  + " - " + level;
     }
-    
-	public String getPriceFormattedForDisplay() {
-		return String.format("%.2f €", price);
-	}
     
     // Database methods
     public static Collection<LessonType> findAllInDatabase(LessonTypeDAO lessonTypeDao){
@@ -228,12 +235,13 @@ public class LessonType {
             Objects.equals(level, lessonType.level) &&
             Objects.equals(name, lessonType.name) &&
             Objects.equals(ageCategoryName, lessonType.ageCategoryName) &&
+            Objects.equals(isPrivate, lessonType.isPrivate) &&
         	accreditation.equals(lessonType.accreditation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, level, price, name, ageCategoryName, minAge, maxAge, minBookings, maxBookings, accreditation.hashCode());
+        return Objects.hash(id, level, price, name, ageCategoryName, minAge, maxAge, minBookings, maxBookings, isPrivate, accreditation.hashCode());
     }
 
     @Override
@@ -248,6 +256,7 @@ public class LessonType {
            ", maxAge'" + maxAge + '\'' +
            ", minBookings'" + minBookings + '\'' +
            ", maxBookings'" + maxBookings + '\'' + 
+           ", isPrivate'" + isPrivate + '\'' +
            ", Accreditation'" + accreditation + '\'';
     }
 }

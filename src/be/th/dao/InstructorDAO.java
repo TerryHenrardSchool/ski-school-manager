@@ -41,7 +41,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	        
 	        return true;
 	    } catch (SQLException e) {
-            DatabaseTransaction.rollbackTransaction(connection);
+            DatabaseTransaction.rollback(connection);
 	        e.printStackTrace();
 	        return false;
 	    } finally {
@@ -61,7 +61,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	        connection.commit();
 	        return true;
 		} catch (SQLException e) {
-            DatabaseTransaction.rollbackTransaction(connection);
+            DatabaseTransaction.rollback(connection);
 	        e.printStackTrace();
 	        return false;
 		} finally {
@@ -76,7 +76,7 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	        boolean isUpdated = updateInstructorInfo(instructor);
 	        if (!isUpdated) {
-	            DatabaseTransaction.rollbackTransaction(connection);
+	            DatabaseTransaction.rollback(connection);
 	            return false;
 	        }
 
@@ -91,7 +91,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	        connection.commit();
 	        return true;
 	    } catch (SQLException e) {
-            DatabaseTransaction.rollbackTransaction(connection);
+            DatabaseTransaction.rollback(connection);
 	        return false;
 	    } finally {
             DatabaseTransaction.restoreAutoCommit(connection);
@@ -162,7 +162,6 @@ public class InstructorDAO extends DAO<Instructor> {
 	        ORDER BY instructor_id DESC
 	    """;
 
-	    List<Instructor> instructors = new ArrayList<>();
 	    Map<Integer, Instructor> instructorMap = new HashMap<>();
 
 	    try (ResultSet rs = connection.prepareStatement(sql).executeQuery()) {
@@ -175,7 +174,6 @@ public class InstructorDAO extends DAO<Instructor> {
 	                instructor = mapInstructor(rs, accreditation);
 	                loadInstructorLessons(instructor);
 	                instructorMap.put(instructorId, instructor);
-	                instructors.add(instructor);
 	            } else {
 	                instructor.addAccreditation(accreditation);
 	            }
@@ -184,7 +182,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	        e.printStackTrace();
 	    }
 
-	    return instructors;
+	    return instructorMap.values().stream().toList();
 	}
 
 	@Override
@@ -273,28 +271,18 @@ public class InstructorDAO extends DAO<Instructor> {
 	
 	        while (rs3.next()) {
 	        	Booking booking = new Booking(
-	        			rs3.getInt("booking_id"),
-	        			rs3.getDate("booking_date").toLocalDate().atStartOfDay(),
-	        			rs3.getBoolean("is_insured"),
-	        			rs3.getInt("period_id"),
-	        			rs3.getDate("start_date").toLocalDate(),
-	        			rs3.getDate("end_date").toLocalDate(),
-	        			rs3.getBoolean("is_vacation"),
-	        			rs3.getString("name"),
-	        			new Skier(
-        					rs3.getInt("skier_id_1"),
-        					rs3.getString("last_name"),
-        					rs3.getString("first_name"),
-        					rs3.getDate("date_of_birth").toLocalDate(),
-        					rs3.getString("city"),
-        					rs3.getString("postcode"),
-        					rs3.getString("street_name"),
-        					rs3.getString("street_number"),
-        					rs3.getString("phone_number"),
-        					rs3.getString("email")
-    					)
-		            );
-	
+        			rs3.getInt("booking_id"),
+        			rs3.getTimestamp("booking_date").toLocalDateTime(),
+        			rs3.getBoolean("is_insured"),
+        			rs3.getInt("period_id"),
+        			rs3.getDate("start_date").toLocalDate(),
+        			rs3.getDate("end_date").toLocalDate(),
+        			rs3.getBoolean("is_vacation"),
+        			rs3.getString("name"),
+        			lesson,
+        			mapSkier(rs3.getInt("skier_id_1"))
+	            );
+	        		
 	            lesson.addBooking(booking);
 	        }
 	    } catch (SQLException e) {
@@ -316,6 +304,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	        maxAgeOptional,
 	        rs.getInt("min_bookings"),
 	        rs.getInt("max_bookings"),
+	        rs.getBoolean("is_private"),
 	        new Accreditation(
 	            rs.getInt("accreditation_id"),
 	            rs.getString("sport"),
@@ -325,7 +314,7 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	    return new Lesson(
 	        rs.getInt("lesson_id"),
-	        rs.getDate("start_date").toLocalDate().atStartOfDay(),
+	        rs.getTimestamp("start_date").toLocalDateTime(),
 	        lessonType,
 	        instructor,
 	        rs.getInt("location_id_1"),
@@ -335,8 +324,7 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	private int insertPerson(Instructor instructor) throws SQLException {
 		String sqlPerson = """
-    		INSERT INTO persons
-	        (
+    		INSERT INTO persons(
 	            last_name, 
 	            first_name, 
 	            date_of_birth, 
@@ -381,7 +369,7 @@ public class InstructorDAO extends DAO<Instructor> {
 	private int insertInstructor(int personId) throws SQLException {
 		String sqlInstructor = """
     		INSERT INTO instructors (person_id)
-    		VALUES(?)
+    		VALUES (?)
 		""";
 		
 		try (PreparedStatement pstmtInstructor = connection.prepareStatement(sqlInstructor, new String[] {"instructor_id"})) {
@@ -406,8 +394,7 @@ public class InstructorDAO extends DAO<Instructor> {
 
 	private void insertAccreditations(int instructorId, Set<Accreditation> accreditations) throws SQLException {
 		String sqlAccreditation = """
-	        INSERT INTO instructor_accreditation_details 
-	        (
+	        INSERT INTO instructor_accreditation_details(
 			    instructor_id, 
 			    accreditation_id
 		    )
@@ -463,6 +450,10 @@ public class InstructorDAO extends DAO<Instructor> {
 	    } catch (SQLException ex) {
 	        throw new SQLException("Error while deleting instructor. Error: " + ex.getMessage(), ex);
 	    }
+	}
+	
+	private Skier mapSkier(int id) throws SQLException {
+	    return Skier.findInDatabaseById(id, (SkierDAO) new DAOFactory().getSkierDAO());
 	}
 
 	private boolean updateInstructorInfo(Instructor instructor) {

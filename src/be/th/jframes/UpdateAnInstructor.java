@@ -70,7 +70,7 @@ public class UpdateAnInstructor extends JFrame {
 		this.instructorToUpdate = instructorToUpdate;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 630, 739);
+		setBounds(100, 100, 630, 755);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -79,7 +79,7 @@ public class UpdateAnInstructor extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Instructor information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 72, 600, 617);
+		panel.setBounds(10, 88, 600, 617);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -230,7 +230,7 @@ public class UpdateAnInstructor extends JFrame {
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_1.setBackground(new Color(0, 153, 255));
 		lblNewLabel_1.setOpaque(true);
-		lblNewLabel_1.setBounds(10, 10, 600, 52);
+		lblNewLabel_1.setBounds(10, 26, 600, 52);
 		contentPane.add(lblNewLabel_1);
 		
 		preFillFields(instructorToUpdate);
@@ -288,21 +288,22 @@ public class UpdateAnInstructor extends JFrame {
 		    return checkBoxMap;
 		}
 	
-	private Instructor buildInstructorFromFields() {
-		int id = instructorToUpdate.getId();
-		String lastName = lastNameField.getText();
-        String firstName = firstNameField.getText();
-        LocalDate dateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
-        String phoneNumber = phoneNumberField.getText();
-        String email = emailField.getText();
-        String city = cityField.getText();
-        String postcode = postcodeField.getText();
-        String streetName = streetNameField.getText();
-        String streetNumber = streetNumberField.getText();
-        
-        Set<Accreditation> selectedAccreditations = getSelectedAccreditations(checkBoxMap);
-        
-        return new Instructor(id, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email, selectedAccreditations);
+	private Instructor updateInstructorFromFields(Instructor instructorToUpdate) {
+		instructorToUpdate.setLastName(lastNameField.getText());
+	    instructorToUpdate.setFirstName(firstNameField.getText());
+	    instructorToUpdate.setDateOfBirth(DateParser.toLocalDate(dateOfBirthField.getDate()));
+	    instructorToUpdate.setPhoneNumber(phoneNumberField.getText());
+	    instructorToUpdate.setEmail(emailField.getText());
+	    instructorToUpdate.getAddress().setCity(cityField.getText());
+	    instructorToUpdate.getAddress().setPostcode(postcodeField.getText());
+	    instructorToUpdate.getAddress().setStreetName(streetNameField.getText());
+	    instructorToUpdate.getAddress().setStreetNumber(streetNumberField.getText());
+	    
+	    Set<Accreditation> selectedAccreditations = getSelectedAccreditations(checkBoxMap);
+	    instructorToUpdate.clearAccreditations();
+	    instructorToUpdate.setAccreditations(selectedAccreditations);
+	    
+	    return instructorToUpdate;
 	}
 	
 	private void preFillFields(Instructor instructor) {
@@ -328,7 +329,7 @@ public class UpdateAnInstructor extends JFrame {
 	
 	private void handleClickOnUpdateButton(BiConsumer<Boolean, Instructor> onUpdateCallBack) {
         try {		   
-            Instructor instructorWithNewData = buildInstructorFromFields();
+            Instructor instructorWithNewData = updateInstructorFromFields(instructorToUpdate);
             boolean isUpdated = instructorWithNewData.updateInDatabase((InstructorDAO) instructorDAO);
             if (!isUpdated) {
             	displayFailedToUpdateMessage();

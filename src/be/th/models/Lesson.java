@@ -3,12 +3,14 @@ package be.th.models;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.IntToDoubleFunction;
 
 import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
@@ -24,14 +26,14 @@ public class Lesson implements Serializable {
 
     // Attributes
     private int id;
-    private LocalDateTime date;
+    private LocalDateTime startDate;
     
     // References
     Location location;
     LessonType lessonType;
     Instructor instructor;
     // Secretary secretary;
-    Set<Booking> bookings; //TODO: Implement booking methods
+    Set<Booking> bookings;
     
     // Constructor
     public Lesson(
@@ -43,7 +45,7 @@ public class Lesson implements Serializable {
 		String LocationName
 	) {
         setId(id);
-        setDate(startDate);
+        setStartDate(startDate);
         setLessonType(lessonType);
         setInstructor(instructor);
         location = new Location(locationId, LocationName);
@@ -66,7 +68,7 @@ public class Lesson implements Serializable {
     }
 
     public LocalDateTime getDate() {
-        return date;
+        return startDate;
     }
     
     public Location getLocation() {
@@ -93,11 +95,16 @@ public class Lesson implements Serializable {
         this.id = id;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setStartDate(LocalDateTime date) {
     	if (!DateValidator.hasValue(date)) {
             throw new IllegalArgumentException("Date must have a value.");
         }
-        this.date = date;
+    	
+		if (!DateValidator.isInRange(date.toLocalDate(), Period.SKI_SCHOOL_OPENING_DATE, Period.SKI_SCHOOL_CLOSING_DATE)) {
+			throw new IllegalArgumentException("Date must be within the ski school's opening dates.");
+    		
+    	}
+        this.startDate = date;
     }
 
 	public void setLessonType(LessonType lessonType) {
@@ -119,6 +126,10 @@ public class Lesson implements Serializable {
 		return lessonDAO.create(this);
 	}
 	
+	public boolean deleteFromDatabase(LessonDAO lessonDAO) {
+		return lessonDAO.delete(id);
+	}
+	
 	public static List<Lesson> findAllInDatabase(LessonDAO lessonDAO) {
 		return lessonDAO.findAll();
 	}
@@ -127,24 +138,43 @@ public class Lesson implements Serializable {
 		return lessonDAO.findAll(date);
 	}
 
-    // Methods
+	public boolean isBookingWithinAllowedTimeframe(Booking booking) {
+	    if (!getLessonType().getIsPrivate()) {
+	        return true;
+	    }
+
+	    if (booking.getPeriod().getIsVacation()) {
+	        return booking.getBookingDate().isAfter(booking.getLesson().getDate().minusWeeks(1));
+	    } else {
+	        return booking.getBookingDate().isAfter(booking.getLesson().getDate().minusMonths(1));
+	    }
+	}
+	
 	public boolean addBooking(Booking booking) {
 		if (!ObjectValidator.hasValue(booking)) {
 			throw new IllegalArgumentException("Booking must have value.");
 		}
 		
-		if (bookings.contains(booking)) {
-			throw new IllegalArgumentException("Booking already exists.");
+		if (!isBookingWithinAllowedTimeframe(booking)) { 
+		    throw new IllegalArgumentException(
+		        "It's too early to book for this private lesson. "
+		        + "Private lessons during school vacation must be booked at least 1 week in advance and "
+		        + "private lessons during non-school vacation must be booked at least 1 month in advance."
+		    );
 		}
 		
-		if (bookings.size() >= lessonType.getMaxBookings()) {
+		if (bookings.contains(booking)) {
+			return false;
+		}
+		
+		if (!isAvailable()) {
 			throw new IllegalArgumentException("Lesson is fully booked.");
-			
 		}
 		
 		if (!booking.getSkier().hasValidAgeForLessonType(lessonType)) {
 			throw new IllegalArgumentException("Skier does not meet the age requirements for the lesson type.");
 		}
+		
 		return bookings.add(booking);
 	}
 	
@@ -160,12 +190,8 @@ public class Lesson implements Serializable {
 	}
 	
     public double calculatePrice() {
-        return lessonType.getPrice() * bookings.size();
+        return bookings.stream().mapToDouble(Booking::calculatePrice).sum();
     }
-    
-	public String getCalculatePriceFormattedForDisplay() {
-		return String.format("%.2f €", calculatePrice());
-	}
 
     public boolean hasBooking() {
         return !bookings.isEmpty();
@@ -178,6 +204,42 @@ public class Lesson implements Serializable {
 	public int getRemainingBookingsCount() {
 		return lessonType.getMaxBookings() - bookings.size();
 	}
+
+	public boolean isFullyBooked() {
+		return bookings.size() >= lessonType.getMaxBookings();
+	}
+
+	public boolean isAvailable() {
+		return bookings.size() < lessonType.getMaxBookings();
+	}
+	
+	public long calculateDaysUntilStartDate() {
+        return Math.max(0, ChronoUnit.DAYS.between(LocalDate.now(), startDate));
+    }
+
+	public String getCalculatedDaysUntilStartDateFormattedForDisplay() {
+	    long days = calculateDaysUntilStartDate();
+
+	    long years = days / 365; 
+	    long remainingDays = days % 365;
+
+	    long months = remainingDays / 30;
+	    remainingDays %= 30;
+
+	    String result = "";
+	    if (years > 0) {
+	        result += years + " years ";
+	    }
+	    if (months > 0) {
+	        result += months + " months ";
+	    }
+	    if (remainingDays > 0 || result.length() == 0) {
+	        result += remainingDays + " days";
+	    }
+
+	    return result.toString().trim();
+	}
+
 
     // Override methods
     @Override
@@ -192,19 +254,19 @@ public class Lesson implements Serializable {
 
         Lesson lesson = (Lesson) object;
         return id == lesson.id &&
-            Objects.equals(date, lesson.date);
+            Objects.equals(startDate, lesson.startDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date);
+        return Objects.hash(id, startDate);
     }
 
     @Override
     public String toString() {
         return "Lesson:" +
            "id=" + id +
-           ", date=" + date + '\'' + 
+           ", date=" + startDate + '\'' + 
            ", " + location + '\'' +
            ", " + lessonType + '\'' + 
            ", " + bookings.toString() + '\'' +

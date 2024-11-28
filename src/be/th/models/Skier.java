@@ -1,6 +1,7 @@
 package be.th.models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -72,10 +73,45 @@ public class Skier extends Person {
     public static List<Skier> findAllInDatabase(SkierDAO skierDAO){
     	return skierDAO.findAll();
     }
+    
+	public static Skier findInDatabaseById(int id, SkierDAO skierDAO) {
+		return skierDAO.find(id);
+	}
 
     // Methods
+    public double calculateTotalSpent() {
+    	return bookings.stream().mapToDouble(Booking::calculatePrice).sum();
+    }
+    
+    public boolean isBookingSlotFree(Booking newBooking) {
+        LocalDateTime newBookingDate = newBooking.getLesson().getDate();
+        
+        return bookings.stream().noneMatch(booking -> {        	
+        	return booking.getLesson().getDate().equals(newBookingDate);
+        });
+    }
+    
+    public boolean isFullyBookedDay(LocalDateTime lessonDateTime) {
+        return bookings.stream().anyMatch(skierBooking -> {
+            LocalDateTime skierBookingDateTime = skierBooking.getLesson().getDate();
+            LocalDate skierBookingDate = skierBookingDateTime.toLocalDate();
+            LocalDate lessonDate = lessonDateTime.toLocalDate();
+            
+            return 
+            	skierBookingDate.equals(lessonDate) && 
+        		skierBookingDateTime.getHour() != lessonDateTime.getHour();
+        });
+    }
+	
+	public Booking findBookingById(int bookingId) {
+	    return bookings.stream()
+		    .filter(booking -> booking.getId() == bookingId)
+		    .findFirst()
+		    .orElse(null); 
+	}
+    
     public boolean hasValidAgeForLessonType(LessonType lessonType) {
-        int age = LocalDate.now().getYear() - getDateOfBirth().getYear();
+        int age = super.calculateAge();
         return lessonType.isAgeValid(age);
     }
     
@@ -83,19 +119,22 @@ public class Skier extends Person {
         return lesson.getBookings().stream().anyMatch(booking -> booking.getSkier().equals(this));
     }
 
-	public boolean addBooking(Booking booking) {
-		if (!ObjectValidator.hasValue(booking)) {
-			throw new IllegalArgumentException("Booking must have value.");
+    public boolean addBooking(Booking newBooking) {
+        if (!ObjectValidator.hasValue(newBooking)) {
+            throw new IllegalArgumentException("Booking must have value.");
         }
-		
-		if (bookings.contains(booking)) {
-			return false;
-		}
-		
-		return bookings.add(booking);
 
-	}
-	
+        if (!isBookingSlotFree(newBooking)) {
+            throw new IllegalArgumentException("Skier already has a booking for this date and time.");
+        }
+
+        if (bookings.contains(newBooking)) {
+            return false;
+        }
+
+        return bookings.add(newBooking);
+    }
+
 	public boolean removeBooking(Booking booking) {
 		if (!ObjectValidator.hasValue(booking)) {
 			throw new IllegalArgumentException("Booking must have value.");
@@ -124,7 +163,7 @@ public class Skier extends Person {
     
     @Override
     public int hashCode() {
-    	return Objects.hash(super.hashCode(), bookings);
+    	return Objects.hash(super.hashCode());
     }
     
     @Override

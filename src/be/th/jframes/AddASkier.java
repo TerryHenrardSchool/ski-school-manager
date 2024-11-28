@@ -44,7 +44,7 @@ public class AddASkier extends JFrame {
 	public AddASkier() {
 		this.skierDAO = new DAOFactory().getSkierDAO();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 630, 554);
+		setBounds(100, 100, 630, 567);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -53,7 +53,7 @@ public class AddASkier extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Skier information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 72, 600, 435);
+		panel.setBounds(10, 89, 600, 435);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -189,7 +189,7 @@ public class AddASkier extends JFrame {
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_1.setBackground(new Color(0, 153, 255));
 		lblNewLabel_1.setOpaque(true);
-		lblNewLabel_1.setBounds(10, 10, 600, 52);
+		lblNewLabel_1.setBounds(10, 27, 600, 52);
 		contentPane.add(lblNewLabel_1);
 	}
 	

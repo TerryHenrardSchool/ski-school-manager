@@ -11,6 +11,10 @@ import be.th.validators.BooleanValidator;
 import be.th.validators.StringValidator;
 
 public class Period {
+	
+	// Static attributes
+	public static final LocalDate SKI_SCHOOL_OPENING_DATE = LocalDate.of(2024, 12, 6);
+	public static final LocalDate SKI_SCHOOL_CLOSING_DATE = LocalDate.of(2025, 5, 3);
     
     // Attributes
     private int id;
@@ -40,7 +44,7 @@ public class Period {
         return endDate;
     }
 
-    public boolean isVacation() {
+    public boolean getIsVacation() {
         return isVacation;
     }
 

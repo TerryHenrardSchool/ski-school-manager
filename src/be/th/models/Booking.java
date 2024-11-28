@@ -3,7 +3,11 @@ package be.th.models;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
+
 import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
 import be.th.dao.BookingDAO;
@@ -14,6 +18,8 @@ public class Booking implements Serializable {
     
     // Static attributes
     private static final long serialVersionUID = 6020444951685458127L;
+    private static final double INSURANCE_PRICE = 20.0;
+    private static final double FULL_DAY_BOOKING_DISCOUNT = 0.15;
     
     // Attributes
     private int id;
@@ -35,35 +41,40 @@ public class Booking implements Serializable {
 		LocalDate endDate, 
 		boolean isVacation, 
 		String name,
+		Lesson lesson,
 		Skier skier
 	) {
         setId(id);
         setBookingDate(bookingDate);
         setInsured(isInsured);
         setSkier(skier);
+        setLesson(lesson);
         this.period = new Period(periodId, startDate, endDate, isVacation, name);
+        lesson.addBooking(this);
     }
     
     public Booking(
-    		LocalDateTime bookingDate, 
-    		boolean isInsured, 
-    		int periodId, 
-    		LocalDate startDate, 
-    		LocalDate endDate, 
-    		boolean isVacation, 
-    		String name,
-    		Skier skier
+		LocalDateTime bookingDate, 
+		boolean isInsured, 
+		int periodId, 
+		LocalDate startDate, 
+		LocalDate endDate, 
+		boolean isVacation, 
+		String name,
+		Lesson lesson,
+		Skier skier
 	) {
-    	this(0, bookingDate, isInsured, periodId, startDate, endDate, isVacation, name, skier);
+    	this(0, bookingDate, isInsured, periodId, startDate, endDate, isVacation, name, lesson, skier);
     }
     
     public Booking(
 		LocalDateTime bookingDate, 
 		boolean isInsured, 
 		Period period,
+		Lesson lesson,
 		Skier skier
 		) {
-    	this(0, bookingDate, isInsured, period.getId(), period.getStartDate(), period.getEndDate(), period.isVacation(), period.getName(), skier);
+    	this(0, bookingDate, isInsured, period.getId(), period.getStartDate(), period.getEndDate(), period.getIsVacation(), period.getName(), lesson, skier);
     }
 
     // Getters
@@ -75,7 +86,7 @@ public class Booking implements Serializable {
         return bookingDate;
     }
 
-    public boolean isInsured() {
+    public boolean getInsurance() {
         return isInsured;
     }
     
@@ -126,17 +137,42 @@ public class Booking implements Serializable {
         }
         this.isInsured = isInsured;
     }
+    
+    public double calculateInsuranceSupplement() {
+    	return isInsured ? INSURANCE_PRICE : 0;
+    }
+    
+	public double calculateFullDayDiscount() {
+		return getSkier().isFullyBookedDay(getLesson().getDate()) ? 1 - FULL_DAY_BOOKING_DISCOUNT : 1;
+	}
 
     // Methods
     public double calculatePrice() {
-        return 0.0; // TODO: Implement price calculation logic
+        double insuranceSupplement = calculateInsuranceSupplement();
+        double fullDayDiscount = calculateFullDayDiscount();
+                        
+        return getLesson().getLessonType().getPrice() * fullDayDiscount + insuranceSupplement;
     }
+    
+    public String getCalculatedPriceFormattedForDisplay() {
+    	String discountText = getSkier().isFullyBookedDay(getLesson().getDate()) ? " (-15%)" : "";
+    	String insuranceText = isInsured ? " (+20€)" : "";
+		return String.format("%.2f€", calculatePrice()) + discountText + insuranceText;
+	}
     
     // Database methods
 	public boolean insertIntoDatabase(BookingDAO bookingDAO) {
 		return bookingDAO.create(this);
 	}
+	
+	public int insertIntoDatabaseAndGetId(BookingDAO bookingDAO) {
+		return bookingDAO.createAndGetId(this);
+	}
     
+	public boolean deleteFromDatabase(BookingDAO bookingDAO) {
+		return bookingDAO.delete(id);
+	}
+	
     // Override methods
     @Override
     public boolean equals(Object object) {
@@ -158,7 +194,7 @@ public class Booking implements Serializable {
     
     @Override
     public int hashCode() {
-        return Objects.hash(id, isInsured, bookingDate, period.hashCode(), skier.hashCode());
+        return Objects.hash(id, isInsured, bookingDate);
     }
     
     @Override
@@ -167,7 +203,7 @@ public class Booking implements Serializable {
             "id=" + id +
             ", insured=" + isInsured +
             ", booking date=" + bookingDate + 
-            ", period=" + period + 
+            ", period=" + period.getName() + 
             ", skier=" + skier.getFullNameFormattedForDisplay();
     }
 }

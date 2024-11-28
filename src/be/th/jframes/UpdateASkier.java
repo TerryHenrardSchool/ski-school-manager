@@ -55,7 +55,7 @@ public class UpdateASkier extends JFrame {
 		this.skierToUpdate = skierToUpdate;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 630, 554);
+		setBounds(100, 100, 630, 561);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -64,7 +64,7 @@ public class UpdateASkier extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Skier information", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 72, 600, 435);
+		panel.setBounds(10, 85, 600, 435);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -200,7 +200,7 @@ public class UpdateASkier extends JFrame {
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_1.setBackground(new Color(0, 153, 255));
 		lblNewLabel_1.setOpaque(true);
-		lblNewLabel_1.setBounds(10, 10, 600, 52);
+		lblNewLabel_1.setBounds(10, 23, 600, 52);
 		contentPane.add(lblNewLabel_1);
 		
 		preFillTexteFields(skierToUpdate);
@@ -222,24 +222,23 @@ public class UpdateASkier extends JFrame {
 		dispose();
 	}
 	
-	private Skier buildSkierFromFields() {
-		int skierId = skierToUpdate.getId();
-        String skierLastName = DatabaseFormatter.format(lastNameField.getText());
-        String skierFirstName = DatabaseFormatter.format(firstNameField.getText());
-        LocalDate skierDateOfBirth = DateParser.toLocalDate(dateOfBirthField.getDate());
-        String phoneNumber = DatabaseFormatter.format(phoneNumberField.getText());
-        String email = DatabaseFormatter.format(emailField.getText());
-        String city = DatabaseFormatter.format(cityField.getText());
-        String postcode = DatabaseFormatter.format(postcodeField.getText());
-        String streetName = DatabaseFormatter.format(streetNameField.getText());
-        String streetNumber = DatabaseFormatter.format(streetNumberField.getText());
-        
-        return new Skier(skierId, skierLastName, skierFirstName, skierDateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email);
+	private Skier updateSkierFromFields(Skier skierToUpdate) {
+	    skierToUpdate.setLastName(DatabaseFormatter.format(lastNameField.getText()));
+	    skierToUpdate.setFirstName(DatabaseFormatter.format(firstNameField.getText()));
+	    skierToUpdate.setDateOfBirth(DateParser.toLocalDate(dateOfBirthField.getDate()));
+	    skierToUpdate.setPhoneNumber(DatabaseFormatter.format(phoneNumberField.getText()));
+	    skierToUpdate.setEmail(DatabaseFormatter.format(emailField.getText()));
+	    skierToUpdate.getAddress().setCity(DatabaseFormatter.format(cityField.getText()));
+	    skierToUpdate.getAddress().setPostcode(DatabaseFormatter.format(postcodeField.getText()));
+	    skierToUpdate.getAddress().setStreetName(DatabaseFormatter.format(streetNameField.getText()));
+	    skierToUpdate.getAddress().setStreetNumber(DatabaseFormatter.format(streetNumberField.getText()));
+	    
+	    return skierToUpdate;
 	}
 	
 	private void handleCLickOnUpdateButton(BiConsumer<Boolean, Skier> onUpdateCallBack) {
         try {		   
-            Skier skierWithNewData = buildSkierFromFields();
+            Skier skierWithNewData = updateSkierFromFields(skierToUpdate);
             boolean isUpdated = skierWithNewData.updateInDatabase((SkierDAO) skierDAO);
             if (!isUpdated) {
             	displayFailedToUpdateMessage();

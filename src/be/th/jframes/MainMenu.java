@@ -3,6 +3,8 @@ package be.th.jframes;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -12,6 +14,8 @@ import javax.swing.border.TitledBorder;
 import be.th.styles.FontStyles;
 
 import java.awt.GridLayout;
+import java.awt.Label;
+
 import javax.swing.border.EtchedBorder;
 
 public class MainMenu extends JFrame {
@@ -20,7 +24,7 @@ public class MainMenu extends JFrame {
     
     public MainMenu() {
         setTitle("Ski School Manager");
-        setSize(1017, 694);
+        setSize(1017, 559);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -28,7 +32,7 @@ public class MainMenu extends JFrame {
         
         JPanel panel = new JPanel();
         panel.setBorder(new TitledBorder(null, "Skier actions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel.setBounds(20, 72, 973, 136);
+        panel.setBounds(10, 87, 983, 136);
         getContentPane().add(panel);
         panel.setLayout(new GridLayout(0, 2, 0, 0));
 
@@ -53,12 +57,12 @@ public class MainMenu extends JFrame {
         lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
         lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 24));
         lblNewLabel_1.setBackground(new Color(0, 153, 255));
-        lblNewLabel_1.setBounds(10, 10, 983, 52);
+        lblNewLabel_1.setBounds(10, 24, 983, 52);
         getContentPane().add(lblNewLabel_1);
                 
         JPanel panel_1 = new JPanel();
         panel_1.setBorder(new TitledBorder(null, "Skier actions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        panel_1.setBounds(20, 218, 973, 136);
+        panel_1.setBounds(10, 233, 983, 136);
         getContentPane().add(panel_1);
         panel_1.setLayout(new GridLayout(0, 2, 0, 0));
         
@@ -77,7 +81,7 @@ public class MainMenu extends JFrame {
 	    
 	    JPanel panel_1_1 = new JPanel();
 	    panel_1_1.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Lesson Actions", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-	    panel_1_1.setBounds(20, 365, 973, 136);
+	    panel_1_1.setBounds(10, 380, 981, 136);
 	    getContentPane().add(panel_1_1);
 	    panel_1_1.setLayout(new GridLayout(0, 2, 0, 0));
 	    
@@ -89,25 +93,32 @@ public class MainMenu extends JFrame {
 	    btnAddLesson.setFont(new Font("Tahoma", Font.PLAIN, 14));
 	    panel_1_1.add(btnAddLesson);
 	    
-	    JButton btnSearchLesson = new JButton("Search a lesson");
-	    btnSearchLesson.setFont(new Font("Tahoma", Font.PLAIN, 14));
-	    panel_1_1.add(btnSearchLesson);
+	    JLabel lblNewLabel = new JLabel("To consult the lessons, go to the section \"search an instructor\"");
+	    lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+	    lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+	    panel_1_1.add(lblNewLabel);
+	    
+	    
 	    btnAddInstructor.addActionListener(e ->{
 	    	openFrame(new AddAnInstructor());
 	    	dispose();
 	    });
+	    
+	    ClockElement.create(this);
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 MainMenu frame = new MainMenu();
+                
                 frame.setVisible(true);
             }
         });
     }
     
     private void openFrame(JFrame frame) {
+    	ClockElement.create(frame);
         frame.setVisible(true);
     }
 }

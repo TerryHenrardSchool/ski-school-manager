@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public class LessonDAO extends DAO<Lesson>{
     		VALUES (?, ?, ?, ?, ?)
 		""";
 	    try (PreparedStatement ps = connection.prepareStatement(query)) {
-	        ps.setDate(1, Date.valueOf(lesson.getDate().toLocalDate()));
+	        ps.setTimestamp(1, Timestamp.valueOf(lesson.getDate()));
 	        ps.setInt(2, lesson.getLocation().getId());
 	        ps.setInt(3, 21);
 	        ps.setInt(4, lesson.getInstructor().getId());
@@ -52,11 +53,35 @@ public class LessonDAO extends DAO<Lesson>{
 	    }
 	}
 
-
 	@Override
 	public boolean delete(int id) {
-		return false; // TODO
+	    String sqlDeleteBookings = """
+	        DELETE FROM bookings
+	        WHERE lesson_id = ?
+	    """;
+	    
+	    String sqlDeleteLesson = """
+	        DELETE FROM lessons
+	        WHERE lesson_id = ?
+	    """;
+
+	    try (
+	        PreparedStatement pstmtDeleteBookings = connection.prepareStatement(sqlDeleteBookings);
+	        PreparedStatement pstmtDeleteLesson = connection.prepareStatement(sqlDeleteLesson)
+	    ) {
+	        pstmtDeleteBookings.setInt(1, id);
+	        pstmtDeleteBookings.executeUpdate();
+
+	        pstmtDeleteLesson.setInt(1, id);
+	        int affectedRows = pstmtDeleteLesson.executeUpdate();
+
+	        return affectedRows > 0;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
 	}
+
 
 	@Override
 	public boolean update(Lesson obj) {
@@ -98,7 +123,6 @@ public class LessonDAO extends DAO<Lesson>{
 	        ORDER BY l.lesson_id
 	    """;
 
-	    List<Lesson> lessons = new ArrayList<>();
 	    Map<Integer, Lesson> lessonMap = new HashMap<>();
 
 	    try (ResultSet rs = connection.prepareStatement(sql).executeQuery()) {
@@ -128,6 +152,7 @@ public class LessonDAO extends DAO<Lesson>{
 	                maxAgeOptional,
 	                rs.getInt("min_bookings"),
 	                rs.getInt("max_bookings"),
+	                rs.getBoolean("is_private"),
 	                accreditation
 	            );
 
@@ -156,7 +181,6 @@ public class LessonDAO extends DAO<Lesson>{
 	                    location.getName()
 	                );
 	                lessonMap.put(lessonId, lesson);
-	                lessons.add(lesson);
 	            }
 
 	            lessonType.setAccreditation(accreditation);
@@ -168,7 +192,7 @@ public class LessonDAO extends DAO<Lesson>{
 	        e.printStackTrace();
 	    }
 
-	    return lessons;
+	    return lessonMap.values().stream().toList();
 	}
 	
 	public List<Lesson> findAll(LocalDate date) {
@@ -197,7 +221,6 @@ public class LessonDAO extends DAO<Lesson>{
 	        ORDER BY l.lesson_id
 	    """;
 
-	    List<Lesson> lessons = new ArrayList<>();
 	    Map<Integer, Lesson> lessonMap = new HashMap<>();
 	    
 	    try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -230,6 +253,7 @@ public class LessonDAO extends DAO<Lesson>{
 	                maxAgeOptional,
 	                rs.getInt("min_bookings"),
 	                rs.getInt("max_bookings"),
+	                rs.getBoolean("is_private"),
 	                accreditation
 	            );
 
@@ -258,7 +282,6 @@ public class LessonDAO extends DAO<Lesson>{
 	                    location.getName()
 	                );
 	                lessonMap.put(lessonId, lesson);
-	                lessons.add(lesson);
 	            }
 
 	            lessonType.setAccreditation(accreditation);
@@ -270,7 +293,7 @@ public class LessonDAO extends DAO<Lesson>{
 	        e.printStackTrace();
 	    }
 
-	    return lessons;
+	    return lessonMap.values().stream().toList();
 	}
 	
 	private void loadLessonBookings(Lesson lesson) throws SQLException {
@@ -296,13 +319,14 @@ public class LessonDAO extends DAO<Lesson>{
 	        while (rs.next()) {
 	        	Booking booking = new Booking(
         			rs.getInt("booking_id"),
-        			rs.getDate("booking_date").toLocalDate().atStartOfDay(),
+        			rs.getTimestamp("booking_date").toLocalDateTime(),
         			rs.getBoolean("is_insured"),
         			rs.getInt("period_id"),
         			rs.getDate("start_date").toLocalDate(),
         			rs.getDate("end_date").toLocalDate(),
         			rs.getBoolean("is_vacation"),
         			rs.getString("name"),
+        			lesson,
         			new Skier(
     					rs.getInt("skier_id_1"),
     					rs.getString("last_name"),
