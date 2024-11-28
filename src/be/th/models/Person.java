@@ -45,7 +45,7 @@ public abstract class Person implements Serializable {
     private String email;
     
     // References
-    private Address address;
+    private final Address address;
 
     // Constructor
     public Person(
