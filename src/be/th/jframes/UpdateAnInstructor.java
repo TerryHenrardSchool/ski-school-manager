@@ -29,7 +29,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
 import java.awt.event.ActionListener;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.awt.event.ActionEvent;
 
 public class UpdateAnInstructor extends JFrame {
@@ -225,7 +223,7 @@ public class UpdateAnInstructor extends JFrame {
 		lblAccreditation.setBounds(10, 292, 114, 31);
 		panel.add(lblAccreditation);
 		
-		JLabel lblNewLabel_1 = new JLabel("Updating " + instructorToUpdate.getLastnameFormattedForDisplay() +  " " + instructorToUpdate.getFirstNameFormattedForDisplay() + " information");
+		JLabel lblNewLabel_1 = new JLabel("Updating " + instructorToUpdate.getFullNameFormattedForDisplay() + " information");
 		lblNewLabel_1.setFont(FontStyles.TITLE);
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_1.setBackground(new Color(0, 153, 255));
@@ -347,7 +345,7 @@ public class UpdateAnInstructor extends JFrame {
 	private void displaySuccessToUpdateMessage(Instructor instructor) {
 		JOptionPane.showMessageDialog(
     		null, 
-    		instructor.getLastnameFormattedForDisplay() + " " + instructor.getFirstNameFormattedForDisplay() + " successfully updated.", 
+    		instructor.getFullNameFormattedForDisplay() + " successfully updated.", 
     		"Success", 
     		JOptionPane.PLAIN_MESSAGE
 		);

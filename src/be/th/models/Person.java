@@ -1,14 +1,9 @@
 package be.th.models;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import be.th.dao.DatabaseConstant;
 import be.th.formatters.DatabaseFormatter;
@@ -17,11 +12,9 @@ import be.th.validators.DateValidator;
 import be.th.validators.IntegerValidator;
 import be.th.validators.StringValidator;
 
-public abstract class Person implements Serializable {
+public abstract class Person {
 	
 	// Static constant attributes
-	private static final long serialVersionUID = -6721217695491429434L;
-	
     private final static String DATE_PATTERN = "YYYY-MM-DD";
     
     private final static LocalDate MIN_VALID_BIRTHDATE = LocalDate.of(1900, 1, 1);
@@ -29,7 +22,6 @@ public abstract class Person implements Serializable {
     
     private final static int MIN_AGE = 4;
     
-    private final static String SPLIT_LAST_NAME_AND_FIRST_NAME_REGEX = "^([A-Z\\s]+)\\s+([A-Z][a-zA-Z\\s]+)$";
 	private final static String EMAIL_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
 	private final static String NAMES_REGEX = "^[a-zA-ZÀ-ÖØ-öø-ÿ\\s'\\-,.]{2,}$";
 	private final static String PHONE_NUMBER_REGEX = 
@@ -44,8 +36,8 @@ public abstract class Person implements Serializable {
     private String phoneNumber;
     private String email;
     
-    // References
-    private final Address address;
+    // References 
+    private final Address address; // Composition
 
     // Constructor
     public Person(
@@ -211,45 +203,23 @@ public abstract class Person implements Serializable {
         this.email = email;
     }
     
-    // Static Methods
-    public static Map<String, String> splitLastNameAndFirstName(String fullName) {
-        if (fullName == null || fullName.isBlank()) {
-            throw new IllegalArgumentException("The fullName must have value.");
-        }
-
-        Pattern pattern = Pattern.compile(SPLIT_LAST_NAME_AND_FIRST_NAME_REGEX);
-        Matcher matcher = pattern.matcher(fullName);
-
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("The format of the full name must be 'LASTNAME Firstname'");
-        }
-
-        String lastName = matcher.group(1).trim();
-        String firstName = matcher.group(2).trim();
-
-        Map<String, String> nameParts = new HashMap<>();
-        nameParts.put("lastName", lastName);
-        nameParts.put("firstName", firstName);
-
-        return nameParts;
+    //Private methods
+    private String getFirstNameFormattedForDisplay() {
+    	return StringFormatter.firstToUpper(firstName);	
     }
     
-    // Methods
-    public static boolean hasRequiredMinimumAge(LocalDate birthDate) {
-        LocalDate today = LocalDate.now();
-        java.time.Period age = java.time.Period.between(birthDate, today);
-
-        return age.getYears() >= MIN_AGE;
+    private String getLastnameFormattedForDisplay() {
+    	return lastName.toUpperCase();
     }
     
-    public String getFirstNameFormattedForDisplay() {
-		return StringFormatter.firstToUpper(firstName);	
+    private boolean hasRequiredMinimumAge(LocalDate birthDate) {
+    	LocalDate today = LocalDate.now();
+    	java.time.Period age = java.time.Period.between(birthDate, today);
+    	
+    	return age.getYears() >= MIN_AGE;
     }
     
-    public String getLastnameFormattedForDisplay() {
-		return lastName.toUpperCase();
-    }
-    
+    // Public methods
 	public String getFullNameFormattedForDisplay() {
 		return getLastnameFormattedForDisplay() + " " + getFirstNameFormattedForDisplay();
 	}
@@ -258,7 +228,7 @@ public abstract class Person implements Serializable {
 		return LocalDate.now().getYear() - getDateOfBirth().getYear();
 	}
 	
-	public String getAgeFormattedForDisplay() {
+	public String getCalculatedAgeFormattedForDisplay() {
 		int age = calculateAge();
 		return age + (age > 1 ? " years" : " year");
 	}

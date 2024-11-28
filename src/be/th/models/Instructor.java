@@ -3,11 +3,8 @@ package be.th.models;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.time.Year;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,9 +14,6 @@ import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
 
 public class Instructor extends Person {
-	
-	// Static attributes
-	private static final long serialVersionUID = -5724827101822519690L;
 	
 	// References
 	private Set<Accreditation> accreditations;
@@ -57,7 +51,7 @@ public class Instructor extends Person {
 		String phoneNumber, 
 		String email,
 		Set<Accreditation> accreditations
-		) {
+	) {
     	this(0, lastName, firstName, dateOfBirth, city, postcode, streetName, streetNumber, phoneNumber, email, accreditations);
     }
     
@@ -95,53 +89,11 @@ public class Instructor extends Person {
         	throw new IllegalArgumentException("Accreditations must have at least one value.");
         }
     	
-    	for(Accreditation accreditation: accreditations) {
-        	addAccreditation(accreditation);
-        }
-    }
-
-    // Methods
-	public void clearAccreditations() {
-		accreditations.clear();
-	}
-	public Lesson findLessonById(int lessonId) {
-		if (!IntegerValidator.isPositiveOrEqualToZero(lessonId)) {
-			throw new IllegalArgumentException("Lesson ID must be positive.");
-		}
-
-		return lessons.stream()
-			.filter(lesson -> lesson.getId() == lessonId)
-			.findFirst()
-			.orElse(null);
-	}
-	
-    public boolean removeAccreditation(Accreditation accreditation) {
-        if (!ObjectValidator.hasValue(accreditation)) {
-            throw new IllegalArgumentException("Accreditation must have value");
-        }
-        return accreditations.remove(accreditation);
-    }
-
-    public boolean addAccreditation(Accreditation accreditation) {
-    	if (!ObjectValidator.hasValue(accreditation)) {
-    		throw new IllegalArgumentException("Accreditation must have value");
-    	}
-    	
-		if (accreditations.contains(accreditation)) {
-			throw new IllegalArgumentException("Accreditation already exists.");
-		}
-    	
-    	return accreditations.add(accreditation); 
+		accreditations.forEach(accreditation -> addAccreditation(accreditation));
     }
     
-    public boolean removeLesson(Lesson lesson) {
-		if (!ObjectValidator.hasValue(lesson)) {
-			throw new IllegalArgumentException("Lesson must have value");
-		}
-		return lessons.remove(lesson);
-    }
-    
-	public boolean isLessonSlotFree(Lesson newLesson) {
+    // Private methods
+    private boolean isLessonSlotFree(Lesson newLesson) {
 		LocalDateTime lessonDate = newLesson.getDate();
 		
 		return lessons.stream().noneMatch(instructorLesson -> {
@@ -149,53 +101,11 @@ public class Instructor extends Person {
 		});
 	}
     
-    public boolean addLesson(Lesson lesson) {
-        if (!ObjectValidator.hasValue(lesson)) {
-        	throw new IllegalArgumentException("Lesson must have value");
-        }
-        
-		if (!isLessonSlotFree(lesson)) {
-			throw new IllegalArgumentException("Instructor already has a lesson for this date and time.");
-		}
-        
-		if (lessons.contains(lesson)) {
-			throw new IllegalArgumentException("Lesson already exists.");
-        }
-        return lessons.add(lesson);
-    }
-    
-    public boolean isAccreditate(Accreditation accreditationToCheck) {
-        return accreditations.stream().anyMatch(accreditation -> accreditation.equals(accreditationToCheck));
-    }
-    
-    public boolean isAvailable(LocalDateTime dateTime) {
+    private boolean isAvailable(LocalDateTime dateTime) {
     	return lessons.stream().noneMatch(lesson -> lesson.getDate().equals(dateTime));
     }
     
-    public boolean isEligible(Accreditation accreditation, LocalDateTime lessonStartTime) {
-        return isAccreditate(accreditation) && 
-    		   isAvailable(lessonStartTime);
-    }
-
-    public boolean hasScheduledLesson() {
-        return !lessons.isEmpty();
-    }
-    
-    public double calculateGeneratedRevenue() {
-        return calculateTotalRevenue(lessons);
-    }
-	
-    public double calculateGeneratedRevenueForCurrentMonthOfCurrentYear() {
-        LocalDate now = LocalDate.now();
-        Month currentMonth = now.getMonth();
-        int currentYear = now.getYear();
-
-        return calculateTotalRevenue(getLessons().stream()
-            .filter(lesson -> isLessonInMonth(lesson, currentMonth) && isLessonInYear(lesson, currentYear))
-            .toList());
-    }
-
-	private boolean isLessonInMonth(Lesson lesson, Month month) {
+    private boolean isLessonInMonth(Lesson lesson, Month month) {
 	    return lesson.getDate().getMonth().equals(month);
 	}
 	
@@ -208,12 +118,88 @@ public class Instructor extends Person {
             .mapToDouble(this::calculateTotalRevenueForLesson)
             .sum();
     }
-
+	
 	private double calculateTotalRevenueForLesson(Lesson lesson) {
 	    return lesson.getBookings().stream()
 	        .mapToDouble(Booking::calculatePrice)
 	        .sum();
 	}
+
+    // Public methods
+	public void clearAccreditations() {
+		accreditations.clear();
+	}
+	
+	public boolean removeAccreditation(Accreditation accreditation) {
+		if (!ObjectValidator.hasValue(accreditation)) {
+			throw new IllegalArgumentException("Accreditation must have value");
+		}
+		
+		return accreditations.remove(accreditation);
+	}
+	
+	public boolean addAccreditation(Accreditation accreditation) {
+		if (!ObjectValidator.hasValue(accreditation)) {
+			throw new IllegalArgumentException("Accreditation must have value");
+		}
+		
+		return accreditations.add(accreditation); 
+	}
+	
+	public boolean isAccreditate(Accreditation accreditationToCheck) {
+        return accreditations.stream().anyMatch(accreditation -> accreditation.equals(accreditationToCheck));
+    }
+	
+	public Lesson findLessonById(int lessonId) {
+		if (!IntegerValidator.isPositiveOrEqualToZero(lessonId)) {
+			throw new IllegalArgumentException("Lesson ID must be positive.");
+		}
+
+		return lessons.stream()
+			.filter(lesson -> lesson.getId() == lessonId)
+			.findFirst()
+			.orElse(null);
+	}
+	
+    public boolean removeLesson(Lesson lesson) {
+		if (!ObjectValidator.hasValue(lesson)) {
+			throw new IllegalArgumentException("Lesson must have value");
+		}
+		
+		return lessons.remove(lesson);
+    }
+    
+    public boolean addLesson(Lesson lesson) {
+        if (!ObjectValidator.hasValue(lesson)) {
+        	throw new IllegalArgumentException("Lesson must have value");
+        }
+        
+		if (!isLessonSlotFree(lesson)) {
+			throw new IllegalArgumentException("Instructor already has a lesson for this date and time.");
+		}
+		
+        return lessons.add(lesson);
+    }
+    
+    public boolean isEligible(Accreditation accreditation, LocalDateTime lessonStartTime) {
+        return isAccreditate(accreditation) && isAvailable(lessonStartTime);
+    }
+    
+    public double calculateGeneratedRevenue() {
+        return calculateTotalRevenue(lessons);
+    }
+	
+    public double calculateGeneratedRevenueForCurrentMonthOfCurrentYear() {
+        LocalDate now = LocalDate.now();
+        Month currentMonth = now.getMonth();
+        int currentYear = now.getYear();
+
+        return calculateTotalRevenue(
+    		getLessons().stream()
+            .filter(lesson -> isLessonInMonth(lesson, currentMonth) && isLessonInYear(lesson, currentYear))
+            .toList()
+        );
+    }
 	
     // Database methods
     public boolean insertIntoDatabase(InstructorDAO instructorDAO) {

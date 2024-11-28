@@ -1,20 +1,14 @@
 package be.th.jframes;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.awt.Font;
 import java.awt.Color;
-import java.awt.EventQueue;
 
 import javax.swing.border.TitledBorder;
 
 import be.th.styles.FontStyles;
 
 import java.awt.GridLayout;
-import java.awt.Label;
 
 import javax.swing.border.EtchedBorder;
 

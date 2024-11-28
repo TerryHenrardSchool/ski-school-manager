@@ -1,7 +1,5 @@
 package be.th.jframes;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -12,7 +10,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -21,7 +18,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.swing.SwingConstants;
-import javax.swing.Timer;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -40,11 +36,9 @@ import be.th.dao.LessonDAO;
 import be.th.dao.LessonTypeDAO;
 import be.th.dao.LocationDAO;
 import be.th.dao.PeriodDAO;
-import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
 import be.th.formatters.NumericFormatter;
 import be.th.models.Booking;
-import be.th.models.Instructor;
 import be.th.models.Lesson;
 import be.th.models.LessonType;
 import be.th.models.Location;
@@ -57,12 +51,9 @@ import be.th.validators.ObjectValidator;
 import be.th.validators.StringValidator;
 
 import javax.swing.JButton;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.security.KeyStore.PrivateKeyEntry;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.awt.event.ActionEvent;
