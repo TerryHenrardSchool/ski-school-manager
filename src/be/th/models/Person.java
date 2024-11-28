@@ -27,6 +27,8 @@ public abstract class Person implements Serializable {
     private final static LocalDate MIN_VALID_BIRTHDATE = LocalDate.of(1900, 1, 1);
     private final static LocalDate MAX_VALID_BIRTHDATE = LocalDate.now();
     
+    private final static int MIN_AGE = 4;
+    
     private final static String SPLIT_LAST_NAME_AND_FIRST_NAME_REGEX = "^([A-Z\\s]+)\\s+([A-Z][a-zA-Z\\s]+)$";
 	private final static String EMAIL_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
 	private final static String NAMES_REGEX = "^[a-zA-ZÀ-ÖØ-öø-ÿ\\s'\\-,.]{2,}$";
@@ -153,6 +155,10 @@ public abstract class Person implements Serializable {
 				+ " and " + DatabaseFormatter.toBelgianFormat(MAX_VALID_BIRTHDATE)
     		);        
         }
+        
+		if (!hasRequiredMinimumAge(dateOfBirth)) {
+			throw new IllegalArgumentException("The person must be at least " + MIN_AGE + " years old.");
+		}
         this.dateOfBirth = dateOfBirth;
     }
     
@@ -168,8 +174,19 @@ public abstract class Person implements Serializable {
     		);
     	}
     	
-    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
-    	this.dateOfBirth = LocalDate.parse(dateOfBirth, formatter);
+    	LocalDate dateOfBirthParsed = null;
+    	try {
+    		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
+    		dateOfBirthParsed = LocalDate.parse(dateOfBirth, formatter);    		
+    	} catch (DateTimeParseException ex) {
+    		throw new IllegalArgumentException("The birthdate format is invalid. Please enter a valid date in the format " + DATE_PATTERN);
+    	}
+    	
+    	if (!hasRequiredMinimumAge(dateOfBirthParsed)) {
+			throw new IllegalArgumentException("The person must be at least " + MIN_AGE + " years old.");
+		}
+    	
+    	this.dateOfBirth = dateOfBirthParsed;
     }
 
     public void setPhoneNumber(String phoneNumber) {
@@ -217,7 +234,14 @@ public abstract class Person implements Serializable {
         return nameParts;
     }
     
-    // Methods    
+    // Methods
+    public static boolean hasRequiredMinimumAge(LocalDate birthDate) {
+        LocalDate today = LocalDate.now();
+        java.time.Period age = java.time.Period.between(birthDate, today);
+
+        return age.getYears() >= MIN_AGE;
+    }
+    
     public String getFirstNameFormattedForDisplay() {
 		return StringFormatter.firstToUpper(firstName);	
     }
