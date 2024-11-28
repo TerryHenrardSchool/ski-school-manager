@@ -31,9 +31,7 @@ public class Address {
     	setStreetNumber(streetNumber);
     }
     
-    public Address(String address) {
-        this(destructureFormattedAddress(address));
-    }
+    
 
     private Address(Map<String, String> addressMap) {
         this(
@@ -107,23 +105,7 @@ public class Address {
     }
     
     // Static methods
-    public static Map<String, String> destructureFormattedAddress(String address) {
-        Pattern pattern = Pattern.compile(DESTRUCTUR_FORMATTED_ADDRESS_REGEX);
-        Matcher matcher = pattern.matcher(address);
-        
-        Map<String, String> addressComponents = new HashMap<>();
-        
-        if (matcher.matches()) {
-            addressComponents.put("streetName", matcher.group(1).trim());
-            addressComponents.put("streetNumber", matcher.group(2).trim());
-            addressComponents.put("city", matcher.group(3).trim());
-            addressComponents.put("postcode", matcher.group(4).trim());
-        } else {
-            throw new IllegalArgumentException("Address does not match the expected format. E.g. 'Square Jules Hiérnaux 5, 6000 Charleroi'.");
-        }
-        
-        return addressComponents;
-    }
+
 
     
     // Methods
