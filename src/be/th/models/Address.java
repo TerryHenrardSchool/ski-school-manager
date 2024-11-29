@@ -1,10 +1,6 @@
 package be.th.models;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import be.th.dao.DatabaseConstant;
 import be.th.formatters.StringFormatter;
@@ -13,7 +9,6 @@ import be.th.validators.StringValidator;
 public class Address {
 	
 	// Static constant attributes
-	private final static String DESTRUCTUR_FORMATTED_ADDRESS_REGEX = "^(.+?)\\s+(\\d+),\\s+(.+)\\s+(\\d{4})$";
 	private final static String STREET_NUMBER_REGEX = "^[0-9]{1,4}";
 	private final static String POSTCODE_REGEX = "^[0-9]{4}$";
 	
@@ -29,17 +24,6 @@ public class Address {
     	setPostcode(postcode);
     	setStreetName(streetName);
     	setStreetNumber(streetNumber);
-    }
-    
-    
-
-    private Address(Map<String, String> addressMap) {
-        this(
-            addressMap.get("city"),
-            addressMap.get("postcode"),
-            addressMap.get("streetName"),
-            addressMap.get("streetNumber")
-        );
     }
 
     // Getters
@@ -103,10 +87,6 @@ public class Address {
         }
         this.streetNumber = streetNumber;
     }
-    
-    // Static methods
-
-
     
     // Methods
     public String getAddressFormattedForDisplay() {

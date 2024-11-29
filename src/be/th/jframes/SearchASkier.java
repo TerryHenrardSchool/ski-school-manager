@@ -3,7 +3,6 @@ package be.th.jframes;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -28,10 +27,7 @@ import be.th.dao.DAOFactory;
 import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
 import be.th.formatters.NumericFormatter;
-import be.th.models.Address;
 import be.th.models.Booking;
-import be.th.models.Instructor;
-import be.th.models.Person;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
 import be.th.styles.ColorStyles;
@@ -50,20 +46,15 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.security.KeyStore.PrivateKeyEntry;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.awt.event.ActionEvent;
 import javax.swing.border.EtchedBorder;
 import com.toedter.calendar.JDateChooser;
-import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
-import javax.swing.JSpinner;
 
 public class SearchASkier extends JFrame {
 
@@ -456,8 +447,7 @@ public class SearchASkier extends JFrame {
 		JOptionPane.showMessageDialog(
 			null, 
 			"Error while deleting " + 
-			selectedSkier.getLastnameFormattedForDisplay() + " " + 
-			selectedSkier.getFirstNameFormattedForDisplay() + 
+			selectedSkier.getFullNameFormattedForDisplay() + 
 			".Please, try again later."
 		);
 	}
@@ -607,7 +597,7 @@ public class SearchASkier extends JFrame {
 			skier.getId(),
 			skier.getFullNameFormattedForDisplay(),
 			DatabaseFormatter.toBelgianFormat(skier.getDateOfBirth()),
-			skier.getAgeFormattedForDisplay(),
+			skier.getCalculatedAgeFormattedForDisplay(),
 			skier.getAddress().getAddressFormattedForDisplay(),
 			skier.getPhoneNumber(),
 			skier.getEmail(),
@@ -827,8 +817,7 @@ public class SearchASkier extends JFrame {
 		
 		final int userResponse = askConfirmationBeforeDeletion(
 			"This is a critical operation. Are you sure that you want to delete " + 
-			selectedSkier.getLastnameFormattedForDisplay() + " " + 
-			selectedSkier.getFirstNameFormattedForDisplay()
+			selectedSkier.getFullNameFormattedForDisplay()
 		);
 		if (userResponse != 0) {
 			return;
@@ -899,8 +888,7 @@ public class SearchASkier extends JFrame {
 		
 		final int userResponse = askConfirmationBeforeDeletion(
 			"This is a critical operation. Are you sure that you want to delete " + 
-			selectedSkier.getLastnameFormattedForDisplay() + " " + 
-			selectedSkier.getFirstNameFormattedForDisplay() + "'s booking?"
+			selectedSkier.getFullNameFormattedForDisplay() + "'s booking?"
 		);
 		if (userResponse != 0) {
 			return;

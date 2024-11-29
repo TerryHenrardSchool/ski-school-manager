@@ -13,7 +13,6 @@ import be.th.dao.DAO;
 import be.th.dao.DAOFactory;
 import be.th.dao.SkierDAO;
 import be.th.formatters.DatabaseFormatter;
-import be.th.models.Instructor;
 import be.th.models.Skier;
 import be.th.parsers.DateParser;
 import be.th.styles.ColorStyles;
@@ -22,10 +21,7 @@ import be.th.styles.FontStyles;
 import java.awt.Color;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.time.LocalDate;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.awt.event.ActionEvent;
 
 public class UpdateASkier extends JFrame {
@@ -195,7 +191,7 @@ public class UpdateASkier extends JFrame {
 		updateBtn.setBounds(304, 360, 154, 51);
 		panel.add(updateBtn);
 		
-		JLabel lblNewLabel_1 = new JLabel("Updating " + skierToUpdate.getLastnameFormattedForDisplay() +  " " + skierToUpdate.getFirstNameFormattedForDisplay() + " information");
+		JLabel lblNewLabel_1 = new JLabel("Updating " + skierToUpdate.getFullNameFormattedForDisplay() + " information");
 		lblNewLabel_1.setFont(FontStyles.TITLE);
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel_1.setBackground(new Color(0, 153, 255));
@@ -256,7 +252,7 @@ public class UpdateASkier extends JFrame {
 	private void displaySuccessToUpdateMessage(Skier skier) {
 		JOptionPane.showMessageDialog(
     		null, 
-    		skier.getLastnameFormattedForDisplay() + " " + skier.getFirstNameFormattedForDisplay() + " successfully updated.", 
+    		skier.getFullNameFormattedForDisplay() + " successfully updated.", 
     		"Success", 
     		JOptionPane.PLAIN_MESSAGE
 		);

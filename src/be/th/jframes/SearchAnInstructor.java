@@ -328,8 +328,7 @@ public class SearchAnInstructor extends JFrame {
 	private void confirmDeletion() {
 		JOptionPane.showMessageDialog(
 			null, 
-			selectedInstructor.getLastnameFormattedForDisplay() + " " + 
-			selectedInstructor.getFirstNameFormattedForDisplay() + " has been successfully deleted.",
+			selectedInstructor.getFullNameFormattedForDisplay() + " has been successfully deleted.",
 			"Success",
 			JOptionPane.WARNING_MESSAGE
 		);
@@ -339,8 +338,7 @@ public class SearchAnInstructor extends JFrame {
 		return JOptionPane.showConfirmDialog(
 			null, 
 			"This is a critical operation. Are you sure that you want to delete " + 
-			selectedInstructor.getLastnameFormattedForDisplay() + " " + 
-			selectedInstructor.getFirstNameFormattedForDisplay(),
+			selectedInstructor.getFullNameFormattedForDisplay(),
 			"Are you sure?",
 			JOptionPane.YES_NO_OPTION,
 			JOptionPane.WARNING_MESSAGE
@@ -351,8 +349,7 @@ public class SearchAnInstructor extends JFrame {
 		JOptionPane.showMessageDialog(
 			null, 
 			"Error while deleting " + 
-			selectedInstructor.getLastnameFormattedForDisplay() + " " + 
-			selectedInstructor.getFirstNameFormattedForDisplay() + 
+			selectedInstructor.getFullNameFormattedForDisplay() + 
 			".Please, try again later."
 		);
 	}
@@ -457,7 +454,7 @@ public class SearchAnInstructor extends JFrame {
 			instructor.getId(),
 			instructor.getFullNameFormattedForDisplay(),
 			DatabaseFormatter.toBelgianFormat(instructor.getDateOfBirth()),
-			instructor.getAgeFormattedForDisplay(),
+			instructor.getCalculatedAgeFormattedForDisplay(),
 			instructor.getAddress().getAddressFormattedForDisplay(),
 			instructor.getPhoneNumber(),
 			instructor.getEmail(),

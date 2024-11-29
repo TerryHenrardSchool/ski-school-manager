@@ -1,28 +1,20 @@
 package be.th.models;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.IntToDoubleFunction;
 
 import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
-import be.th.dao.DatabaseConstant;
 import be.th.dao.LessonDAO;
 import be.th.validators.DateValidator;
-import be.th.validators.StringValidator;
 
-public class Lesson implements Serializable {
-
-    // Static attributes
-    private static final long serialVersionUID = 5815631340419350701L;
+public class Lesson {
 
     // Attributes
     private int id;
@@ -32,7 +24,6 @@ public class Lesson implements Serializable {
     Location location;
     LessonType lessonType;
     Instructor instructor;
-    // Secretary secretary;
     Set<Booking> bookings;
     
     // Constructor
@@ -137,8 +128,9 @@ public class Lesson implements Serializable {
 	public static List<Lesson> findAllAfterDateInDatabase(LocalDate date, LessonDAO lessonDAO) {
 		return lessonDAO.findAll(date);
 	}
-
-	public boolean isBookingWithinAllowedTimeframe(Booking booking) {
+	
+	// Private methods
+	private boolean isBookingWithinAllowedTimeframe(Booking booking) {
 	    if (!getLessonType().getIsPrivate()) {
 	        return true;
 	    }
@@ -150,6 +142,11 @@ public class Lesson implements Serializable {
 	    }
 	}
 	
+	private boolean isAvailable() {
+		return bookings.size() < lessonType.getMaxBookings();
+	}
+	
+	// Public methods
 	public boolean addBooking(Booking booking) {
 		if (!ObjectValidator.hasValue(booking)) {
 			throw new IllegalArgumentException("Booking must have value.");
@@ -161,10 +158,6 @@ public class Lesson implements Serializable {
 		        + "Private lessons during school vacation must be booked at least 1 week in advance and "
 		        + "private lessons during non-school vacation must be booked at least 1 month in advance."
 		    );
-		}
-		
-		if (bookings.contains(booking)) {
-			return false;
 		}
 		
 		if (!isAvailable()) {
@@ -182,10 +175,7 @@ public class Lesson implements Serializable {
 		if (!ObjectValidator.hasValue(booking)) {
 			throw new IllegalArgumentException("Booking must have value.");
 		}
-
-		if (!bookings.contains(booking)) {
-			throw new IllegalArgumentException("Booking does not exist.");
-		}
+		
 		return bookings.remove(booking);
 	}
 	
@@ -207,10 +197,6 @@ public class Lesson implements Serializable {
 
 	public boolean isFullyBooked() {
 		return bookings.size() >= lessonType.getMaxBookings();
-	}
-
-	public boolean isAvailable() {
-		return bookings.size() < lessonType.getMaxBookings();
 	}
 	
 	public long calculateDaysUntilStartDate() {

@@ -26,7 +26,6 @@ import java.awt.Component;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,9 +34,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.awt.event.ActionEvent;
 import java.awt.Font;
-import javax.swing.JList;
-import javax.swing.AbstractListModel;
-import javax.swing.ListSelectionModel;
 import javax.swing.JCheckBox;
 
 public class AddAnInstructor extends JFrame {

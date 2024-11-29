@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +19,6 @@ import be.th.models.Instructor;
 import be.th.models.Lesson;
 import be.th.models.LessonType;
 import be.th.models.Skier;
-import be.th.validators.IntegerValidator;
 
 public class InstructorDAO extends DAO<Instructor> {
 

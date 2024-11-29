@@ -2,8 +2,6 @@ package be.th.models;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -14,9 +12,6 @@ import be.th.dao.SkierDAO;
 import be.th.validators.ObjectValidator;
 
 public class Skier extends Person {
-
-	// Static attributes
-	private static final long serialVersionUID = -342070697036823773L;
 	
 	// References
 	private Set<Booking> bookings;
@@ -78,31 +73,35 @@ public class Skier extends Person {
 		return skierDAO.find(id);
 	}
 
-    // Methods
+    // Public methods
     public double calculateTotalSpent() {
     	return bookings.stream().mapToDouble(Booking::calculatePrice).sum();
     }
     
     public boolean isBookingSlotFree(Booking newBooking) {
         LocalDateTime newBookingDate = newBooking.getLesson().getDate();
-        
-        return bookings.stream().noneMatch(booking -> {        	
-        	return booking.getLesson().getDate().equals(newBookingDate);
-        });
+
+        return bookings
+    		.stream()
+    		.noneMatch(booking -> booking.getLesson().getDate().equals(newBookingDate));
     }
+
     
     public boolean isFullyBookedDay(LocalDateTime lessonDateTime) {
-        return bookings.stream().anyMatch(skierBooking -> {
-            LocalDateTime skierBookingDateTime = skierBooking.getLesson().getDate();
-            LocalDate skierBookingDate = skierBookingDateTime.toLocalDate();
-            LocalDate lessonDate = lessonDateTime.toLocalDate();
-            
-            return 
-            	skierBookingDate.equals(lessonDate) && 
-        		skierBookingDateTime.getHour() != lessonDateTime.getHour();
-        });
+        LocalDate lessonDate = lessonDateTime.toLocalDate();
+        int lessonHour = lessonDateTime.getHour();
+
+        return bookings
+    		.stream()
+    		.anyMatch(booking -> {
+				LocalDateTime bookingDateTime = booking.getLesson().getDate();
+				LocalDate bookingDate = bookingDateTime.toLocalDate();
+				int bookingHour = bookingDateTime.getHour();
+							
+				return bookingDate.equals(lessonDate) && bookingHour != lessonHour;
+    		});
     }
-	
+
 	public Booking findBookingById(int bookingId) {
 	    return bookings.stream()
 		    .filter(booking -> booking.getId() == bookingId)
@@ -112,7 +111,7 @@ public class Skier extends Person {
     
     public boolean hasValidAgeForLessonType(LessonType lessonType) {
         int age = super.calculateAge();
-        return lessonType.isAgeValid(age);
+        return lessonType.isValidAge(age);
     }
     
     public boolean hasBookingForLesson(Lesson lesson) {
@@ -128,10 +127,6 @@ public class Skier extends Person {
             throw new IllegalArgumentException("Skier already has a booking for this date and time.");
         }
 
-        if (bookings.contains(newBooking)) {
-            return false;
-        }
-
         return bookings.add(newBooking);
     }
 
@@ -140,16 +135,8 @@ public class Skier extends Person {
 			throw new IllegalArgumentException("Booking must have value.");
 		}
 		
-		if (!bookings.contains(booking)) {
-			return false;
-		}
-		
 		return bookings.remove(booking);
 	}
-	
-    public boolean hasScheduledLesson() {
-        return !bookings.isEmpty();
-    }
 
     //Override methods
     @Override

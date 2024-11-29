@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.sound.midi.VoiceStatus;
-
 import be.th.dao.DatabaseConstant;
 import be.th.dao.LessonTypeDAO;
 import be.th.validators.IntegerValidator;
@@ -109,6 +107,7 @@ public class LessonType {
         if (!IntegerValidator.isPositiveOrEqualToZero(id)) {
             throw new IllegalArgumentException("ID must be a positive integer. Negative values are not allowed.");
         }
+        
         this.id = id;
     }
     
@@ -120,6 +119,7 @@ public class LessonType {
         if(!StringValidator.isLengthSmallerOrEqual(level, DatabaseConstant.MAX_CHARACTERS)) {
             throw new IllegalArgumentException("Level length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
+        
         this.level = level;
     }
 
@@ -127,6 +127,7 @@ public class LessonType {
         if (!IntegerValidator.isGreaterOrEqual(price, MIN_PRICE)) {
             throw new IllegalArgumentException("Price must be a non-negative value. Negative values are not allowed.");
         }
+        
         this.price = price;
     }
 
@@ -138,6 +139,7 @@ public class LessonType {
         if(!StringValidator.isLengthSmallerOrEqual(level, DatabaseConstant.MAX_CHARACTERS)) {
             throw new IllegalArgumentException("Lesson type's name length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
+        
         this.name = name;
     }
     
@@ -149,6 +151,7 @@ public class LessonType {
         if(!StringValidator.isLengthSmallerOrEqual(ageCategoryName, DatabaseConstant.MAX_CHARACTERS)) {
             throw new IllegalArgumentException("Age category name's name length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
+        
         this.ageCategoryName = ageCategoryName;
     }
     
@@ -197,7 +200,7 @@ public class LessonType {
     }
     
     // Methods 
-    public boolean isAgeValid(int age) {
+    public boolean isValidAge(int age) {
         if (this.maxAge.isPresent()) {
             return age >= this.minAge && age <= this.maxAge.get();
         } else {
