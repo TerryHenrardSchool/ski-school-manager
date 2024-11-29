@@ -16,6 +16,7 @@ public class MainMenu extends JFrame {
     
     private static final long serialVersionUID = -639386033572169717L;
     
+    // Release 2.0.1 everything works fine
     public MainMenu() {
         setTitle("Ski School Manager");
         setSize(1017, 559);
