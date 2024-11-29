@@ -39,6 +39,7 @@ public class Accreditation {
     	if (!IntegerValidator.isPositiveOrEqualToZero(id)) {
             throw new IllegalArgumentException("ID must be positive or equals to 0.");
     	}
+    	
     	this.id = id;
     }
     
@@ -50,6 +51,7 @@ public class Accreditation {
         if(!StringValidator.isLengthSmallerOrEqual(sportType, DatabaseConstant.MAX_CHARACTERS)) {
             throw new IllegalArgumentException("Sport type's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
+        
         this.sportType = sportType;
     }
 
@@ -61,6 +63,7 @@ public class Accreditation {
         if(!StringValidator.isLengthSmallerOrEqual(ageCategory, DatabaseConstant.MAX_CHARACTERS)) {
             throw new IllegalArgumentException("Age category's length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
+        
         this.ageCategory = ageCategory;
     }
     

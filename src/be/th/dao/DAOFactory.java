@@ -9,7 +9,6 @@ import be.th.models.Lesson;
 import be.th.models.LessonType;
 import be.th.models.Location;
 import be.th.models.Period;
-import be.th.models.Secretary;
 import be.th.models.Skier;
 
 public class DAOFactory {
@@ -29,10 +28,6 @@ public class DAOFactory {
 	
 	public DAO<Instructor> getInstructorDAO(){
 		return new InstructorDAO(CONNECTION);
-	}
-	
-	public DAO<Secretary> getSecretaryDAO(){
-		return new SecretaryDAO(CONNECTION);
 	}
 	
 	public DAO<LessonType> getLessonTypeDAO(){

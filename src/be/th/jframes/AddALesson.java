@@ -14,8 +14,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.swing.SwingConstants;
@@ -35,36 +33,25 @@ import be.th.models.LessonType;
 import be.th.models.Location;
 import be.th.models.Period;
 import be.th.parsers.DateParser;
-import be.th.validators.ObjectValidator;
 
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.print.event.PrintJobAttributeEvent;
 import javax.swing.AbstractButton;
-import javax.swing.AbstractListModel;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
-import java.awt.Cursor;
-import javax.swing.DebugGraphics;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.JRadioButton;
-import javax.swing.JToggleButton;
-import javax.swing.JCheckBox;
 import com.toedter.calendar.JDateChooser;
 import javax.swing.JButton;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.awt.event.ActionEvent;
 
 public class AddALesson extends JFrame {
 
@@ -338,8 +325,7 @@ public class AddALesson extends JFrame {
 	
 	private String getInstructorFormattedNames(Instructor instructor) {
 		return 
-			instructor.getLastnameFormattedForDisplay() + " " + 
-			instructor.getFirstNameFormattedForDisplay() + " " + 
+			instructor.getFullNameFormattedForDisplay() + 
 			"(N° " + instructor.getId() + ')';
 	}
 	

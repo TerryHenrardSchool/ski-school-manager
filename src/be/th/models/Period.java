@@ -57,6 +57,7 @@ public class Period {
         if (!IntegerValidator.isPositiveOrEqualToZero(id)) {
             throw new IllegalArgumentException("ID must be a positive integer. Negative values are not allowed.");
         }
+        
         this.id = id;
     }
     
@@ -72,6 +73,7 @@ public class Period {
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("Start date must be before the end date.");
         }
+        
         this.startDate = startDate;
         this.endDate = endDate;
     }
@@ -91,6 +93,7 @@ public class Period {
         if(!StringValidator.isLengthSmallerOrEqual(name, DatabaseConstant.MAX_CHARACTERS)) {
             throw new IllegalArgumentException("Name length must be smaller than " + DatabaseConstant.MAX_CHARACTERS);
         }
+        
         this.name = name;
     }
     

@@ -18,8 +18,6 @@ import be.th.models.Booking;
 import be.th.models.Instructor;
 import be.th.models.Lesson;
 import be.th.models.LessonType;
-import be.th.models.Location;
-import be.th.models.Period;
 import be.th.models.Skier;
 
 public class SkierDAO extends DAO<Skier>{

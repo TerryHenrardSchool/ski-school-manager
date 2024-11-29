@@ -1,10 +1,6 @@
 package be.th.models;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import be.th.dao.DatabaseConstant;
 import be.th.formatters.StringFormatter;
@@ -13,11 +9,8 @@ import be.th.validators.StringValidator;
 public class Address {
 	
 	// Static constant attributes
-	private final static String DESTRUCTUR_FORMATTED_ADDRESS_REGEX = "^(.+?)\\s+(\\d+),\\s+(.+)\\s+(\\d{4})$";
-	
-	// Constant attributes
-	private final String STREET_NUMBER_REGEX = "^[0-9]{1,4}";
-	private final String POSTCODE_REGEX = "^[0-9]{4}$";
+	private final static String STREET_NUMBER_REGEX = "^[0-9]{1,4}";
+	private final static String POSTCODE_REGEX = "^[0-9]{4}$";
 	
 	// Attributes
 	private String city;
@@ -32,20 +25,6 @@ public class Address {
     	setStreetName(streetName);
     	setStreetNumber(streetNumber);
     }
-    
-    public Address(String address) {
-        this(destructureFormattedAddress(address));
-    }
-
-    private Address(Map<String, String> addressMap) {
-        this(
-            addressMap.get("city"),
-            addressMap.get("postcode"),
-            addressMap.get("streetName"),
-            addressMap.get("streetNumber")
-        );
-    }
-
 
     // Getters
 	public String getCity() {
@@ -108,26 +87,6 @@ public class Address {
         }
         this.streetNumber = streetNumber;
     }
-    
-    // Static methods
-    public static Map<String, String> destructureFormattedAddress(String address) {
-        Pattern pattern = Pattern.compile(DESTRUCTUR_FORMATTED_ADDRESS_REGEX);
-        Matcher matcher = pattern.matcher(address);
-        
-        Map<String, String> addressComponents = new HashMap<>();
-        
-        if (matcher.matches()) {
-            addressComponents.put("streetName", matcher.group(1).trim());
-            addressComponents.put("streetNumber", matcher.group(2).trim());
-            addressComponents.put("city", matcher.group(3).trim());
-            addressComponents.put("postcode", matcher.group(4).trim());
-        } else {
-            throw new IllegalArgumentException("Address does not match the expected format. E.g. 'Square Jules Hiérnaux 5, 6000 Charleroi'.");
-        }
-        
-        return addressComponents;
-    }
-
     
     // Methods
     public String getAddressFormattedForDisplay() {

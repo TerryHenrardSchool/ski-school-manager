@@ -1,12 +1,8 @@
 package be.th.models;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Objects;
-
-import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 
 import be.th.validators.IntegerValidator;
 import be.th.validators.ObjectValidator;
@@ -14,10 +10,9 @@ import be.th.dao.BookingDAO;
 import be.th.validators.BooleanValidator;
 import be.th.validators.DateValidator;
 
-public class Booking implements Serializable {
+public class Booking {
     
     // Static attributes
-    private static final long serialVersionUID = 6020444951685458127L;
     private static final double INSURANCE_PRICE = 20.0;
     private static final double FULL_DAY_BOOKING_DISCOUNT = 0.15;
     
@@ -138,20 +133,17 @@ public class Booking implements Serializable {
         this.isInsured = isInsured;
     }
     
-    public double calculateInsuranceSupplement() {
+    private double calculateInsuranceSupplement() {
     	return isInsured ? INSURANCE_PRICE : 0;
     }
     
-	public double calculateFullDayDiscount() {
+	private double calculateFullDayDiscount() {
 		return getSkier().isFullyBookedDay(getLesson().getDate()) ? 1 - FULL_DAY_BOOKING_DISCOUNT : 1;
 	}
 
     // Methods
     public double calculatePrice() {
-        double insuranceSupplement = calculateInsuranceSupplement();
-        double fullDayDiscount = calculateFullDayDiscount();
-                        
-        return getLesson().getLessonType().getPrice() * fullDayDiscount + insuranceSupplement;
+        return getLesson().getLessonType().getPrice() * calculateFullDayDiscount() + calculateInsuranceSupplement();
     }
     
     public String getCalculatedPriceFormattedForDisplay() {

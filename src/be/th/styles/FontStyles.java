@@ -2,8 +2,6 @@ package be.th.styles;
 
 import java.awt.Font;
 
-import javax.swing.JFrame;
-
 public class FontStyles {
 	
 	public static final Font TITLE = new Font("Tahoma", Font.PLAIN, 24);
